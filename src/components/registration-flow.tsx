@@ -16,7 +16,15 @@ import {
 } from "lucide-react";
 
 import type { EventSetup, GatherEvent } from "@/lib/mock-data";
+import { FormRenderer } from "@/components/form-renderer";
 import { SeatMap } from "@/components/seat-map";
+import {
+  buildAnswersPayload,
+  parseFormSchema,
+  validateAnswers,
+  type FormAnswers,
+  type FormField
+} from "@/lib/form-schema";
 import { getSupabaseBrowserClient, isSupabaseConfigured } from "@/lib/supabase/client";
 
 type RegistrationFlowProps = {
@@ -77,7 +85,15 @@ export function RegistrationFlow({ event, initialStep, setup }: RegistrationFlow
   const [contact, setContact] = useState("moirahoumiki@example.com");
   const [quantity, setQuantity] = useState(1);
   const [attendeeIds, setAttendeeIds] = useState(["GU-MIKI"]);
-  const [formAnswers, setFormAnswers] = useState('{"notes":"希望和同行坐一起"}');
+  const parsedFormSchema = useMemo(() => parseFormSchema(event.customFormConfig), [event.customFormConfig]);
+  const formFields: FormField[] = useMemo(
+    () => (parsedFormSchema.kind === "form" ? parsedFormSchema.schema.fields : []),
+    [parsedFormSchema]
+  );
+  const [dynamicAnswers, setDynamicAnswers] = useState<FormAnswers>({});
+  const [fallbackNote, setFallbackNote] = useState("");
+  const [answerErrors, setAnswerErrors] = useState<Record<string, string>>({});
+  const [answerWarnings, setAnswerWarnings] = useState<Record<string, string>>({});
   const [screenshotName, setScreenshotName] = useState("");
   const [paymentProofFile, setPaymentProofFile] = useState<File | null>(null);
   const [createdOrderNumber, setCreatedOrderNumber] = useState("");
@@ -111,6 +127,14 @@ export function RegistrationFlow({ event, initialStep, setup }: RegistrationFlow
   const attendeeSlots = useMemo(() => {
     return Array.from({ length: quantity }, (_, index) => attendeeIds[index] ?? "");
   }, [attendeeIds, quantity]);
+  const answersPayload = useMemo(() => {
+    if (formFields.length > 0) {
+      return buildAnswersPayload(formFields, dynamicAnswers);
+    }
+
+    return fallbackNote.trim() ? { notes: fallbackNote.trim() } : {};
+  }, [dynamicAnswers, fallbackNote, formFields]);
+  const answersFilled = Object.keys(answersPayload).length > 0;
   const locationOptions = useMemo(() => {
     return Array.from(new Set([event.venue, ...baseLocationOptions]));
   }, [event.venue]);
@@ -179,7 +203,7 @@ export function RegistrationFlow({ event, initialStep, setup }: RegistrationFlow
           nickname,
           contact,
           quantity,
-          form_answers: formAnswers
+          form_answers: answersPayload
         })
       });
       const result = (await response.json()) as CreatedOrder;
@@ -269,11 +293,45 @@ export function RegistrationFlow({ event, initialStep, setup }: RegistrationFlow
     setStep(canEnterRegistration ? "profile" : "locked");
   }
 
+  function updateDynamicAnswer(fieldId: string, value: string | string[]) {
+    setDynamicAnswers((current) => ({ ...current, [fieldId]: value }));
+    setAnswerErrors((current) => {
+      if (!current[fieldId]) {
+        return current;
+      }
+
+      const next = { ...current };
+      delete next[fieldId];
+      return next;
+    });
+  }
+
+  function validateDynamicAnswers() {
+    if (formFields.length === 0) {
+      return true;
+    }
+
+    const { blocking, warnings } = validateAnswers(formFields, dynamicAnswers);
+    setAnswerErrors(blocking);
+    setAnswerWarnings(warnings);
+
+    if (Object.keys(blocking).length > 0) {
+      setMessage("还有必填问题没有填写，请补充后再提交。");
+      return false;
+    }
+
+    return true;
+  }
+
   async function submitProfile() {
     setMessage("");
 
     if (capacityFull) {
       setMessage(canJoinWaitlist ? "活动名额已满，请先加入候补。" : "活动名额已满，且主办方未开放候补。");
+      return;
+    }
+
+    if (!validateDynamicAnswers()) {
       return;
     }
 
@@ -307,7 +365,7 @@ export function RegistrationFlow({ event, initialStep, setup }: RegistrationFlow
         body: JSON.stringify({
           event_id: event.id,
           desired_quantity: quantity,
-          participant_note: formAnswers
+          participant_note: answersFilled ? JSON.stringify(answersPayload) : ""
         })
       });
       const result = (await response.json().catch(() => ({}))) as WaitlistResult;
@@ -521,8 +579,32 @@ export function RegistrationFlow({ event, initialStep, setup }: RegistrationFlow
                     ))}
                   </select>
                 </label>
-                <label className="wide-field">自定义表单答案<textarea value={formAnswers} onChange={(event) => setFormAnswers(event.target.value)} rows={5} /></label>
               </div>
+
+              {formFields.length > 0 ? (
+                <div className="dynamic-form-card">
+                  <p className="dynamic-form-title">主办方想了解</p>
+                  <FormRenderer
+                    answers={dynamicAnswers}
+                    errors={answerErrors}
+                    fields={formFields}
+                    warnings={answerWarnings}
+                    onChange={updateDynamicAnswer}
+                  />
+                </div>
+              ) : (
+                <div className="form-grid">
+                  <label className="wide-field">
+                    给主办方的备注（选填）
+                    <textarea
+                      placeholder="例如：希望和同行坐一起"
+                      rows={3}
+                      value={fallbackNote}
+                      onChange={(event) => setFallbackNote(event.target.value)}
+                    />
+                  </label>
+                </div>
+              )}
 
               <div className="attendee-list">
                 {attendeeSlots.map((attendeeId, index) => (
@@ -671,7 +753,7 @@ export function RegistrationFlow({ event, initialStep, setup }: RegistrationFlow
             <div><dt>报名人</dt><dd>{nickname || "未填写"}</dd></div>
                 <div><dt>人数</dt><dd>{quantity} 人</dd></div>
                 <div><dt>金额</dt><dd>{isFreeEvent ? "免费" : `¥${amount}`}</dd></div>
-                <div><dt>表单答案</dt><dd>{formAnswers.trim() ? "已填写" : "未填写"}</dd></div>
+                <div><dt>表单答案</dt><dd>{answersFilled ? "已填写" : "未填写"}</dd></div>
                 <div><dt>多人报名</dt><dd>{event.allowMulti ? `最多 ${event.maxPeoplePerOrder} 人` : "不支持"}</dd></div>
           </dl>
           <div className="notice-strip">

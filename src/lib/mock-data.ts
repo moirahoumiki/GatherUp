@@ -251,6 +251,15 @@ export const events: GatherEvent[] = [
     allowMulti: false,
     maxPeoplePerOrder: 1,
     orderPrefix: "CLUB",
+    customFormConfig: {
+      fields: [
+        { id: "student_id", label: "学号", type: "text", required: true, placeholder: "例如 20260001" },
+        { id: "phone", label: "手机号", type: "phone", required: true },
+        { id: "interest_clubs", label: "感兴趣的社团方向", type: "checkbox", required: true, options: ["文艺", "体育", "科技", "公益"], maxSelect: 2 },
+        { id: "arrival_slot", label: "预计到场时段", type: "select", required: false, options: ["上午 10:00-12:00", "下午 14:00-16:00"] },
+        { id: "notes", label: "想对社团说的话", type: "textarea", required: false }
+      ]
+    },
     description: "校园社团联合开放日，支持报名、名单、签到和活动通知。"
   },
   {

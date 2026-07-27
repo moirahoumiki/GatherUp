@@ -20,6 +20,8 @@ import {
   UsersRound
 } from "lucide-react";
 
+import { FormBuilder } from "@/components/form-builder";
+import { parseFormSchema } from "@/lib/form-schema";
 import { saveLocalCreatedEvent } from "@/lib/local-created-events";
 import { getSupabaseBrowserClient, isSupabaseConfigured } from "@/lib/supabase/client";
 
@@ -253,6 +255,9 @@ export default function NewEventPage() {
   const isLastStep = activeIndex === steps.length - 1;
 
   const summary = useMemo(() => {
+    const parsedForm = parseFormSchema(form.customFormConfig);
+    const questionCount = parsedForm.kind === "form" ? parsedForm.schema.fields.length : 0;
+
     return [
       ["活动 ID", form.publicCode],
       ["活动类型", `${form.category} · ${form.template}`],
@@ -260,7 +265,7 @@ export default function NewEventPage() {
       ["费用模式", form.feeMode],
       ["报名人数", `${form.capacity} 人`],
       ["多人报名", form.allowMulti],
-      ["自定义表单", form.customFormConfig.trim() ? "已配置" : "未配置"],
+      ["报名问题", questionCount > 0 ? `${questionCount} 个问题` : form.customFormConfig.trim() ? "已配置（JSON）" : "未配置"],
       ["收款码", form.paymentCodeImg.trim() ? "已配置" : "未配置"],
       ["微信群码", form.wechatGroupImg.trim() ? "审核通过后展示" : "未配置"],
       ["座位", form.seatingMode]
@@ -529,20 +534,28 @@ export default function NewEventPage() {
           )}
 
           {activeStep === "rules" && (
-            <div className="form-grid two-column">
-              <label>活动人数上限<input value={form.capacity} onChange={(event) => updateField("capacity", event.target.value)} /></label>
-              <label>报名截止时间<input value={form.deadline} onChange={(event) => updateField("deadline", event.target.value)} /></label>
-              <label>多人报名<select value={form.allowMulti} onChange={(event) => updateField("allowMulti", event.target.value)}><option>不允许</option><option>允许</option></select></label>
-              <label>每单最多人数<input defaultValue="1" /></label>
-              <label>订单编号<select value={form.orderFormat} onChange={(event) => updateField("orderFormat", event.target.value)}><option>{"{eventCode}-0001"}</option><option>GU-0001</option><option>{"{eventCode}-{YYYYMMDD}-0001"}</option><option>自定义前缀 + 流水号</option></select></label>
-              <label>候补名单<select defaultValue="accept"><option value="accept">接受候补</option><option value="deny">不接受候补</option></select></label>
-              {form.orderFormat === "自定义前缀 + 流水号" && (
-                <>
-                  <label>自定义前缀<input value={form.orderPrefix} onChange={(event) => updateField("orderPrefix", event.target.value.toUpperCase())} /></label>
-                  <label>编号预览<input readOnly value={`${form.orderPrefix || "GU"}-0001`} /></label>
-                </>
+            <>
+              <div className="form-grid two-column">
+                <label>活动人数上限<input value={form.capacity} onChange={(event) => updateField("capacity", event.target.value)} /></label>
+                <label>报名截止时间<input value={form.deadline} onChange={(event) => updateField("deadline", event.target.value)} /></label>
+                <label>多人报名<select value={form.allowMulti} onChange={(event) => updateField("allowMulti", event.target.value)}><option>不允许</option><option>允许</option></select></label>
+                <label>每单最多人数<input defaultValue="1" /></label>
+                <label>订单编号<select value={form.orderFormat} onChange={(event) => updateField("orderFormat", event.target.value)}><option>{"{eventCode}-0001"}</option><option>GU-0001</option><option>{"{eventCode}-{YYYYMMDD}-0001"}</option><option>自定义前缀 + 流水号</option></select></label>
+                <label>候补名单<select defaultValue="accept"><option value="accept">接受候补</option><option value="deny">不接受候补</option></select></label>
+                {form.orderFormat === "自定义前缀 + 流水号" && (
+                  <>
+                    <label>自定义前缀<input value={form.orderPrefix} onChange={(event) => updateField("orderPrefix", event.target.value.toUpperCase())} /></label>
+                    <label>编号预览<input readOnly value={`${form.orderPrefix || "GU"}-0001`} /></label>
+                  </>
+                )}
+              </div>
+              {hasLoadedDraft && (
+                <FormBuilder
+                  value={form.customFormConfig}
+                  onChange={(nextValue) => updateField("customFormConfig", nextValue)}
+                />
               )}
-            </div>
+            </>
           )}
 
           {activeStep === "payment" && (
@@ -551,7 +564,6 @@ export default function NewEventPage() {
               <label>收款码图片链接<input value={form.paymentCodeImg} onChange={(event) => updateField("paymentCodeImg", event.target.value)} placeholder="https://.../payment-code.png" /></label>
               <label>微信群二维码链接<input value={form.wechatGroupImg} onChange={(event) => updateField("wechatGroupImg", event.target.value)} placeholder="https://.../wechat-group.png" /></label>
               <label className="wide-field">付款说明<input value={form.paymentNote} onChange={(event) => updateField("paymentNote", event.target.value)} /></label>
-              <label className="wide-field">自定义表单配置<textarea value={form.customFormConfig} onChange={(event) => updateField("customFormConfig", event.target.value)} rows={6} /></label>
               <label>座位模式<select value={form.seatingMode} onChange={(event) => updateField("seatingMode", event.target.value)}><option>不需要选座</option><option>付款确认后选座</option><option>组织者手动分配</option></select></label>
               <label>座位图来源<select value={form.seatMapSource} onChange={(event) => updateField("seatMapSource", event.target.value)}><option>手动填写</option><option>截图自动识别</option><option>复用场地库座位图</option></select></label>
               <div className="seat-import-card wide-field">
