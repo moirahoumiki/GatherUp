@@ -3,12 +3,9 @@
 import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { BadgeCheck, Globe2, KeyRound, LockKeyhole, Mail, ShieldCheck, UserPlus } from "lucide-react";
 
 import {
   PROTOTYPE_ACCOUNTS_STORAGE_KEY,
-  authProviderOptions,
-  authStrategyNotes,
   createPrototypeAccount,
   createSessionCookies,
   demoAccounts,
@@ -33,26 +30,22 @@ import { getCurrentSupabaseProfile } from "@/lib/supabase/profile";
 
 type AuthMode = "login" | "register" | "code" | "reset";
 
-const authModeCopy: Record<AuthMode, { eyebrow: string; title: string; description: string }> = {
+const authModeCopy: Record<AuthMode, { title: string; description: string }> = {
   login: {
-    eyebrow: "账号登录",
-    title: "一个账号，完成参与和组织",
-    description: "邮箱是 GatherUp 的全球账号底座。后续可以绑定 Google、Apple、手机号和微信。"
+    title: "登录 GatherUp",
+    description: "一个账号，完成参与和组织。"
   },
   register: {
-    eyebrow: "创建账号",
-    title: "先拥有稳定身份，再进入活动流程",
-    description: "注册后会生成 GatherUp ID。正式版会通过邮箱验证码确认账号归属。"
+    title: "创建账号",
+    description: "注册后会生成你的 GatherUp ID。"
   },
   code: {
-    eyebrow: "验证码登录",
-    title: "适合移动端和临时设备的登录方式",
-    description: "正式版会发送 6 位验证码。当前原型会模拟发送状态，方便先确认交互。"
+    title: "验证码登录",
+    description: "通过邮箱验证码快捷登录。"
   },
   reset: {
-    eyebrow: "找回账号",
-    title: "长期有效的账号需要可靠找回机制",
-    description: "正式版会通过邮箱验证后重设密码，并保留历史活动、订单和组织权限。"
+    title: "找回账号",
+    description: "通过邮箱验证后重设密码。"
   }
 };
 
@@ -324,18 +317,11 @@ function LoginForm() {
           <span className="brand-mark">G</span>
           <div>
             <strong>GatherUp</strong>
-            <span>
-              {supabaseEnabled
-                ? "已连接真实账号服务。"
-                : authUnavailable
-                  ? "账号服务暂时不可用，请联系管理员配置 Supabase。"
-                  : "当前使用本地原型账号。"}
-            </span>
+            <span>让兴趣在线下发生</span>
           </div>
         </div>
 
         <div>
-          <p className="eyebrow">{currentCopy.eyebrow}</p>
           <h1>{currentCopy.title}</h1>
           <p className="subtle">{currentCopy.description}</p>
         </div>
@@ -381,65 +367,25 @@ function LoginForm() {
         </div>
 
         {message && <p className="validation-note">{message}</p>}
+        {authUnavailable && <p className="validation-note">账号服务暂时不可用，请联系管理员配置 Supabase。</p>}
 
         <div className="auth-action-grid">
           {mode === "code" && (
             <button className="button secondary full" type="button" onClick={sendCode} disabled={isSubmitting || authUnavailable}>
-              <Mail size={17} />
               发送验证码
             </button>
           )}
           <button className="button primary full" type="button" onClick={submitPrimaryAction} disabled={isSubmitting || authUnavailable}>
-            {mode === "register" && <UserPlus size={17} />}
-            {mode === "reset" && <KeyRound size={17} />}
-            {(mode === "login" || mode === "code") && <LockKeyhole size={17} />}
             {isSubmitting ? "处理中" : mode === "register" ? "创建账号" : mode === "reset" ? "发送找回邮件" : "登录"}
           </button>
         </div>
 
-        <div className="demo-account-grid">
-          <div className="choice-card selected">
-            <Mail size={18} />
-            <strong>演示账号</strong>
-            <span>{demoAccounts[0].email}</span>
-            <span>{demoAccounts[0].gatherUpId}</span>
-            <span>{demoAccounts[0].description}</span>
-          </div>
-          <div className="choice-card">
-            <BadgeCheck size={18} />
-            <strong>{supabaseEnabled ? "真实账号服务" : "正式版账号保存方式"}</strong>
-            <span>
-              {supabaseEnabled
-                ? "当前登录页会使用 Supabase Auth。下一步会把用户资料同步到 users 表。"
-                : "账号资料会进入数据库，验证码记录会有过期时间，所有活动数据绑定永久 user_id。"}
-            </span>
-          </div>
-        </div>
-
-        <div className="provider-grid">
-          {authProviderOptions.map((option) => {
-            const ProviderIcon = option.provider === "email" ? Mail : option.provider === "wechat" ? ShieldCheck : Globe2;
-
-            return (
-              <div className={`provider-card ${option.availability === "ready" ? "active" : ""}`} key={option.label}>
-                <ProviderIcon size={17} />
-                <strong>{option.label}</strong>
-                <span>{option.description}</span>
-              </div>
-            );
-          })}
-        </div>
+        {!supabaseEnabled && !authUnavailable && (
+          <p className="login-demo-hint">
+            演示账号 {demoAccounts[0].email}，密码已预填，直接点击登录即可体验。
+          </p>
+        )}
       </section>
-
-      <aside className="login-aside">
-        <ShieldCheck size={28} />
-        <h2>为什么用统一账号？</h2>
-        <div className="notice-list">
-          {authStrategyNotes.map((note) => (
-            <div key={note}>{note}</div>
-          ))}
-        </div>
-      </aside>
 
       <footer className="app-footer login-footer">
         <span>© 2026 GatherUp</span>

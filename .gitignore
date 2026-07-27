@@ -31,3 +31,4 @@ coverage/
 # Supabase local runtime artifacts
 supabase/.branches/
 supabase/.temp/
+.review-shots/

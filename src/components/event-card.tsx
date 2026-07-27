@@ -1,6 +1,4 @@
 import Link from "next/link";
-import { ChevronRight } from "lucide-react";
-
 import type { GatherEvent } from "@/lib/mock-data";
 
 type EventCardProps = {
@@ -11,19 +9,31 @@ export function EventCard({ event }: EventCardProps) {
   const remaining = event.capacity - event.registered;
 
   return (
-    <Link className="g2-card" href={`/events/${event.id}`}>
-      <p className="g2-card-city">{event.city} · {event.customTypeLabel}</p>
-      <h3 className="g2-card-title">{event.name}</h3>
-      <p className="g2-card-date">{event.startsAt} · {event.venue}</p>
-      <p className="g2-card-desc">{event.description}</p>
-      <p className="g2-card-meta">
-        <strong>¥{event.price}</strong>
-        <span>剩余 {remaining} 位</span>
+    <Link className="event-card clickable-card" href={`/events/${event.id}`}>
+      <div className="event-card-top">
+        <p className="muted g2-card-meta">
+          {event.city} · {event.customTypeLabel}
+        </p>
         <span className="g2-badge">{event.status}</span>
+      </div>
+      <h3 className="g2-card-title">{event.name}</h3>
+      <p className="g2-card-when">
+        {event.startsAt} · {event.venue}
       </p>
-      <span className="g2-card-go" aria-hidden="true">
-        <ChevronRight size={18} />
-      </span>
+      <p className="g2-card-desc">{event.description}</p>
+      <div className="event-card-bottom">
+        <p className="g2-card-price">
+          {event.price > 0 ? (
+            <>
+              <small>¥</small>
+              {event.price}
+            </>
+          ) : (
+            "免费"
+          )}
+        </p>
+        <span className="muted g2-card-remaining">剩余 {remaining} 位</span>
+      </div>
     </Link>
   );
 }

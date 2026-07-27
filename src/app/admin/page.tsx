@@ -6,13 +6,12 @@ export default function AdminPage() {
     <>
       <section className="page-header">
         <div>
-          <p className="eyebrow">平台后台</p>
-          <h1>审核工作台</h1>
-          <p className="subtle">当前覆盖活动审核和主办认证审核，后续再扩展投诉、争议和平台配置。</p>
+          <h1 className="apple-title">审核工作台</h1>
+          <p className="apple-sub">处理活动审核和主办认证审核。</p>
         </div>
       </section>
 
-      <section className="setup-grid">
+      <section className="admin-panel-grid">
         <AdminEventReviewPanel />
         <AdminVerificationReviewPanel />
       </section>

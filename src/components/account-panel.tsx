@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { AtSign, BadgeCheck, ShieldCheck } from "lucide-react";
+import { AtSign, BadgeCheck } from "lucide-react";
 
 import {
   ID_COOKIE,
@@ -130,7 +130,7 @@ export function AccountPanel() {
       <article className="content-card account-card">
         <div className="section-heading">
           <div>
-            <p className="eyebrow">账号中心</p>
+            <p className="eyebrow">账号</p>
             <h2>{name}</h2>
           </div>
           <BadgeCheck size={22} />
@@ -145,10 +145,6 @@ export function AccountPanel() {
             <dt>GatherUp ID</dt>
             <dd>{publicId}</dd>
           </div>
-          <div>
-            <dt>剩余修改</dt>
-            <dd>{remainingChanges} / {maxPublicIdChanges}</dd>
-          </div>
         </dl>
       </article>
 
@@ -156,7 +152,7 @@ export function AccountPanel() {
         <div className="section-heading">
           <div>
             <p className="eyebrow">公开 ID</p>
-            <h2>用于同行人填写和活动名单识别</h2>
+            <h2>用于同行人填写和名单识别</h2>
           </div>
           <AtSign size={22} />
         </div>
@@ -172,26 +168,9 @@ export function AccountPanel() {
 
         <div className="button-row">
           <button className="button primary" type="button" onClick={updatePublicId} disabled={isSaving}>
-            {isSaving ? "保存中" : "保存 ID"}
+            {isSaving ? "保存中" : "保存"}
           </button>
-          <span className="subtle">最多修改两次。</span>
-        </div>
-      </article>
-
-      <article className="content-card account-card">
-        <div className="section-heading">
-          <div>
-            <p className="eyebrow">登录方式</p>
-            <h2>后续接入验证码和绑定</h2>
-          </div>
-          <ShieldCheck size={22} />
-        </div>
-
-        <div className="notice-list">
-          <div>邮箱：已绑定，作为全球账号底座，后续支持验证码登录和忘记密码。</div>
-          <div>{sessionType === "supabase" ? "账号资料：已接入 Supabase users 表。" : "账号资料：当前为本地原型保存。"}</div>
-          <div>Google / Apple：预留，适合全球用户快捷登录和跨设备找回。</div>
-          <div>手机号 / 微信：预留，适合中国区活动、小程序和现场联系。</div>
+          <span className="subtle">剩余修改 {remainingChanges} 次</span>
         </div>
       </article>
     </section>

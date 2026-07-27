@@ -1,151 +1,102 @@
 import Link from "next/link";
-import {
-  BadgeAlert,
-  CalendarClock,
-  FileWarning,
-  Gavel,
-  Handshake,
-  ScrollText,
-  ShieldAlert,
-  UserRoundCog
-} from "lucide-react";
 
 const lastUpdated = "2026-07-22";
 
+const sections = [
+  {
+    title: "账号与身份",
+    items: [
+      "你需要使用有效邮箱注册并登录 GatherUp 账号，账号信息应真实、准确，并及时更新。",
+      "系统会为每个账号生成内部 user_id 和公开的 GatherUp ID，GatherUp ID 用于活动名单识别、同行人填写和现场核对，最多可修改两次。",
+      "不要与他人共享账号或密码；账号下发生的操作由账号所有人承担相应责任。",
+      "同一个账号既可以作为参与者报名活动，也可以创建和管理自己的活动（成为组织者）。"
+    ]
+  },
+  {
+    title: "组织者责任",
+    items: [
+      "组织者需要如实填写活动信息，包括时间、地点、价格、人数上限和报名规则，不得发布虚假或误导性活动。",
+      "收费活动的收款由组织者自行发起和收取（例如线下转账或个人收款码），GatherUp 平台不代收、不托管、不经手任何活动资金，也不作为支付通道或第三方担保方。",
+      "组织者需要及时审核参与者上传的付款凭证，按约定规则确认报名、退款和选座，并对活动现场安全、场地合规、退款处理承担主要责任。",
+      "发布收费活动前，组织者需要完成平台要求的主办认证；认证等级和收费活动资格由平台按规则审核。",
+      "组织者对活动执行过程中与参与者、场地方或第三方产生的纠纷承担相应责任，GatherUp 仅提供工具支持，不代表任何一方处理线下纠纷。"
+    ]
+  },
+  {
+    title: "参与者责任",
+    items: [
+      "报名即代表同意遵守对应活动的具体规则（例如人数限制、退款政策和现场须知），这些规则由组织者设置，可能因活动而异。",
+      "上传的付款凭证需真实有效，恶意伪造凭证、重复刷票或干扰他人正常报名将导致订单被取消或账号被限制使用。",
+      "参与者应对自己填写的报名信息、同行人信息负责，并配合组织者完成现场签到等必要流程。",
+      "与组织者、场地或其他参与者之间因线下活动产生的纠纷，应首先与对方协商解决；GatherUp 提供投诉举报入口，但不承担线下资金和人身安全责任。"
+    ]
+  },
+  {
+    title: "付款与退款说明",
+    items: [
+      "GatherUp 是活动运营工具，不是支付机构，也不提供代收款、担保交易或资金托管服务。所有付款均在参与者与组织者之间直接完成。",
+      "参与者需要按组织者提供的收款方式完成付款，并在系统内上传付款凭证（如转账截图），供组织者核实。",
+      "退款需按活动设置的退款规则申请，由组织者审批并线下退款，退款完成后组织者需上传退款凭证，参与者确认收到退款。",
+      "如对付款或退款结果有异议，可以在系统内提交投诉，由平台管理员介入核查相关记录，但平台不承担资金垫付责任。"
+    ]
+  },
+  {
+    title: "账号删除",
+    items: [
+      "你可以在个人中心提交账号删除申请。当前版本支持「删除申请」流程，不支持即时彻底删除。",
+      "提交删除申请前，需要先处理完未结订单、未完成的退款、进行中的活动、组织者角色和未解决的争议或投诉。",
+      "删除申请通过后，你的个人资料（如昵称、联系方式）会被匿名化处理；必要的交易记录和审计日志会依法依规保留，用于财务对账、争议处理和平台安全审计。",
+      "如需提交账号删除申请，请前往「我的活动 - 账号中心」或联系平台支持。"
+    ]
+  },
+  {
+    title: "免责声明",
+    items: [
+      "GatherUp 仅提供活动组织和报名管理的技术工具，不参与线下活动的实际举办，不对活动内容、现场安全、场地合规性作担保。",
+      "平台不代收活动费用，不对组织者与参与者之间的收付款结果、活动取消或延期造成的损失承担赔偿责任。",
+      "在法律允许的最大范围内，GatherUp 不对因使用本服务而产生的间接损失、数据丢失或第三方行为承担责任。",
+      "当前为 v0.1 早期阶段产品，功能和条款可能随版本迭代调整，平台会尽量提前公示重大变更。"
+    ]
+  },
+  {
+    title: "条款变更与联系方式",
+    items: [
+      "平台可能根据产品迭代或法律法规要求更新本条款，更新后会在本页标注最近更新日期。",
+      "继续使用 GatherUp 即表示你接受更新后的条款；如不同意变更，可以停止使用并申请账号删除。",
+      "关于本条款的问题，可以通过账号中心的投诉入口或平台支持渠道联系我们。"
+    ]
+  }
+];
+
 export default function TermsPage() {
   return (
-    <div className="stack">
-      <section className="page-header">
-        <div>
-          <p className="eyebrow">法律条款</p>
-          <h1>服务条款</h1>
-          <p className="subtle">
-            本条款适用于所有使用 GatherUp 的用户。GatherUp 是面向线下社区活动的组织者优先运营系统，帮助组织者完成报名、收款凭证审核、选座、签到、退款和财务管理，也帮助参与者完成报名、上传付款凭证和跟进订单状态。
-          </p>
-        </div>
-      </section>
+    <div className="legal-doc">
+      <header>
+        <h1 className="apple-title">服务条款</h1>
+        <p className="subtle">最近更新：{lastUpdated}</p>
+        <p className="legal-intro">
+          本条款适用于所有使用 GatherUp 的用户。GatherUp 是面向线下社区活动的组织者优先运营系统，帮助组织者完成报名、收款凭证审核、选座、签到、退款和财务管理，也帮助参与者完成报名、上传付款凭证和跟进订单状态。
+        </p>
+      </header>
 
-      <section className="guard-panel">
-        <CalendarClock size={18} />
-        <span>最近更新：{lastUpdated}。当前为 v0.1 阶段产品，条款会随功能上线持续更新。</span>
-      </section>
+      {sections.map((section, index) => (
+        <section key={section.title}>
+          <h2>
+            {index + 1}. {section.title}
+          </h2>
+          <ul>
+            {section.items.map((item) => (
+              <li key={item}>{item}</li>
+            ))}
+          </ul>
+        </section>
+      ))}
 
-      <article className="content-card setup-card">
-        <div className="section-heading">
-          <div>
-            <p className="eyebrow">01</p>
-            <h2>账号与身份</h2>
-          </div>
-          <UserRoundCog size={22} />
-        </div>
-        <div className="notice-list">
-          <div>你需要使用有效邮箱注册并登录 GatherUp 账号，账号信息应真实、准确，并及时更新。</div>
-          <div>系统会为每个账号生成内部 user_id 和公开的 GatherUp ID，GatherUp ID 用于活动名单识别、同行人填写和现场核对，最多可修改两次。</div>
-          <div>不要与他人共享账号或密码；账号下发生的操作由账号所有人承担相应责任。</div>
-          <div>同一个账号既可以作为参与者报名活动，也可以创建和管理自己的活动（成为组织者）。</div>
-        </div>
-      </article>
-
-      <article className="content-card setup-card">
-        <div className="section-heading">
-          <div>
-            <p className="eyebrow">02</p>
-            <h2>组织者责任</h2>
-          </div>
-          <Handshake size={22} />
-        </div>
-        <div className="notice-list">
-          <div>组织者需要如实填写活动信息，包括时间、地点、价格、人数上限和报名规则，不得发布虚假或误导性活动。</div>
-          <div>收费活动的收款由组织者自行发起和收取（例如线下转账或个人收款码），GatherUp 平台不代收、不托管、不经手任何活动资金，也不作为支付通道或第三方担保方。</div>
-          <div>组织者需要及时审核参与者上传的付款凭证，按约定规则确认报名、退款和选座，并对活动现场安全、场地合规、退款处理承担主要责任。</div>
-          <div>发布收费活动前，组织者需要完成平台要求的主办认证；认证等级和收费活动资格由平台按规则审核。</div>
-          <div>组织者对活动执行过程中与参与者、场地方或第三方产生的纠纷承担相应责任，GatherUp 仅提供工具支持，不代表任何一方处理线下纠纷。</div>
-        </div>
-      </article>
-
-      <article className="content-card setup-card">
-        <div className="section-heading">
-          <div>
-            <p className="eyebrow">03</p>
-            <h2>参与者责任</h2>
-          </div>
-          <ScrollText size={22} />
-        </div>
-        <div className="notice-list">
-          <div>报名即代表同意遵守对应活动的具体规则（例如人数限制、退款政策和现场须知），这些规则由组织者设置，可能因活动而异。</div>
-          <div>上传的付款凭证需真实有效，恶意伪造凭证、重复刷票或干扰他人正常报名将导致订单被取消或账号被限制使用。</div>
-          <div>参与者应对自己填写的报名信息、同行人信息负责，并配合组织者完成现场签到等必要流程。</div>
-          <div>与组织者、场地或其他参与者之间因线下活动产生的纠纷，应首先与对方协商解决；GatherUp 提供投诉举报入口，但不承担线下资金和人身安全责任。</div>
-        </div>
-      </article>
-
-      <article className="content-card setup-card">
-        <div className="section-heading">
-          <div>
-            <p className="eyebrow">04</p>
-            <h2>付款与退款说明</h2>
-          </div>
-          <FileWarning size={22} />
-        </div>
-        <div className="notice-list">
-          <div>GatherUp 是活动运营工具，不是支付机构，也不提供代收款、担保交易或资金托管服务。所有付款均在参与者与组织者之间直接完成。</div>
-          <div>参与者需要按组织者提供的收款方式完成付款，并在系统内上传付款凭证（如转账截图），供组织者核实。</div>
-          <div>退款需按活动设置的退款规则申请，由组织者审批并线下退款，退款完成后组织者需上传退款凭证，参与者确认收到退款。</div>
-          <div>如对付款或退款结果有异议，可以在系统内提交投诉，由平台管理员介入核查相关记录，但平台不承担资金垫付责任。</div>
-        </div>
-      </article>
-
-      <article className="content-card setup-card">
-        <div className="section-heading">
-          <div>
-            <p className="eyebrow">05</p>
-            <h2>账号删除</h2>
-          </div>
-          <BadgeAlert size={22} />
-        </div>
-        <div className="notice-list">
-          <div>你可以在个人中心提交账号删除申请。当前版本支持"删除申请"流程，不支持即时彻底删除。</div>
-          <div>提交删除申请前，需要先处理完未结订单、未完成的退款、进行中的活动、组织者角色和未解决的争议或投诉。</div>
-          <div>删除申请通过后，你的个人资料（如昵称、联系方式）会被匿名化处理；必要的交易记录和审计日志会依法依规保留，用于财务对账、争议处理和平台安全审计。</div>
-          <div>如需提交账号删除申请，请前往「我的活动 - 账号中心」或联系平台支持。</div>
-        </div>
-      </article>
-
-      <article className="content-card setup-card">
-        <div className="section-heading">
-          <div>
-            <p className="eyebrow">06</p>
-            <h2>免责声明</h2>
-          </div>
-          <ShieldAlert size={22} />
-        </div>
-        <div className="notice-list">
-          <div>GatherUp 仅提供活动组织和报名管理的技术工具，不参与线下活动的实际举办，不对活动内容、现场安全、场地合规性作担保。</div>
-          <div>平台不代收活动费用，不对组织者与参与者之间的收付款结果、活动取消或延期造成的损失承担赔偿责任。</div>
-          <div>在法律允许的最大范围内，GatherUp 不对因使用本服务而产生的间接损失、数据丢失或第三方行为承担责任。</div>
-          <div>当前为 v0.1 早期阶段产品，功能和条款可能随版本迭代调整，平台会尽量提前公示重大变更。</div>
-        </div>
-      </article>
-
-      <article className="content-card setup-card">
-        <div className="section-heading">
-          <div>
-            <p className="eyebrow">07</p>
-            <h2>条款变更与联系方式</h2>
-          </div>
-          <Gavel size={22} />
-        </div>
-        <div className="notice-list">
-          <div>平台可能根据产品迭代或法律法规要求更新本条款，更新后会在本页标注最近更新日期。</div>
-          <div>继续使用 GatherUp 即表示你接受更新后的条款；如不同意变更，可以停止使用并申请账号删除。</div>
-          <div>关于本条款的问题，可以通过账号中心的投诉入口或平台支持渠道联系我们。</div>
-        </div>
-        <div className="button-row">
-          <Link className="button secondary" href="/privacy">
-            查看隐私政策
-          </Link>
-        </div>
-      </article>
+      <footer>
+        <Link className="legal-link" href="/privacy">
+          查看隐私政策
+        </Link>
+      </footer>
     </div>
   );
 }

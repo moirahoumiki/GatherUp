@@ -36,15 +36,10 @@ function OrganizerPageHeader() {
   return (
     <section className="page-header workspace-header">
       <div>
-        <p className="eyebrow">组织工作台</p>
-        <h1>今天需要处理什么</h1>
-        <p className="subtle">先处理会阻塞参与者的事项，再检查筹备进度和活动数据。</p>
+        <h1 className="apple-title">组织工作台</h1>
+        <p className="apple-sub">先处理会阻塞参与者的事项，再检查筹备进度。</p>
       </div>
       <div className="button-row">
-        <Link className="button secondary" href="/dev/status">
-          <ServerCog size={17} />
-          后端状态
-        </Link>
         <Link className="button primary" href="/organizer/events/new">
           <Plus size={17} />
           创建活动
@@ -154,20 +149,10 @@ export default async function OrganizerPage() {
 
       <section className="setup-grid" id="setup-list">
         {activeSetups.length === 0 ? (
-          <article className="content-card setup-card">
-            <div className="section-heading">
-              <div>
-                <span className="tag">队列已清空</span>
-                <h2>当前没有筹备中的活动</h2>
-                <p className="event-meta compact">新建活动或检查已经开放报名的活动。</p>
-              </div>
-              <QrCode size={20} />
-            </div>
-            <Link className="button primary" href="/organizer/events/new">
-              <Plus size={17} />
-              创建活动
-            </Link>
-          </article>
+          <div className="empty-state">
+            <strong>当前没有筹备中的活动</strong>
+            <span>新建活动，或查看已经开放报名的活动。</span>
+          </div>
         ) : null}
 
         {activeSetups.map((setup) => {

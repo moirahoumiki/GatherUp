@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { AlertCircle, Clock3, FileImage, QrCode, TicketCheck, UsersRound } from "lucide-react";
+import { AlertCircle, Clock3, QrCode, TicketCheck, UsersRound } from "lucide-react";
 
 import { ParticipantOrderActions } from "@/components/participant-order-actions";
 import { OrderSeatSelectionPanel } from "@/components/order-seat-selection-panel";
@@ -41,7 +41,7 @@ export default async function OrderPage({ params }: OrderPageProps) {
     <>
       <section className="page-header">
         <div>
-          <p className="eyebrow">订单详情</p>
+          <p className="eyebrow">订单</p>
           <h1>{registration.orderNumber}</h1>
           <p className="subtle">
             {event.name} · {event.city} · {event.startsAt}
@@ -188,29 +188,6 @@ export default async function OrderPage({ params }: OrderPageProps) {
           />
         )}
 
-        <article className="content-card">
-          <div className="section-heading">
-            <h2>付款记录</h2>
-            <FileImage size={20} />
-          </div>
-          <dl className="info-list">
-            <div>
-              <dt>付款截图</dt>
-              <dd>{registration.paymentProof ?? "未上传"}</dd>
-            </div>
-            <div>
-              <dt>备注格式</dt>
-              <dd>
-                {registration.orderNumber} + {registration.nickname}
-              </dd>
-            </div>
-            <div>
-              <dt>退款规则</dt>
-              <dd>{registration.refundPolicy}</dd>
-            </div>
-          </dl>
-        </article>
-
         {refundRequest && (
           <article className="content-card">
             <div className="section-heading">
@@ -253,23 +230,6 @@ export default async function OrderPage({ params }: OrderPageProps) {
             </dl>
           </article>
         )}
-
-        <article className="content-card">
-          <div className="section-heading">
-            <h2>需要知道</h2>
-            <AlertCircle size={20} />
-          </div>
-          <div className="notice-list">
-            <div>
-              <Clock3 size={16} />
-              确认前不占座，确认后才会开放选座或签到。
-            </div>
-            <div>
-              <AlertCircle size={16} />
-              付款截图被驳回时，组织者需要填写原因，参与者可以重新上传。
-            </div>
-          </div>
-        </article>
       </section>
     </>
   );

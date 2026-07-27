@@ -11,22 +11,25 @@ export default async function MyEventsPage() {
   const pendingSeats = registrations.filter((registration) => registration.seatStatus === "待选座/签到").length;
   const activeWaitlistInvitations = waitlistInvitations.filter((entry) => entry.status === "invited");
 
+  const hasAnyOrders = registrations.length > 0 || waitlistInvitations.length > 0;
+
   return (
     <>
       <section className="page-header">
         <div>
-          <p className="eyebrow">我的活动</p>
-          <h1>待处理事项和历史参与活动</h1>
-          <p className="subtle">管理你的活动订单、账号资料和后续要处理的报名事项。</p>
+          <h1 className="apple-title">我的活动</h1>
+          <p className="apple-sub">管理你的报名订单和账号资料。</p>
         </div>
       </section>
 
-      <section className="metrics-grid">
-        <div className="metric-card"><strong>{pendingPayments}</strong><span>待审核</span></div>
-        <div className="metric-card"><strong>{pendingSeats}</strong><span>待选座</span></div>
-        <div className="metric-card"><strong>{activeWaitlistInvitations.length}</strong><span>候补邀请</span></div>
-        <div className="metric-card"><strong>{registrations.length}</strong><span>历史活动</span></div>
-      </section>
+      {hasAnyOrders && (
+        <section className="metrics-grid">
+          <div className="metric-card"><strong>{pendingPayments}</strong><span>待审核</span></div>
+          <div className="metric-card"><strong>{pendingSeats}</strong><span>待选座</span></div>
+          <div className="metric-card"><strong>{activeWaitlistInvitations.length}</strong><span>候补邀请</span></div>
+          <div className="metric-card"><strong>{registrations.length}</strong><span>历史活动</span></div>
+        </section>
+      )}
 
       <AccountPanel />
 
@@ -60,16 +63,11 @@ export default async function MyEventsPage() {
 
       <section className="stack">
         {registrations.length === 0 ? (
-          <article className="order-card">
-            <div>
-              <span className="tag">暂无订单</span>
-              <h3>还没有报名记录</h3>
-              <p className="subtle">找到感兴趣的活动后，报名订单会出现在这里。</p>
-            </div>
-            <div className="order-actions">
-              <Link className="button secondary" href="/">浏览活动</Link>
-            </div>
-          </article>
+          <div className="empty-state">
+            <strong>还没有报名记录</strong>
+            <span>找到感兴趣的活动后，报名订单会出现在这里。</span>
+            <Link className="button secondary" href="/">浏览活动</Link>
+          </div>
         ) : null}
 
         {registrations.map((registration) => {
