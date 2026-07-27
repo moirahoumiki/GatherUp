@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GatherUp — 把人聚起来</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; scroll-behavior: smooth; }
+
+  :root {
+    --black: #141414;
+    --white: #FFFFFF;
+    --paper: #F4F1EC;
+    --grey: #8A8A8A;
+    --grey-dark: #6E6A64;
+    --line-dark: rgba(255,255,255,0.14);
+    --line-light: rgba(20,20,20,0.12);
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro SC", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    background: var(--black);
+    color: var(--white);
+    font-size: 15px;
+    line-height: 1.7;
+  }
+  a { color: inherit; text-decoration: none; }
+  ::selection { background: var(--white); color: var(--black); }
+
+  /* ================= 顶栏：极简 ================= */
+  .bar {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 18px 20px;
+    background: var(--black);
+    border-bottom: 1px solid var(--line-dark);
+  }
+  .bar .logo {
+    font-size: 15px;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+  }
+  .bar .right {
+    display: flex;
+    gap: 20px;
+    font-size: 12px;
+    color: var(--grey);
+    letter-spacing: 0.08em;
+  }
+  .bar .right a:hover { color: var(--white); }
+
+  /* ================= HERO：深色宣言 ================= */
+  .hero { padding: 104px 20px 0; }
+  .hero .tag {
+    font-size: 11px;
+    letter-spacing: 0.4em;
+    color: var(--grey);
+  }
+  .hero h1 {
+    margin-top: 40px;
+    font-size: 52px;
+    font-weight: 800;
+    line-height: 1.18;
+    letter-spacing: -0.02em;
+  }
+  .hero h1 .thin { color: var(--grey); font-weight: 300; }
+  .hero p {
+    margin-top: 36px;
+    font-size: 14px;
+    color: var(--grey);
+    font-weight: 300;
+    max-width: 26em;
+    line-height: 2;
+  }
+  .hero .find {
+    margin-top: 72px;
+    max-width: 420px;
+  }
+  .hero .find input {
+    width: 100%;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid var(--line-dark);
+    color: var(--white);
+    font-family: inherit;
+    font-size: 15px;
+    padding: 6px 0 16px;
+    outline: none;
+  }
+  .hero .find input::placeholder { color: #555; font-weight: 300; }
+  .hero .find input:focus { border-color: var(--white); }
+  .hero .cats {
+    margin-top: 24px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 22px;
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    color: #666;
+    padding-bottom: 96px;
+  }
+  .hero .cats a:hover { color: var(--white); }
+  .hero .cats a.on { color: var(--white); border-bottom: 1px solid var(--white); padding-bottom: 3px; }
+
+  /* ================= MARQUEE ================= */
+  .marquee {
+    overflow: hidden;
+    white-space: nowrap;
+    padding: 28px 0;
+    border-top: 1px solid var(--line-dark);
+    border-bottom: 1px solid var(--line-dark);
+  }
+  .marquee .track {
+    display: inline-block;
+    animation: scroll 28s linear infinite;
+  }
+  .marquee span {
+    font-size: 44px;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    padding-right: 72px;
+  }
+  .marquee span em {
+    font-style: normal;
+    font-weight: 300;
+    color: var(--grey);
+  }
+  @keyframes scroll {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-50%); }
+  }
+  .marquee.light {
+    border-color: var(--line-light);
+  }
+
+  /* ================= 主推活动：深色叙事块 ================= */
+  .feature { padding: 88px 20px 104px; }
+  .feature .meta {
+    font-size: 12px;
+    letter-spacing: 0.3em;
+    color: var(--grey);
+  }
+  .feature h2 {
+    margin-top: 28px;
+    font-size: 40px;
+    font-weight: 800;
+    line-height: 1.25;
+    letter-spacing: -0.01em;
+    max-width: 14em;
+  }
+  .feature .story {
+    margin-top: 32px;
+    font-size: 14px;
+    color: var(--grey);
+    font-weight: 300;
+    line-height: 2.1;
+    max-width: 30em;
+  }
+  .feature .facts {
+    margin-top: 64px;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    max-width: 480px;
+  }
+  .feature .fact {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 16px 0;
+    border-bottom: 1px solid var(--line-dark);
+    font-size: 13px;
+  }
+  .feature .fact:first-child { border-top: 1px solid var(--line-dark); }
+  .feature .fact .k { color: #666; letter-spacing: 0.2em; font-size: 11px; }
+  .feature .fact .v { font-weight: 500; }
+  .feature .go {
+    margin-top: 56px;
+    display: inline-block;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    border: 1px solid var(--white);
+    padding: 16px 40px;
+  }
+  .feature .go:hover { background: var(--white); color: var(--black); }
+
+  /* ================= 浅色区：活动叙事列表 ================= */
+  .light-zone {
+    background: var(--paper);
+    color: var(--black);
+  }
+  .light-zone .head {
+    padding: 96px 20px 0;
+    font-size: 11px;
+    letter-spacing: 0.4em;
+    color: var(--grey-dark);
+  }
+
+  .ev { padding: 80px 20px; }
+  .ev + .ev { border-top: 1px solid var(--line-light); }
+  .ev .date {
+    font-size: 12px;
+    letter-spacing: 0.25em;
+    color: var(--grey-dark);
+    font-weight: 500;
+  }
+  .ev h3 {
+    margin-top: 20px;
+    font-size: 32px;
+    font-weight: 800;
+    line-height: 1.3;
+    letter-spacing: -0.01em;
+  }
+  .ev h3 a:hover { text-decoration: underline; text-decoration-thickness: 3px; text-underline-offset: 8px; }
+  .ev .line {
+    margin-top: 20px;
+    font-size: 13.5px;
+    color: var(--grey-dark);
+    font-weight: 300;
+    line-height: 2;
+    max-width: 26em;
+  }
+  .ev .foot {
+    margin-top: 36px;
+    display: flex;
+    gap: 28px;
+    align-items: baseline;
+    font-size: 12px;
+    color: var(--grey-dark);
+    letter-spacing: 0.06em;
+  }
+  .ev .foot .price {
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--black);
+    letter-spacing: 0;
+  }
+  .ev .foot .st { font-weight: 600; color: var(--black); }
+
+  /* ================= 深色收尾块 ================= */
+  .manifesto {
+    padding: 128px 20px;
+    text-align: left;
+  }
+  .manifesto h4 {
+    font-size: 34px;
+    font-weight: 800;
+    line-height: 1.35;
+    max-width: 14em;
+  }
+  .manifesto h4 .thin { color: var(--grey); font-weight: 300; }
+  .manifesto p {
+    margin-top: 32px;
+    font-size: 13px;
+    color: var(--grey);
+    font-weight: 300;
+    line-height: 2.1;
+    max-width: 28em;
+  }
+  .manifesto .go {
+    margin-top: 48px;
+    display: inline-block;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    border-bottom: 1px solid var(--white);
+    padding-bottom: 6px;
+  }
+  .manifesto .go:hover { color: var(--grey); border-color: var(--grey); }
+
+  /* ================= 详情页 ================= */
+  .detail-hero {
+    padding: 112px 20px 96px;
+    border-top: 1px solid var(--line-dark);
+  }
+  .detail-hero .back {
+    font-size: 12px;
+    color: var(--grey);
+    letter-spacing: 0.1em;
+  }
+  .detail-hero .back:hover { color: var(--white); }
+  .detail-hero .meta {
+    margin-top: 80px;
+    font-size: 12px;
+    letter-spacing: 0.3em;
+    color: var(--grey);
+  }
+  .detail-hero h2 {
+    margin-top: 28px;
+    font-size: 46px;
+    font-weight: 800;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+  }
+  .detail-hero .story {
+    margin-top: 40px;
+    font-size: 14px;
+    color: var(--grey);
+    font-weight: 300;
+    line-height: 2.1;
+    max-width: 28em;
+  }
+
+  /* 详情分段叙事（浅色区） */
+  .d-sections { background: var(--paper); color: var(--black); }
+  .d-sec {
+    padding: 88px 20px;
+  }
+  .d-sec + .d-sec { border-top: 1px solid var(--line-light); }
+  .d-sec .label {
+    font-size: 11px;
+    letter-spacing: 0.4em;
+    color: var(--grey-dark);
+  }
+  .d-sec .big {
+    margin-top: 24px;
+    font-size: 30px;
+    font-weight: 800;
+    line-height: 1.35;
+    letter-spacing: -0.01em;
+  }
+  .d-sec .note {
+    margin-top: 20px;
+    font-size: 13.5px;
+    color: var(--grey-dark);
+    font-weight: 300;
+    line-height: 2;
+    max-width: 26em;
+  }
+  .d-sec .huge {
+    margin-top: 24px;
+    font-size: 64px;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1;
+  }
+  .d-sec .huge small {
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--grey-dark);
+    letter-spacing: 0.1em;
+    margin-left: 12px;
+  }
+
+  /* 深色报名块 */
+  .d-cta {
+    padding: 112px 20px 128px;
+  }
+  .d-cta .label {
+    font-size: 11px;
+    letter-spacing: 0.4em;
+    color: var(--grey);
+  }
+  .d-cta h5 {
+    margin-top: 28px;
+    font-size: 36px;
+    font-weight: 800;
+    line-height: 1.3;
+    max-width: 13em;
+  }
+  .d-cta .go {
+    margin-top: 56px;
+    display: inline-block;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    border: 1px solid var(--white);
+    padding: 18px 56px;
+  }
+  .d-cta .go:hover { background: var(--white); color: var(--black); }
+  .d-cta .fine {
+    margin-top: 28px;
+    font-size: 12px;
+    color: #666;
+    font-weight: 300;
+  }
+  .d-cta .team {
+    margin-top: 88px;
+    font-size: 13px;
+    color: var(--grey);
+    font-weight: 300;
+    line-height: 2.2;
+  }
+  .d-cta .team b { color: var(--white); font-weight: 600; }
+
+  /* ================= 页脚 ================= */
+  footer {
+    padding: 72px 20px 96px;
+    border-top: 1px solid var(--line-dark);
+  }
+  footer .f-logo { font-size: 22px; font-weight: 800; }
+  footer .f-line {
+    margin-top: 16px;
+    font-size: 12px;
+    color: #666;
+    font-weight: 300;
+    letter-spacing: 0.1em;
+  }
+  footer .f-switch {
+    margin-top: 48px;
+    font-size: 11px;
+    color: #555;
+    letter-spacing: 0.08em;
+  }
+  footer .f-switch a { color: #777; border-bottom: 1px solid #444; }
+  footer .f-switch a:hover { color: var(--white); }
+
+  /* ================= 桌面端 ================= */
+  @media (min-width: 720px) {
+    .bar { padding: 20px 48px; }
+
+    .hero { padding: 160px 48px 0; }
+    .hero h1 { font-size: 92px; }
+    .hero .find { margin-left: 45%; margin-top: 96px; }
+    .hero .cats { margin-left: 45%; padding-bottom: 144px; }
+
+    .marquee span { font-size: 76px; padding-right: 120px; }
+    .marquee { padding: 40px 0; }
+
+    .feature { padding: 128px 48px 160px; }
+    .feature h2 { font-size: 64px; }
+    .feature .inner { display: flex; gap: 96px; align-items: flex-start; }
+    .feature .left { flex: 1.3; }
+    .feature .right { flex: 1; padding-top: 96px; }
+    .feature .facts { margin-top: 0; }
+    .feature .go { margin-top: 64px; }
+
+    .light-zone .head { padding: 144px 48px 0; }
+    .ev { padding: 112px 48px; }
+    .ev h3 { font-size: 48px; }
+    .ev.push { padding-left: 30%; }
+
+    .manifesto { padding: 192px 48px; }
+    .manifesto h4 { font-size: 52px; }
+
+    .detail-hero { padding: 176px 48px 144px; }
+    .detail-hero h2 { font-size: 84px; }
+    .d-sec { padding: 128px 48px; }
+    .d-sec.push { padding-left: 40%; }
+    .d-sec .big { font-size: 40px; }
+    .d-sec .huge { font-size: 104px; }
+    .d-cta { padding: 176px 48px 192px; }
+    .d-cta h5 { font-size: 52px; }
+
+    footer { padding: 96px 48px 128px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ================= 顶栏 ================= -->
+<div class="bar">
+  <a class="logo" href="#top">GatherUp</a>
+  <div class="right">
+    <a href="#events">活动</a>
+    <a href="#detail">详情示例</a>
+    <a href="#">我的</a>
+  </div>
+</div>
+
+<div id="top"></div>
+
+<!-- ================= HERO ================= -->
+<section class="hero">
+  <div class="tag">活动报名平台</div>
+  <h1>把人聚起来，<br><span class="thin">这件事我们很认真。</span></h1>
+  <p>数调、报名、收款、选座、签到。一场活动的所有琐碎，都被安排好了。你只需要想清楚：和谁，看什么，聊什么。</p>
+
+  <div class="find">
+    <input type="text" placeholder="搜索活动、城市或场地">
+  </div>
+  <div class="cats">
+    <a class="on" href="#events">全部</a>
+    <a href="#events">同好活动</a>
+    <a href="#events">校园活动</a>
+    <a href="#events">会议会务</a>
+    <a href="#events">好友聚会</a>
+  </div>
+</section>
+
+<!-- ================= MARQUEE：主推活动名 ================= -->
+<div class="marquee" aria-hidden="true">
+  <div class="track">
+    <span>坂本龙一 <em>杰作</em></span><span>坂本龙一 <em>杰作</em></span><span>坂本龙一 <em>杰作</em></span><span>坂本龙一 <em>杰作</em></span><span>坂本龙一 <em>杰作</em></span><span>坂本龙一 <em>杰作</em></span><span>坂本龙一 <em>杰作</em></span><span>坂本龙一 <em>杰作</em></span>
+  </div>
+</div>
+
+<!-- ================= 主推活动 ================= -->
+<section class="feature" id="events">
+  <div class="inner">
+    <div class="left">
+      <div class="meta">六月二十二日 · 上海 · 数调中</div>
+      <h2>《坂本龙一：杰作》<br>线下观影</h2>
+      <p class="story">一个下午，一块银幕，和一群同样喜欢他的人。报名后按订单付款、上传截图，组织者确认后开放选座——每一步都清清楚楚。</p>
+      <a class="go" href="#detail">查看这场活动</a>
+    </div>
+    <div class="right">
+      <div class="facts">
+        <div class="fact"><span class="k">场地</span><span class="v">百丽宫影城 环贸店</span></div>
+        <div class="fact"><span class="k">票价</span><span class="v">¥88 起</span></div>
+        <div class="fact"><span class="k">名额</span><span class="v">42 / 60 · 余 18 席</span></div>
+        <div class="fact"><span class="k">截止</span><span class="v">六月十八日 23:59</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 浅色区：其余活动叙事 ================= -->
+<section class="light-zone">
+  <div class="head">近期活动 — 2026 夏</div>
+
+  <article class="ev">
+    <div class="date">六月二十九日 · 杭州 · 待开放报名</div>
+    <h3><a href="#detail">春日同好重映场</a></h3>
+    <p class="line">三十二个位子的小场重映。不做大，只做熟——每个人都是为了同一部片子来的。</p>
+    <div class="foot">
+      <span class="price">¥72</span>
+      <span>浙影时代影城</span>
+      <span class="st">余 6 席</span>
+    </div>
+  </article>
+
+  <article class="ev push">
+    <div class="date">七月五日 · 南京 · 报名中</div>
+    <h3><a href="#detail">生日咖试运营小聚</a></h3>
+    <p class="line">在雾岛咖啡为喜欢的人办一场生日应援。分时段预约，不排队，不拥挤。</p>
+    <div class="foot">
+      <span class="price">¥45</span>
+      <span>雾岛咖啡 · 玄武区</span>
+      <span class="st">36 人已报名</span>
+    </div>
+  </article>
+
+  <article class="ev">
+    <div class="date">七月十二日 · 广州 · 报名中</div>
+    <h3><a href="#detail">春季社团招新开放日</a></h3>
+    <p class="line">三百个名额，四个社团方向。报名、名单、签到、通知，一条链路跑完。</p>
+    <div class="foot">
+      <span class="price">免费</span>
+      <span>岭南大学生活动中心</span>
+      <span class="st">186 人已报名</span>
+    </div>
+  </article>
+
+  <article class="ev push">
+    <div class="date">七月十八日 · 北京 · 付款确认中</div>
+    <h3><a href="#detail">城市青年消费趋势闭门论坛</a></h3>
+    <p class="line">一百二十人的闭门场。收款、审核、签到，正经会务该有的它都有。</p>
+    <div class="foot">
+      <span class="price">¥199</span>
+      <span>望京会议中心</span>
+      <span class="st">74 人已报名</span>
+    </div>
+  </article>
+</section>
+
+<!-- ================= 深色宣言 ================= -->
+<section class="manifesto">
+  <h4>好的聚会不是运气，<br><span class="thin">是被认真对待的结果。</span></h4>
+  <p>从第一次数调投票，到最后一个人签到入场。GatherUp 把组织一场活动的每个环节都做成了顺手的工具——让组织者少熬两个夜，让参与者多一点期待。</p>
+  <a class="go" href="#">发起你的活动</a>
+</section>
+
+<!-- ================= 详情页 ================= -->
+<section class="detail-hero" id="detail">
+  <a class="back" href="#top">← 返回全部活动</a>
+  <div class="meta">同好活动 · 线下观影 · 数调中</div>
+  <h2>《坂本龙一：杰作》<br>线下观影</h2>
+  <p class="story">同好组织的线下观影活动。报名成功后请按订单金额付款并上传截图，组织者确认后开放选座。愿这个下午，和喜欢的音乐一起度过。</p>
+</section>
+
+<div class="marquee light" aria-hidden="true" style="background:#F4F1EC;color:#141414;">
+  <div class="track">
+    <span>六月二十二日 <em style="color:#8A8A8A;">14:30</em></span><span>六月二十二日 <em style="color:#8A8A8A;">14:30</em></span><span>六月二十二日 <em style="color:#8A8A8A;">14:30</em></span><span>六月二十二日 <em style="color:#8A8A8A;">14:30</em></span><span>六月二十二日 <em style="color:#8A8A8A;">14:30</em></span><span>六月二十二日 <em style="color:#8A8A8A;">14:30</em></span>
+  </div>
+</div>
+
+<section class="d-sections">
+
+  <div class="d-sec">
+    <div class="label">地点</div>
+    <div class="big">百丽宫影城 环贸店</div>
+    <p class="note">上海市徐汇区淮海中路999号。交通方便，影厅体验稳定——过往组织者验证过的场地，适合需要选座的观影活动。</p>
+  </div>
+
+  <div class="d-sec push">
+    <div class="label">票价</div>
+    <div class="huge">¥88<small>每人</small></div>
+    <p class="note">每单最多同行四人，支持相邻选座。报名后 24 小时内完成付款，逾期名额自动释放。</p>
+  </div>
+
+  <div class="d-sec">
+    <div class="label">名额</div>
+    <div class="big">42 / 60 — 余 18 席</div>
+    <p class="note">已付款 31 人，已选座 24 人。报名截止六月十八日 23:59，先到先得。</p>
+  </div>
+
+</section>
+
+<section class="d-cta">
+  <div class="label">报名</div>
+  <h5>位子不多了。<br>和喜欢的人坐在一起。</h5>
+  <a class="go" href="#detail">立即报名</a>
+  <div class="fine">报名不收手续费 · 未成团原路退款</div>
+
+  <div class="team">
+    这场活动由 <b>比奇堡miki</b> 主办<br>
+    <b>月见草</b> 联合主办 · <b>青柠</b> 负责财务
+  </div>
+</section>
+
+<!-- ================= 页脚 ================= -->
+<footer>
+  <div class="f-logo">GatherUp</div>
+  <div class="f-line">把人聚起来，这件事我们很认真。</div>
+  <div class="f-switch">
+    其他方向：<a href="v4-a.html">A 纯白画廊</a> · <a href="v4-b-refined.html">B 温暖侘寂</a> · <a href="v4-c.html">C 黑白反差</a>
+  </div>
+</footer>
+
+</body>
+</html>

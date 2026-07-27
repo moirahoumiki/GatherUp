@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GatherUp · 活动详情 — v2 概念稿</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@500;600&family=Noto+Sans+SC:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #F7F5F0;
+    --ink: #3A362F;
+    --ink-soft: #7A756A;
+    --ink-faint: #A39D8F;
+    --lavender: #DDD8EE;
+    --sage: #DCE3D5;
+    --sand: #EFE7DA;
+    --terra: #B5734A;
+    --radius-card: 24px;
+    --serif: 'Noto Serif SC', 'Songti SC', serif;
+    --sans: 'Noto Sans SC', 'PingFang SC', sans-serif;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { -webkit-font-smoothing: antialiased; }
+  body {
+    background: var(--bg);
+    font-family: var(--sans);
+    color: var(--ink);
+    font-size: 15px;
+    line-height: 1.6;
+  }
+  .page {
+    max-width: 390px;
+    margin: 0 auto;
+    padding: 0 24px 144px;
+    position: relative;
+  }
+  @media (min-width: 720px) {
+    .page { max-width: 440px; }
+  }
+
+  .proposal-nav {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    padding: 16px 0 0;
+    font-size: 12px;
+    color: var(--ink-faint);
+  }
+  .proposal-nav a {
+    color: var(--ink-soft);
+    text-decoration: none;
+    border-bottom: 1px solid var(--ink-faint);
+    padding-bottom: 2px;
+  }
+  .proposal-nav .current {
+    color: var(--terra);
+    border-bottom: 1px solid var(--terra);
+    padding-bottom: 2px;
+  }
+
+  /* ---- top bar ---- */
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 24px;
+  }
+  .icon-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 1px solid rgba(58, 54, 47, 0.18);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    text-decoration: none;
+  }
+  .icon-btn svg { width: 16px; height: 16px; stroke: var(--ink-soft); fill: none; stroke-width: 1.5; }
+  .topbar-label {
+    font-size: 12px;
+    letter-spacing: 0.16em;
+    color: var(--ink-faint);
+  }
+
+  /* ---- hero ---- */
+  .hero { margin-top: 48px; position: relative; }
+  .hero-tag {
+    font-size: 12px;
+    letter-spacing: 0.16em;
+    color: var(--ink-soft);
+  }
+  .hero-title {
+    font-family: var(--serif);
+    font-size: 32px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    line-height: 1.35;
+    margin-top: 16px;
+    max-width: 300px;
+  }
+  .hero-host {
+    margin-top: 16px;
+    font-size: 12px;
+    color: var(--ink-soft);
+  }
+  .hero-art {
+    position: absolute;
+    right: -8px;
+    top: 8px;
+    opacity: 0.5;
+    pointer-events: none;
+  }
+  .hero-art svg { stroke: var(--ink); stroke-width: 1; fill: none; opacity: 0.5; }
+
+  /* ---- info card ---- */
+  .info-card {
+    background: var(--lavender);
+    border-radius: var(--radius-card);
+    padding: 24px;
+    margin-top: 40px;
+  }
+  .info-row { display: flex; gap: 16px; }
+  .info-row + .info-row { margin-top: 16px; }
+  .info-icon { width: 20px; flex-shrink: 0; padding-top: 2px; }
+  .info-icon svg { width: 16px; height: 16px; stroke: var(--ink-soft); fill: none; stroke-width: 1.5; }
+  .info-main {
+    font-family: var(--serif);
+    font-size: 15px;
+    font-weight: 500;
+  }
+  .info-sub { font-size: 12px; color: var(--ink-soft); }
+
+  /* ---- description ---- */
+  .section-label {
+    margin-top: 48px;
+    margin-bottom: 16px;
+    font-size: 12px;
+    letter-spacing: 0.16em;
+    color: var(--ink-faint);
+  }
+  .desc { font-size: 15px; color: var(--ink); max-width: 320px; }
+
+  /* ---- tickets ---- */
+  .tickets { display: flex; flex-direction: column; gap: 16px; }
+  .ticket {
+    border-radius: 20px;
+    padding: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+  .ticket.sand { background: var(--sand); }
+  .ticket.sage { background: var(--sage); }
+  .ticket-name {
+    font-family: var(--serif);
+    font-size: 15px;
+    font-weight: 500;
+  }
+  .ticket-note { font-size: 12px; color: var(--ink-soft); margin-top: 8px; }
+  .ticket-price {
+    font-family: var(--serif);
+    font-size: 22px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .ticket-price small {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--ink-soft);
+    margin-right: 2px;
+  }
+  .ticket-soldout { opacity: 0.55; }
+
+  /* ---- progress note ---- */
+  .quota {
+    margin-top: 24px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    font-size: 12px;
+    color: var(--ink-soft);
+  }
+  .quota-bar {
+    flex: 1;
+    height: 3px;
+    border-radius: 2px;
+    background: rgba(58, 54, 47, 0.1);
+    overflow: hidden;
+  }
+  .quota-bar span {
+    display: block;
+    width: 70%;
+    height: 100%;
+    background: var(--terra);
+    border-radius: 2px;
+  }
+
+  /* ---- bottom cta ---- */
+  .cta-bar {
+    position: fixed;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: 24px;
+    width: calc(100% - 48px);
+    max-width: 342px;
+    background: #2E2B26;
+    border-radius: 999px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 8px 8px 32px;
+    box-shadow: 0 8px 24px rgba(46, 43, 38, 0.18);
+  }
+  @media (min-width: 720px) {
+    .cta-bar { max-width: 392px; }
+  }
+  .cta-price {
+    font-family: var(--serif);
+    font-size: 22px;
+    font-weight: 600;
+    color: #F7F5F0;
+  }
+  .cta-price small { font-size: 12px; font-weight: 400; color: #C9C4B8; margin-right: 2px; }
+  .cta-deadline { font-size: 12px; color: #C9C4B8; }
+  .cta-btn {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: var(--terra);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    flex-shrink: 0;
+  }
+  .cta-btn svg { width: 18px; height: 18px; stroke: #F7F5F0; fill: none; stroke-width: 2; }
+</style>
+</head>
+<body>
+<div class="page">
+  <nav class="proposal-nav">
+    <a href="v2-home.html">← 首页 · 活动广场</a>
+    <span class="current">活动详情</span>
+  </nav>
+
+  <header class="topbar">
+    <a class="icon-btn" href="v2-home.html" aria-label="返回">
+      <svg viewBox="0 0 24 24"><path d="M15 5 L8 12 L15 19"/></svg>
+    </a>
+    <span class="topbar-label">活动详情</span>
+    <a class="icon-btn" href="#" aria-label="分享">
+      <svg viewBox="0 0 24 24"><circle cx="6" cy="12" r="2.5"/><circle cx="17" cy="6" r="2.5"/><circle cx="17" cy="18" r="2.5"/><path d="M8.3 10.8 L14.7 7.2 M8.3 13.2 L14.7 16.8"/></svg>
+    </a>
+  </header>
+
+  <section class="hero">
+    <span class="hero-art">
+      <svg width="96" height="120" viewBox="0 0 96 120"><path d="M30 104 C 22 78, 36 64, 50 60 C 72 55, 78 36, 66 22 C 58 12, 40 15, 37 31 C 34 44, 48 50, 58 47"/><path d="M68 84 C 79 89, 82 103, 74 111"/></svg>
+    </span>
+    <p class="hero-tag">同好活动 · 线下观影</p>
+    <h1 class="hero-title">《坂本龙一：杰作》线下观影</h1>
+    <p class="hero-host">发起人 比奇堡miki · 编号 GU-RYU-20260622</p>
+  </section>
+
+  <section class="info-card">
+    <div class="info-row">
+      <span class="info-icon"><svg viewBox="0 0 24 24"><rect x="4" y="6" width="16" height="14" rx="2"/><path d="M4 10 h16 M9 4 v4 M15 4 v4"/></svg></span>
+      <div>
+        <p class="info-main">2026年6月22日 周一 14:30</p>
+        <p class="info-sub">报名截止 6月18日 23:59</p>
+      </div>
+    </div>
+    <div class="info-row">
+      <span class="info-icon"><svg viewBox="0 0 24 24"><path d="M12 21 C 7 15.5, 5 12, 5 9.5 a7 7 0 0 1 14 0 C 19 12, 17 15.5, 12 21 Z"/><circle cx="12" cy="9.5" r="2.5"/></svg></span>
+      <div>
+        <p class="info-main">百丽宫影城 环贸店</p>
+        <p class="info-sub">上海市徐汇区淮海中路999号</p>
+      </div>
+    </div>
+    <div class="info-row">
+      <span class="info-icon"><svg viewBox="0 0 24 24"><circle cx="9" cy="9" r="3.5"/><path d="M3 20 c0-4 2.8-6 6-6 s6 2 6 6"/><path d="M16 6.5 a3.5 3.5 0 0 1 0 6 M18 20 c0-3-1.4-5-3.6-5.7"/></svg></span>
+      <div>
+        <p class="info-main">42 / 60 人已报名</p>
+        <p class="info-sub">每单最多 4 人 · 付款确认后开放选座</p>
+      </div>
+    </div>
+  </section>
+
+  <p class="section-label">活动介绍</p>
+  <p class="desc">同好组织的线下观影活动。报名成功后请按订单金额付款并上传截图，组织者确认后开放选座。</p>
+
+  <p class="section-label">票档</p>
+  <div class="tickets">
+    <div class="ticket sand">
+      <div>
+        <p class="ticket-name">观影票 · 单人</p>
+        <p class="ticket-note">含选座资格与纪念票根</p>
+      </div>
+      <p class="ticket-price"><small>¥</small>88</p>
+    </div>
+    <div class="ticket sage">
+      <div>
+        <p class="ticket-name">观影票 · 双人同行</p>
+        <p class="ticket-note">系统优先安排相邻座位</p>
+      </div>
+      <p class="ticket-price"><small>¥</small>176</p>
+    </div>
+    <div class="ticket sand ticket-soldout">
+      <div>
+        <p class="ticket-name">早鸟票</p>
+        <p class="ticket-note">已售罄</p>
+      </div>
+      <p class="ticket-price"><small>¥</small>76</p>
+    </div>
+  </div>
+
+  <div class="quota">
+    <span>已报名 42</span>
+    <div class="quota-bar"><span></span></div>
+    <span>限 60 人</span>
+  </div>
+</div>
+
+<div class="cta-bar">
+  <div>
+    <p class="cta-price"><small>¥</small>88 起</p>
+    <p class="cta-deadline">6月18日截止</p>
+  </div>
+  <a class="cta-btn" href="#" aria-label="立即报名">
+    <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+  </a>
+</div>
+</body>
+</html>

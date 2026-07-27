@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GatherUp v4 · 方向 A · 纯白画廊</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { -webkit-font-smoothing: antialiased; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro SC", "PingFang SC", "Helvetica Neue", "Microsoft YaHei", sans-serif;
+    background: #FFFFFF;
+    color: #111111;
+    line-height: 1.7;
+    font-size: 15px;
+  }
+  a { color: inherit; text-decoration: none; }
+
+  /* ---- 方向切换 ---- */
+  .switcher {
+    display: flex;
+    justify-content: center;
+    gap: 32px;
+    padding: 16px 24px;
+    font-size: 12px;
+    color: #999;
+    border-bottom: 1px solid #F0F0F0;
+  }
+  .switcher a { color: #999; }
+  .switcher a.on { color: #111; }
+  .switcher a:hover { color: #111; }
+
+  .wrap {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  /* ---- 顶部 ---- */
+  header.site {
+    padding: 48px 0 0;
+  }
+  .brand {
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+  }
+  .brand span { color: #00539C; }
+  nav.top {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+  }
+  nav.top .links { display: flex; gap: 24px; font-size: 13px; color: #666; }
+  nav.top .links a:hover { color: #111; }
+  nav.top .links a.here { color: #111; }
+
+  /* ---- Hero ---- */
+  .hero { padding: 96px 0 0; }
+  .hero h1 {
+    font-size: 32px;
+    font-weight: 700;
+    line-height: 1.4;
+    letter-spacing: 0.01em;
+  }
+  .hero p {
+    margin-top: 16px;
+    font-size: 14px;
+    color: #888;
+    font-weight: 300;
+  }
+
+  /* ---- 搜索 ---- */
+  .search { margin-top: 64px; }
+  .search input {
+    width: 100%;
+    border: none;
+    border-bottom: 1px solid #DDD;
+    padding: 8px 0 16px;
+    font-size: 15px;
+    font-family: inherit;
+    color: #111;
+    background: transparent;
+    outline: none;
+  }
+  .search input::placeholder { color: #BBB; font-weight: 300; }
+  .search input:focus { border-color: #111; }
+  .filters {
+    margin-top: 24px;
+    display: flex;
+    gap: 24px;
+    font-size: 13px;
+    overflow-x: auto;
+  }
+  .filters a { color: #AAA; white-space: nowrap; padding-bottom: 4px; }
+  .filters a.on {
+    color: #111;
+    border-bottom: 1px solid #111;
+  }
+  .filters a:hover { color: #111; }
+
+  /* ---- 活动列表 ---- */
+  .list { padding: 96px 0 0; }
+  .event { padding: 0 0 120px; }
+  .event .meta {
+    font-size: 12px;
+    color: #999;
+    letter-spacing: 0.06em;
+  }
+  .event .meta em {
+    font-style: normal;
+    color: #00539C;
+  }
+  .event h2 {
+    margin-top: 16px;
+    font-size: 26px;
+    font-weight: 700;
+    line-height: 1.45;
+    letter-spacing: 0.01em;
+  }
+  .event h2 a:hover { color: #00539C; }
+  .event .venue {
+    margin-top: 16px;
+    font-size: 13px;
+    color: #888;
+    font-weight: 300;
+  }
+  .event .foot {
+    margin-top: 32px;
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+  }
+  .event .price {
+    font-size: 17px;
+    font-weight: 600;
+  }
+  .event .price small {
+    font-size: 12px;
+    font-weight: 400;
+    color: #999;
+    margin-left: 8px;
+  }
+  .event .go {
+    font-size: 13px;
+    color: #00539C;
+  }
+  .event .go:hover { text-decoration: underline; }
+
+  /* ---- 详情 ---- */
+  .detail { padding: 96px 0 0; }
+  .detail .back {
+    font-size: 13px;
+    color: #999;
+  }
+  .detail .back:hover { color: #111; }
+  .detail .d-meta {
+    margin-top: 64px;
+    font-size: 12px;
+    color: #999;
+    letter-spacing: 0.06em;
+  }
+  .detail .d-meta em { font-style: normal; color: #00539C; }
+  .detail h2 {
+    margin-top: 16px;
+    font-size: 30px;
+    font-weight: 700;
+    line-height: 1.4;
+  }
+  .info {
+    margin-top: 64px;
+  }
+  .info .row {
+    display: flex;
+    padding: 16px 0;
+  }
+  .info .row .k {
+    width: 88px;
+    flex-shrink: 0;
+    font-size: 13px;
+    color: #999;
+    font-weight: 300;
+  }
+  .info .row .v {
+    font-size: 14px;
+    color: #111;
+  }
+  .desc {
+    margin-top: 48px;
+    font-size: 14px;
+    color: #555;
+    font-weight: 300;
+    line-height: 1.9;
+    max-width: 480px;
+  }
+  .tickets { margin-top: 96px; }
+  .tickets h3, .org h3 {
+    font-size: 12px;
+    color: #999;
+    font-weight: 400;
+    letter-spacing: 0.12em;
+  }
+  .ticket {
+    margin-top: 32px;
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+  }
+  .ticket .t-name { font-size: 15px; font-weight: 600; }
+  .ticket .t-note { font-size: 12px; color: #999; margin-top: 4px; font-weight: 300; }
+  .ticket .t-price { font-size: 20px; font-weight: 700; }
+  .ticket .t-price small { font-size: 12px; font-weight: 400; color: #999; }
+  .cta {
+    margin-top: 64px;
+    display: block;
+    width: 100%;
+    text-align: center;
+    background: #00539C;
+    color: #FFF;
+    font-size: 15px;
+    font-weight: 600;
+    padding: 16px 0;
+    letter-spacing: 0.04em;
+  }
+  .cta:hover { background: #004380; }
+  .cta-note {
+    margin-top: 16px;
+    text-align: center;
+    font-size: 12px;
+    color: #AAA;
+    font-weight: 300;
+  }
+  .org { margin-top: 96px; }
+  .org .o-list { margin-top: 24px; }
+  .org .o-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    font-size: 14px;
+  }
+  .org .o-row .o-role { color: #999; font-size: 13px; font-weight: 300; }
+
+  footer.site {
+    margin-top: 160px;
+    padding: 48px 0 96px;
+    text-align: center;
+    font-size: 12px;
+    color: #BBB;
+    font-weight: 300;
+  }
+
+  @media (min-width: 720px) {
+    body { font-size: 16px; }
+    .wrap { max-width: 720px; padding: 0 32px; }
+    header.site { padding-top: 64px; }
+    .hero { padding-top: 160px; }
+    .hero h1 { font-size: 44px; }
+    .list { padding-top: 160px; }
+    .event { padding-bottom: 160px; }
+    .event h2 { font-size: 34px; }
+    .detail h2 { font-size: 40px; }
+    .cta { max-width: 320px; margin-left: auto; margin-right: auto; }
+  }
+</style>
+</head>
+<body>
+
+<div class="switcher">
+  <a class="on" href="v4-a.html">A · 纯白画廊</a>
+  <a href="v4-b.html">B · 温暖侘寂</a>
+  <a href="v4-c.html">C · 黑白反差</a>
+</div>
+
+<div class="wrap">
+
+  <header class="site">
+    <nav class="top">
+      <a class="brand" href="#home">Gather<span>Up</span></a>
+      <div class="links">
+        <a class="here" href="#home">发现</a>
+        <a href="#detail">详情示例</a>
+        <a href="#">我的</a>
+      </div>
+    </nav>
+  </header>
+
+  <!-- ============ 首页 ============ -->
+  <section id="home">
+
+    <div class="hero">
+      <h1>好的聚会，<br>值得被认真对待。</h1>
+      <p>发现同好活动，或发起属于你的那一场。</p>
+    </div>
+
+    <div class="search">
+      <input type="text" placeholder="搜索活动、城市或场地">
+      <div class="filters">
+        <a class="on" href="#home">全部</a>
+        <a href="#home">同好活动</a>
+        <a href="#home">校园活动</a>
+        <a href="#home">会议会务</a>
+        <a href="#home">好友聚会</a>
+      </div>
+    </div>
+
+    <div class="list">
+
+      <article class="event">
+        <div class="meta">上海 · 6月22日 周一 14:30 · <em>数调中</em></div>
+        <h2><a href="#detail">《坂本龙一：杰作》线下观影</a></h2>
+        <div class="venue">百丽宫影城 环贸店 · 已报名 42 / 60</div>
+        <div class="foot">
+          <div class="price">¥88<small>起</small></div>
+          <a class="go" href="#detail">查看详情 →</a>
+        </div>
+      </article>
+
+      <article class="event">
+        <div class="meta">杭州 · 6月29日 周一 19:00 · <em>待开放报名</em></div>
+        <h2><a href="#detail">春日同好重映场</a></h2>
+        <div class="venue">浙影时代影城 · 已报名 26 / 32</div>
+        <div class="foot">
+          <div class="price">¥72</div>
+          <a class="go" href="#detail">查看详情 →</a>
+        </div>
+      </article>
+
+      <article class="event">
+        <div class="meta">南京 · 7月5日 周日 12:00 · <em>报名中</em></div>
+        <h2><a href="#detail">生日咖试运营小聚</a></h2>
+        <div class="venue">雾岛咖啡 · 已报名 36 / 80</div>
+        <div class="foot">
+          <div class="price">¥45</div>
+          <a class="go" href="#detail">查看详情 →</a>
+        </div>
+      </article>
+
+      <article class="event">
+        <div class="meta">广州 · 7月12日 周日 10:00 · <em>报名中</em></div>
+        <h2><a href="#detail">春季社团招新开放日</a></h2>
+        <div class="venue">岭南大学生活动中心 · 已报名 186 / 300</div>
+        <div class="foot">
+          <div class="price">免费</div>
+          <a class="go" href="#detail">查看详情 →</a>
+        </div>
+      </article>
+
+      <article class="event">
+        <div class="meta">北京 · 7月18日 周六 13:30 · <em>付款确认中</em></div>
+        <h2><a href="#detail">城市青年消费趋势闭门论坛</a></h2>
+        <div class="venue">望京会议中心 · 已报名 74 / 120</div>
+        <div class="foot">
+          <div class="price">¥199</div>
+          <a class="go" href="#detail">查看详情 →</a>
+        </div>
+      </article>
+
+    </div>
+  </section>
+
+  <!-- ============ 详情页片段 ============ -->
+  <section id="detail" class="detail">
+    <a class="back" href="#home">← 返回活动列表</a>
+
+    <div class="d-meta">同好活动 · 线下观影 · <em>数调中</em></div>
+    <h2>《坂本龙一：杰作》线下观影</h2>
+
+    <div class="info">
+      <div class="row"><div class="k">时间</div><div class="v">2026年6月22日 周一 14:30</div></div>
+      <div class="row"><div class="k">地点</div><div class="v">百丽宫影城 环贸店<br>上海市徐汇区淮海中路999号</div></div>
+      <div class="row"><div class="k">报名截止</div><div class="v">6月18日 23:59</div></div>
+      <div class="row"><div class="k">名额</div><div class="v">已报名 42 / 60 · 已付款 31 · 已选座 24</div></div>
+    </div>
+
+    <p class="desc">同好组织的线下观影活动。报名成功后请按订单金额付款并上传截图，组织者确认后开放选座。</p>
+
+    <div class="tickets">
+      <h3>票档</h3>
+      <div class="ticket">
+        <div>
+          <div class="t-name">观影票 · 单人</div>
+          <div class="t-note">每单最多 4 人，支持同行选座</div>
+        </div>
+        <div class="t-price">¥88<small> / 人</small></div>
+      </div>
+    </div>
+
+    <a class="cta" href="#detail">立即报名</a>
+    <div class="cta-note">报名后 24 小时内完成付款，逾期名额将自动释放</div>
+
+    <div class="org">
+      <h3>组织者</h3>
+      <div class="o-list">
+        <div class="o-row"><span>比奇堡miki</span><span class="o-role">主办</span></div>
+        <div class="o-row"><span>月见草</span><span class="o-role">联合主办</span></div>
+        <div class="o-row"><span>青柠</span><span class="o-role">财务</span></div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="site">
+    GatherUp · 让每一次相聚都从容
+  </footer>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GatherUp · 活动广场 — v2 概念稿</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@500;600&family=Noto+Sans+SC:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #F7F5F0;
+    --ink: #3A362F;
+    --ink-soft: #7A756A;
+    --ink-faint: #A39D8F;
+    --lavender: #DDD8EE;
+    --sage: #DCE3D5;
+    --sand: #EFE7DA;
+    --terra: #B5734A;
+    --terra-deep: #9C6140;
+    --radius-card: 24px;
+    --serif: 'Noto Serif SC', 'Songti SC', serif;
+    --sans: 'Noto Sans SC', 'PingFang SC', sans-serif;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { -webkit-font-smoothing: antialiased; }
+  body {
+    background: var(--bg);
+    font-family: var(--sans);
+    color: var(--ink);
+    font-size: 15px;
+    line-height: 1.6;
+  }
+  .page {
+    max-width: 390px;
+    margin: 0 auto;
+    padding: 0 24px 120px;
+    position: relative;
+  }
+  @media (min-width: 720px) {
+    .page { max-width: 440px; }
+  }
+
+  /* ---- proposal switcher (concept-stage only) ---- */
+  .proposal-nav {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    padding: 16px 0 0;
+    font-size: 12px;
+    color: var(--ink-faint);
+  }
+  .proposal-nav a {
+    color: var(--ink-soft);
+    text-decoration: none;
+    border-bottom: 1px solid var(--ink-faint);
+    padding-bottom: 2px;
+  }
+  .proposal-nav .current {
+    color: var(--terra);
+    border-bottom: 1px solid var(--terra);
+    padding-bottom: 2px;
+  }
+
+  /* ---- top bar ---- */
+  .topbar {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    padding: 48px 0 0;
+  }
+  .brand {
+    font-family: var(--serif);
+    font-size: 32px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+  }
+  .brand-sub {
+    font-size: 12px;
+    color: var(--ink-soft);
+    letter-spacing: 0.12em;
+    margin-top: 8px;
+  }
+  .avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 1px solid rgba(58, 54, 47, 0.18);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    flex-shrink: 0;
+    margin-bottom: 8px;
+  }
+  .avatar svg { width: 18px; height: 18px; stroke: var(--ink-soft); }
+
+  /* ---- tabs ---- */
+  .tabs {
+    display: flex;
+    gap: 24px;
+    margin-top: 40px;
+    border-bottom: 1px solid rgba(58, 54, 47, 0.08);
+  }
+  .tab {
+    font-size: 15px;
+    color: var(--ink-faint);
+    padding-bottom: 16px;
+    text-decoration: none;
+  }
+  .tab.active {
+    color: var(--ink);
+    font-weight: 500;
+    border-bottom: 1.5px solid var(--ink);
+    margin-bottom: -1px;
+  }
+
+  /* ---- section label ---- */
+  .section-label {
+    margin-top: 40px;
+    margin-bottom: 16px;
+    font-size: 12px;
+    letter-spacing: 0.16em;
+    color: var(--ink-faint);
+  }
+
+  /* ---- event cards ---- */
+  .cards { display: flex; flex-direction: column; gap: 16px; }
+  .card {
+    border-radius: var(--radius-card);
+    padding: 24px;
+    position: relative;
+    display: block;
+    text-decoration: none;
+    color: var(--ink);
+    overflow: hidden;
+  }
+  .card.lavender { background: var(--lavender); }
+  .card.sage { background: var(--sage); }
+  .card.sand { background: var(--sand); }
+
+  .card-city {
+    font-size: 12px;
+    letter-spacing: 0.16em;
+    color: var(--ink-soft);
+  }
+  .card-title {
+    font-family: var(--serif);
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    line-height: 1.4;
+    margin-top: 8px;
+    max-width: 240px;
+  }
+  .card-date {
+    font-family: var(--serif);
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--ink-soft);
+    margin-top: 16px;
+  }
+  .card-desc {
+    font-size: 12px;
+    color: var(--ink-soft);
+    margin-top: 8px;
+    max-width: 232px;
+    line-height: 1.6;
+  }
+  .card-go {
+    position: absolute;
+    right: 24px;
+    bottom: 24px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--terra);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .card-go svg { width: 14px; height: 14px; stroke: #F7F5F0; }
+  .card-art {
+    position: absolute;
+    top: 24px;
+    right: 16px;
+    opacity: 0.5;
+    pointer-events: none;
+  }
+  .card-art svg { stroke: var(--ink); stroke-width: 1; fill: none; opacity: 0.45; }
+
+  /* ---- floating pill nav ---- */
+  .pill-nav {
+    position: fixed;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: 24px;
+    background: #2E2B26;
+    border-radius: 999px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px;
+    box-shadow: 0 8px 24px rgba(46, 43, 38, 0.18);
+  }
+  .pill-nav a {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .pill-nav a.active { background: rgba(247, 245, 240, 0.14); }
+  .pill-nav svg { width: 20px; height: 20px; stroke: #C9C4B8; fill: none; stroke-width: 1.5; }
+  .pill-nav a.active svg { stroke: #F7F5F0; }
+
+  /* ---- page bg line art ---- */
+  .bg-line {
+    position: absolute;
+    top: 96px;
+    left: -48px;
+    z-index: -1;
+    opacity: 0.35;
+    pointer-events: none;
+  }
+</style>
+</head>
+<body>
+<div class="page">
+  <nav class="proposal-nav">
+    <span class="current">首页 · 活动广场</span>
+    <a href="v2-detail.html">活动详情 →</a>
+  </nav>
+
+  <svg class="bg-line" width="180" height="240" viewBox="0 0 180 240" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M140 20 C 60 40, 30 110, 70 150 C 100 180, 60 220, 20 210" stroke="#3A362F" stroke-width="1" opacity="0.4"/>
+  </svg>
+
+  <header class="topbar">
+    <div>
+      <h1 class="brand">GatherUp</h1>
+      <p class="brand-sub">相聚 · 记录 · 分享</p>
+    </div>
+    <div class="avatar">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.5-6 8-6s8 2 8 6"/></svg>
+    </div>
+  </header>
+
+  <nav class="tabs">
+    <a class="tab active" href="#">报名中</a>
+    <a class="tab" href="#">即将开始</a>
+    <a class="tab" href="#">已结束</a>
+  </nav>
+
+  <p class="section-label">本季活动</p>
+
+  <main class="cards">
+
+    <!-- 1. lavender -->
+    <a class="card lavender" href="v2-detail.html">
+      <p class="card-city">上海 · 线下观影</p>
+      <h2 class="card-title">《坂本龙一：杰作》线下观影</h2>
+      <p class="card-date">6月22日 周一 · 14:30</p>
+      <p class="card-desc">同好组织的观影场，付款确认后开放选座。</p>
+      <span class="card-art">
+        <svg width="72" height="88" viewBox="0 0 72 88"><path d="M20 76 C 14 56, 26 46, 36 44 C 52 40, 56 26, 48 16 C 42 8, 28 10, 26 22 C 24 32, 34 36, 42 34" /><path d="M50 62 C 58 66, 60 76, 54 82"/></svg>
+      </span>
+      <span class="card-go"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+    </a>
+
+    <!-- 2. sage -->
+    <a class="card sage" href="v2-detail.html">
+      <p class="card-city">杭州 · 线下观影</p>
+      <h2 class="card-title">春日同好重映场</h2>
+      <p class="card-date">6月29日 周一 · 19:00</p>
+      <p class="card-desc">小规模重映观影，单人报名即可。</p>
+      <span class="card-art">
+        <svg width="64" height="84" viewBox="0 0 64 84"><path d="M32 80 C 30 60, 30 44, 32 28"/><path d="M32 40 C 22 36, 16 26, 20 16 C 28 18, 34 28, 32 40 Z"/><path d="M32 30 C 40 28, 46 20, 44 10 C 36 12, 30 20, 32 30 Z"/></svg>
+      </span>
+      <span class="card-go"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+    </a>
+
+    <!-- 3. sand -->
+    <a class="card sand" href="v2-detail.html">
+      <p class="card-city">南京 · 生咖</p>
+      <h2 class="card-title">生日咖试运营小聚</h2>
+      <p class="card-date">7月5日 周日 · 12:00</p>
+      <p class="card-desc">分时段预约入场，验证生咖聚会体验。</p>
+      <span class="card-art">
+        <svg width="68" height="80" viewBox="0 0 68 80"><path d="M16 34 h32 v6 c0 14 -8 24 -16 24 s-16 -10 -16 -24 Z"/><path d="M48 38 c8 0 10 10 2 14"/><path d="M26 24 c0 -6 6 -6 6 -12 M38 24 c0 -6 6 -6 6 -12"/></svg>
+      </span>
+      <span class="card-go"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+    </a>
+
+    <!-- 4. lavender -->
+    <a class="card lavender" href="v2-detail.html">
+      <p class="card-city">广州 · 校园招新</p>
+      <h2 class="card-title">春季社团招新开放日</h2>
+      <p class="card-date">7月12日 周日 · 10:00</p>
+      <p class="card-desc">免费开放日，凭 GatherUp ID 现场签到。</p>
+      <span class="card-art">
+        <svg width="68" height="80" viewBox="0 0 68 80"><path d="M14 68 h40 M18 68 v-34 M50 68 v-34 M14 32 h40 M12 32 L34 16 L56 32"/><path d="M28 68 v-16 h12 v16"/></svg>
+      </span>
+      <span class="card-go"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+    </a>
+
+    <!-- 5. sage -->
+    <a class="card sage" href="v2-detail.html">
+      <p class="card-city">北京 · 闭门会议</p>
+      <h2 class="card-title">城市青年消费趋势闭门论坛</h2>
+      <p class="card-date">7月18日 周六 · 13:30</p>
+      <p class="card-desc">面向品牌方与组织者的闭门交流会。</p>
+      <span class="card-art">
+        <svg width="60" height="80" viewBox="0 0 60 80"><circle cx="30" cy="22" r="10"/><path d="M12 66 c0 -14 8 -22 18 -22 s18 8 18 22"/><path d="M44 34 c6 -2 10 -8 8 -14"/></svg>
+      </span>
+      <span class="card-go"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+    </a>
+
+  </main>
+</div>
+
+<nav class="pill-nav">
+  <a class="active" href="#" aria-label="广场">
+    <svg viewBox="0 0 24 24"><path d="M4 11 L12 4 L20 11 V20 H14 V15 H10 V20 H4 Z"/></svg>
+  </a>
+  <a href="#" aria-label="搜索">
+    <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6"/><path d="M16 16 L21 21"/></svg>
+  </a>
+  <a href="#" aria-label="我的票">
+    <svg viewBox="0 0 24 24"><path d="M4 8 a2 2 0 0 0 2-2 h12 a2 2 0 0 0 2 2 v8 a2 2 0 0 0-2 2 H6 a2 2 0 0 0-2-2 Z" transform="rotate(0)"/><path d="M14 6 v12" stroke-dasharray="2 2"/></svg>
+  </a>
+  <a href="#" aria-label="收藏">
+    <svg viewBox="0 0 24 24"><path d="M12 20 C 5 15, 3 10, 6 7 C 8.5 4.8, 11.5 6, 12 8 C 12.5 6, 15.5 4.8, 18 7 C 21 10, 19 15, 12 20 Z"/></svg>
+  </a>
+</nav>
+</body>
+</html>

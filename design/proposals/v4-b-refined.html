@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GatherUp v4 · 方向 B 精修 · 温暖侘寂</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
+
+  :root {
+    --paper: #FAF8F5;
+    --ink: #35312C;
+    --ink-strong: #26231F;
+    --ink-soft: #7C7468;
+    --ink-faint: #A69D90;
+    --clay: #A85B2A;
+    --hairline: rgba(90, 78, 62, 0.16);
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro SC", "PingFang SC", "Hiragino Sans GB", sans-serif;
+    background: var(--paper);
+    background-image:
+      radial-gradient(rgba(120, 100, 75, 0.028) 1px, transparent 1px);
+    background-size: 5px 5px;
+    color: var(--ink);
+    line-height: 1.8;
+    font-size: 15px;
+    font-weight: 400;
+  }
+
+  .serif {
+    font-family: "Noto Serif SC", "Songti SC", "STSong", "SimSun", serif;
+  }
+
+  a { color: inherit; text-decoration: none; }
+
+  /* ---- 方向切换 ---- */
+  .switcher {
+    display: flex;
+    justify-content: center;
+    gap: 32px;
+    padding: 14px 24px;
+    font-size: 12px;
+    color: var(--ink-faint);
+    border-bottom: 1px solid var(--hairline);
+  }
+  .switcher a { color: var(--ink-faint); }
+  .switcher a.on { color: var(--ink); }
+  .switcher a:hover { color: var(--ink); }
+
+  .wrap {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 0 28px;
+  }
+
+  /* ---- 顶部 ---- */
+  header.site { padding: 44px 0 0; }
+  nav.top {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+  }
+  .brand {
+    font-family: "Noto Serif SC", "Songti SC", serif;
+    font-size: 17px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: var(--ink-strong);
+  }
+  nav.top .links {
+    display: flex;
+    gap: 28px;
+    font-size: 12.5px;
+    color: var(--ink-soft);
+    letter-spacing: 0.04em;
+  }
+  nav.top .links a:hover { color: var(--clay); }
+  nav.top .links a.here { color: var(--ink-strong); }
+
+  /* ---- Hero：不对称，靠左，右侧留空 ---- */
+  .hero { padding: 104px 0 0; }
+  .hero .season {
+    font-size: 11px;
+    letter-spacing: 0.5em;
+    color: var(--clay);
+  }
+  .hero h1 {
+    margin-top: 36px;
+    font-family: "Noto Serif SC", "Songti SC", "STSong", serif;
+    font-size: 34px;
+    font-weight: 600;
+    line-height: 1.7;
+    letter-spacing: 0.04em;
+    color: var(--ink-strong);
+    max-width: 11em;
+  }
+  .hero p {
+    margin-top: 28px;
+    margin-left: 2px;
+    font-size: 13px;
+    color: var(--ink-soft);
+    font-weight: 300;
+    letter-spacing: 0.06em;
+    max-width: 22em;
+  }
+
+  /* ---- 搜索：靠左、窄，不撑满 ---- */
+  .search {
+    margin-top: 88px;
+    max-width: 400px;
+  }
+  .search input {
+    width: 100%;
+    border: none;
+    border-bottom: 1px solid var(--hairline);
+    padding: 6px 0 14px;
+    font-size: 14px;
+    font-family: inherit;
+    color: var(--ink);
+    background: transparent;
+    outline: none;
+    letter-spacing: 0.02em;
+  }
+  .search input::placeholder { color: var(--ink-faint); font-weight: 300; }
+  .search input:focus { border-color: var(--clay); }
+  .filters {
+    margin-top: 26px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 26px;
+    font-size: 12.5px;
+    letter-spacing: 0.04em;
+  }
+  .filters a { color: var(--ink-faint); }
+  .filters a.on {
+    color: var(--clay);
+    border-bottom: 1px solid var(--clay);
+    padding-bottom: 2px;
+  }
+  .filters a:hover { color: var(--ink); }
+
+  /* ---- 活动列表：节奏不均匀 ---- */
+  .list { padding: 128px 0 0; }
+  .sec-label {
+    display: block;
+    font-size: 11px;
+    letter-spacing: 0.5em;
+    color: var(--ink-faint);
+  }
+
+  .event { position: relative; }
+  .event .date {
+    font-size: 12px;
+    color: var(--ink-faint);
+    letter-spacing: 0.1em;
+    font-weight: 300;
+  }
+  .event .date .status { color: var(--clay); margin-left: 14px; }
+  .event h2 {
+    font-family: "Noto Serif SC", "Songti SC", "STSong", serif;
+    font-weight: 600;
+    line-height: 1.6;
+    letter-spacing: 0.03em;
+    color: var(--ink-strong);
+  }
+  .event h2 a { border-bottom: 1px solid transparent; }
+  .event h2 a:hover { color: var(--clay); }
+  .event .venue {
+    font-size: 13px;
+    color: var(--ink-soft);
+    font-weight: 300;
+    letter-spacing: 0.03em;
+  }
+  .event .fee {
+    font-size: 12px;
+    color: var(--ink-faint);
+    font-weight: 300;
+    letter-spacing: 0.06em;
+  }
+  .event .fee strong {
+    font-weight: 500;
+    color: var(--ink);
+    font-size: 14px;
+    letter-spacing: 0.02em;
+  }
+
+  /* 首位活动：主推，标题最大 */
+  .event.lead { margin-top: 72px; }
+  .event.lead h2 { margin-top: 20px; font-size: 30px; }
+  .event.lead .venue { margin-top: 18px; }
+  .event.lead .fee { margin-top: 30px; }
+
+  /* 其余活动：稍小，间距与缩进有微差 */
+  .event.rest h2 { margin-top: 14px; font-size: 22px; }
+  .event.rest .venue { margin-top: 10px; }
+  .event.rest .fee { margin-top: 20px; }
+
+  .event + .event.rest { margin-top: 104px; }
+  .event.rest + .event.rest { margin-top: 88px; }
+  .event.indent { padding-left: 48px; }
+
+  .list .thread {
+    margin: 96px 0 0 2px;
+    width: 1px;
+    height: 56px;
+    background: var(--hairline);
+  }
+
+  /* ---- 详情 ---- */
+  .detail { padding: 176px 0 0; }
+  .detail .back {
+    font-size: 12px;
+    color: var(--ink-faint);
+    letter-spacing: 0.08em;
+  }
+  .detail .back:hover { color: var(--clay); }
+  .detail .d-cat {
+    margin-top: 88px;
+    font-size: 11px;
+    letter-spacing: 0.5em;
+    color: var(--ink-faint);
+  }
+  .detail .d-cat .status { color: var(--clay); }
+  .detail h2 {
+    margin-top: 32px;
+    font-family: "Noto Serif SC", "Songti SC", "STSong", serif;
+    font-size: 32px;
+    font-weight: 600;
+    line-height: 1.65;
+    letter-spacing: 0.04em;
+    color: var(--ink-strong);
+    max-width: 12em;
+  }
+
+  .info { margin-top: 88px; max-width: 480px; }
+  .info .row {
+    display: flex;
+    padding: 18px 0;
+    border-bottom: 1px solid var(--hairline);
+  }
+  .info .row:first-child { border-top: 1px solid var(--hairline); }
+  .info .row .k {
+    width: 96px;
+    flex-shrink: 0;
+    font-size: 12px;
+    color: var(--ink-faint);
+    letter-spacing: 0.3em;
+    font-weight: 300;
+    padding-top: 3px;
+  }
+  .info .row .v {
+    font-size: 14px;
+    color: var(--ink);
+    letter-spacing: 0.02em;
+  }
+  .info .row .v .sub {
+    display: block;
+    font-size: 12px;
+    color: var(--ink-soft);
+    font-weight: 300;
+    margin-top: 2px;
+  }
+
+  .desc {
+    margin-top: 64px;
+    font-size: 14px;
+    color: var(--ink-soft);
+    font-weight: 300;
+    line-height: 2.1;
+    letter-spacing: 0.04em;
+    max-width: 30em;
+  }
+
+  /* ---- 票档：文字排列，非表格 ---- */
+  .tickets { margin-top: 128px; }
+  .t-label {
+    font-size: 11px;
+    letter-spacing: 0.5em;
+    color: var(--ink-faint);
+  }
+  .ticket { margin-top: 40px; }
+  .ticket .t-price {
+    font-family: "Noto Serif SC", "Songti SC", serif;
+    font-size: 34px;
+    font-weight: 600;
+    color: var(--ink-strong);
+    letter-spacing: 0.02em;
+    line-height: 1.3;
+  }
+  .ticket .t-price small {
+    font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif;
+    font-size: 12px;
+    font-weight: 300;
+    color: var(--ink-faint);
+    margin-left: 10px;
+    letter-spacing: 0.1em;
+  }
+  .ticket .t-note {
+    margin-top: 14px;
+    font-size: 12.5px;
+    color: var(--ink-soft);
+    font-weight: 300;
+    letter-spacing: 0.04em;
+  }
+
+  /* ---- CTA：陶土色文字链接 ---- */
+  .cta-block { margin-top: 96px; }
+  .cta {
+    display: inline-block;
+    font-family: "Noto Serif SC", "Songti SC", serif;
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--clay);
+    letter-spacing: 0.3em;
+    border-bottom: 1px solid var(--clay);
+    padding-bottom: 8px;
+  }
+  .cta:hover { color: var(--ink-strong); border-color: var(--ink-strong); }
+  .cta-note {
+    margin-top: 26px;
+    font-size: 12px;
+    color: var(--ink-faint);
+    font-weight: 300;
+    letter-spacing: 0.04em;
+  }
+
+  /* ---- 组织者 ---- */
+  .org { margin-top: 128px; max-width: 400px; }
+  .org .o-list { margin-top: 32px; }
+  .org .o-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 13px 0;
+    font-size: 14px;
+    letter-spacing: 0.02em;
+  }
+  .org .o-row + .o-row { border-top: 1px solid var(--hairline); }
+  .org .o-row .o-role {
+    color: var(--ink-faint);
+    font-size: 11.5px;
+    font-weight: 300;
+    letter-spacing: 0.3em;
+  }
+
+  footer.site {
+    margin-top: 192px;
+    padding: 72px 0 104px;
+    border-top: 1px solid var(--hairline);
+  }
+  footer.site .f-mark {
+    font-family: "Noto Serif SC", "Songti SC", serif;
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 0.4em;
+    color: var(--ink-soft);
+  }
+  footer.site .f-line {
+    margin-top: 14px;
+    font-size: 11.5px;
+    color: var(--ink-faint);
+    font-weight: 300;
+    letter-spacing: 0.14em;
+  }
+
+  @media (min-width: 720px) {
+    .wrap { max-width: 760px; padding: 0 40px; }
+    header.site { padding-top: 56px; }
+
+    .hero { padding-top: 168px; display: flex; justify-content: flex-start; }
+    .hero .inner { max-width: 560px; }
+    .hero h1 { font-size: 42px; }
+
+    .search { margin-top: 120px; margin-left: 168px; max-width: 400px; }
+
+    .list { padding-top: 192px; }
+    .event.lead { margin-top: 88px; }
+    .event.lead h2 { font-size: 38px; max-width: 15em; }
+    .event.rest h2 { font-size: 26px; }
+    .event + .event.rest { margin-top: 144px; }
+    .event.rest + .event.rest { margin-top: 120px; }
+    .event.indent { padding-left: 168px; }
+
+    .detail { padding-top: 240px; }
+    .detail h2 { font-size: 46px; }
+    .info { margin-left: 2px; }
+    .desc { margin-left: 168px; }
+    .tickets { margin-left: 168px; margin-top: 144px; }
+    .cta-block { margin-left: 168px; margin-top: 112px; }
+    .org { margin-top: 160px; }
+
+    footer.site { margin-top: 256px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="switcher">
+  <a href="v4-a.html">A · 纯白画廊</a>
+  <a class="on" href="v4-b-refined.html">B · 温暖侘寂（精修）</a>
+  <a href="v4-c.html">C · 黑白反差</a>
+</div>
+
+<div class="wrap">
+
+  <header class="site">
+    <nav class="top">
+      <a class="brand" href="#home">聚 GatherUp</a>
+      <div class="links">
+        <a class="here" href="#home">发现</a>
+        <a href="#detail">详情示例</a>
+        <a href="#">我的</a>
+      </div>
+    </nav>
+  </header>
+
+  <!-- ============ 首页 ============ -->
+  <section id="home">
+
+    <div class="hero">
+      <div class="inner">
+        <div class="season">二〇二六 · 夏</div>
+        <h1>一期一会，<br>把相聚安排得妥帖。</h1>
+        <p>从数调、报名到成团，安静地办好每一场活动。</p>
+      </div>
+    </div>
+
+    <div class="search">
+      <input type="text" placeholder="搜索活动、城市或场地">
+      <div class="filters">
+        <a class="on" href="#home">全部</a>
+        <a href="#home">同好活动</a>
+        <a href="#home">校园活动</a>
+        <a href="#home">会议会务</a>
+        <a href="#home">好友聚会</a>
+      </div>
+    </div>
+
+    <div class="list">
+      <span class="sec-label">近期活动</span>
+
+      <article class="event lead">
+        <div class="date">六月二十二日 · 上海<span class="status">数调中</span></div>
+        <h2 class="serif"><a href="#detail">《坂本龙一：杰作》线下观影</a></h2>
+        <div class="venue">百丽宫影城 环贸店 · 徐汇区淮海中路</div>
+        <div class="fee"><strong>¥88</strong> 起 &nbsp;·&nbsp; 四十二人已报名，余十八席</div>
+      </article>
+
+      <article class="event rest indent">
+        <div class="date">六月二十九日 · 杭州<span class="status">待开放报名</span></div>
+        <h2 class="serif"><a href="#detail">春日同好重映场</a></h2>
+        <div class="venue">浙影时代影城</div>
+        <div class="fee"><strong>¥72</strong> &nbsp;·&nbsp; 二十六人已报名，余六席</div>
+      </article>
+
+      <article class="event rest">
+        <div class="date">七月五日 · 南京<span class="status">报名中</span></div>
+        <h2 class="serif"><a href="#detail">生日咖试运营小聚</a></h2>
+        <div class="venue">雾岛咖啡 · 玄武区长江路</div>
+        <div class="fee"><strong>¥45</strong> &nbsp;·&nbsp; 三十六人已报名</div>
+      </article>
+
+      <article class="event rest indent">
+        <div class="date">七月十二日 · 广州<span class="status">报名中</span></div>
+        <h2 class="serif"><a href="#detail">春季社团招新开放日</a></h2>
+        <div class="venue">岭南大学生活动中心</div>
+        <div class="fee"><strong>免费</strong> &nbsp;·&nbsp; 一百八十六人已报名</div>
+      </article>
+
+      <article class="event rest">
+        <div class="date">七月十八日 · 北京<span class="status">付款确认中</span></div>
+        <h2 class="serif"><a href="#detail">城市青年消费趋势闭门论坛</a></h2>
+        <div class="venue">望京会议中心</div>
+        <div class="fee"><strong>¥199</strong> &nbsp;·&nbsp; 七十四人已报名</div>
+      </article>
+
+      <div class="thread"></div>
+    </div>
+  </section>
+
+  <!-- ============ 详情页片段 ============ -->
+  <section id="detail" class="detail">
+    <a class="back" href="#home">← 返回活动列表</a>
+
+    <div class="d-cat">同好活动 · 线下观影 · <span class="status">数调中</span></div>
+    <h2 class="serif">《坂本龙一：杰作》<br>线下观影</h2>
+
+    <div class="info">
+      <div class="row">
+        <div class="k">时间</div>
+        <div class="v">二〇二六年六月二十二日 周一 14:30</div>
+      </div>
+      <div class="row">
+        <div class="k">地点</div>
+        <div class="v">百丽宫影城 环贸店<span class="sub">上海市徐汇区淮海中路999号</span></div>
+      </div>
+      <div class="row">
+        <div class="k">截止</div>
+        <div class="v">六月十八日 23:59</div>
+      </div>
+      <div class="row">
+        <div class="k">名额</div>
+        <div class="v">已报名 42 / 60<span class="sub">已付款 31 · 已选座 24</span></div>
+      </div>
+    </div>
+
+    <p class="desc">同好组织的线下观影活动。报名成功后请按订单金额付款并上传截图，组织者确认后开放选座。愿这个下午，和喜欢的音乐一起度过。</p>
+
+    <div class="tickets">
+      <span class="t-label">票档</span>
+      <div class="ticket">
+        <div class="t-price serif">¥88<small>每人</small></div>
+        <div class="t-note">每单最多同行四人，支持相邻选座。</div>
+      </div>
+    </div>
+
+    <div class="cta-block">
+      <a class="cta" href="#detail">报名参加</a>
+      <div class="cta-note">报名后 24 小时内完成付款，逾期名额将自动释放。</div>
+    </div>
+
+    <div class="org">
+      <span class="t-label">组织者</span>
+      <div class="o-list">
+        <div class="o-row"><span>比奇堡miki</span><span class="o-role">主办</span></div>
+        <div class="o-row"><span>月见草</span><span class="o-role">联合主办</span></div>
+        <div class="o-row"><span>青柠</span><span class="o-role">财务</span></div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="site">
+    <div class="f-mark">聚</div>
+    <div class="f-line">GatherUp · 让每一次相聚都从容</div>
+  </footer>
+
+</div>
+</body>
+</html>
