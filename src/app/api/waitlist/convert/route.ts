@@ -1,12 +1,7 @@
 import { NextResponse } from "next/server";
 
-import {
-  asRecord,
-  getString,
-  jsonError,
-  normalizeJsonInput,
-  toPublicOrderStatus
-} from "@/lib/server/api";
+import { asRecord, getString, jsonError, normalizeJsonInput, toPublicOrderStatus } from "@/lib/server/api";
+import { sendInstantEmailNotifications } from "@/lib/server/instant-email";
 import { enforceRateLimit } from "@/lib/server/rate-limit";
 import {
   getAuthenticatedSupabaseClient,
@@ -102,6 +97,8 @@ export async function POST(request: Request) {
       .select("id, amount_cents, status")
       .eq("registration_id", registrationId)
       .maybeSingle();
+
+    await sendInstantEmailNotifications({ templateKeys: ["waitlist_converted"] });
 
     return NextResponse.json({
       ok: true,

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+import { processPendingEmailNotifications } from "@/lib/server/email-notifications";
 import { getSupabaseServiceClient } from "@/lib/supabase/server";
 
 export const runtime = "nodejs";
@@ -49,9 +50,14 @@ export async function GET(request: Request) {
     return NextResponse.json({ ok: false, message: errors.join("；") }, { status: 500 });
   }
 
+  const emailResults = await processPendingEmailNotifications(supabase);
+
   return NextResponse.json({
     ok: true,
     expired_seat_locks: typeof seatLocksResult.data === "number" ? seatLocksResult.data : 0,
-    expired_waitlist_invitations: typeof waitlistResult.data === "number" ? waitlistResult.data : 0
+    expired_waitlist_invitations: typeof waitlistResult.data === "number" ? waitlistResult.data : 0,
+    email_processed_count: emailResults.length,
+    email_sent_count: emailResults.filter((result) => result.ok).length,
+    email_failed_count: emailResults.filter((result) => !result.ok).length
   });
 }

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { asRecord, getString, jsonError } from "@/lib/server/api";
+import { sendInstantEmailNotifications } from "@/lib/server/instant-email";
 import { enforceRateLimit } from "@/lib/server/rate-limit";
 import { getAuthenticatedSupabaseClient } from "@/lib/supabase/server";
 
@@ -72,6 +73,8 @@ export async function POST(request: Request) {
         { status: statusMap[errorCode] ?? 500 }
       );
     }
+
+    await sendInstantEmailNotifications({ templateKeys: ["refund_confirmed", "refund_proof_uploaded"] });
 
     return NextResponse.json({
       ok: true,

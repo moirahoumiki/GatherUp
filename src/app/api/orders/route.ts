@@ -8,6 +8,7 @@ import {
   normalizeJsonInput,
   toPublicOrderStatus
 } from "@/lib/server/api";
+import { sendInstantEmailNotifications } from "@/lib/server/instant-email";
 import { enforceRateLimit } from "@/lib/server/rate-limit";
 import {
   getAuthenticatedSupabaseClient,
@@ -104,6 +105,11 @@ export async function POST(request: Request) {
       .select("id, amount_cents, status")
       .eq("registration_id", registrationId)
       .maybeSingle();
+
+    await sendInstantEmailNotifications({
+      eventId,
+      templateKeys: ["registration_awaiting_payment", "registration_confirmed"]
+    });
 
     return NextResponse.json({
       ok: true,

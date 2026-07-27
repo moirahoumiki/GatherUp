@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { asRecord, canEditEvent, findUserByAuthUserId, getNumber, getString, jsonError } from "@/lib/server/api";
+import { notifyEventParticipantsOfImportantChange } from "@/lib/server/instant-email";
 import { enforceRateLimit } from "@/lib/server/rate-limit";
 import { getAuthenticatedSupabaseClient } from "@/lib/supabase/server";
 
@@ -192,6 +193,16 @@ export async function POST(request: Request) {
     if (reviewError) {
       return jsonError(`活动已更新，但平台复审请求创建失败：${reviewError.message}`, 500);
     }
+  }
+
+  if (requiresReview) {
+    await notifyEventParticipantsOfImportantChange({
+      eventId: updatedEvent.id,
+      eventName: updatedEvent.name,
+      startsAt: updatedEvent.starts_at ?? null,
+      venueName: updatedEvent.venue_name ?? null,
+      changedFields: reviewSensitiveChanges
+    });
   }
 
   return NextResponse.json({
