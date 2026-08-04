@@ -1,6 +1,6 @@
 # GatherUp commercial v0.1 Supabase live validation log
 
-Last updated: 2026-06-12
+Last updated: 2026-07-19
 
 This log records real Supabase validation attempts and findings. It is not a replacement for the SQL execution runbook; it captures what actually happened against a live project.
 
@@ -706,3 +706,46 @@ Conclusion:
 
 - This was a network reachability failure from the Codex execution environment, not a database assertion failure.
 - The live status of the newer `consume_rate_limit` integration test remains pending until the clean dev/staging Supabase project is reachable from a normal terminal or browser network.
+
+## 2026-07-19 Clean Dev Recovery and Full Integration Closure
+
+Environment:
+
+- Supabase project: `gatherup-commercial-v01-validation`
+- Project ref: `oxbrxkllftyevlzmiydt`
+- Target marker: `clean-dev`
+
+Actions and findings:
+
+1. Confirmed the validation project was paused and restored it from the Supabase Dashboard.
+2. Confirmed terminal access after restoration with a public API request and a service-role read-only query.
+3. Applied `20260717000000_create_event_atomic.sql`; Supabase SQL Editor returned `Success. No rows returned.`
+4. The first real event-creation run exposed schema drift in the older validation database: `event_organizers` lacked the `event_organizer_status` enum and the `status`, `accepted_at`, and `declined_at` columns already present in the frozen repository baseline.
+5. Added and applied the idempotent `20260719000000_reconcile_event_organizer_lifecycle.sql` migration. It creates the enum when absent, adds the lifecycle columns, and backfills `accepted_at` for active collaborators.
+6. Re-ran `event-creation.test.mts`: 4/4 passed, covering anonymous rejection, complete transactional creation, duplicate public-code rejection, and invalid-input rollback.
+7. The first full suite then exposed the previously documented missing `consume_rate_limit` migration. Applied `20260705000100_api_rate_limits.sql` and verified the service-role-only rate-limit RPC independently: 2/2 passed.
+8. A subsequent production build exposed application drift against the canonical schema: three data adapters still selected the intentionally absent `events.registered_count` column. Added and applied `20260719000100_public_event_registration_counts.sql`, then moved public and participant reads to its aggregate-only RPC. The event-creation suite verified that an anonymous caller receives the new event's count without access to registration rows: 4/4 passed.
+9. Re-ran the complete live suite:
+
+```text
+tests 25
+suites 5
+pass 25
+fail 0
+```
+10. Completed a browser smoke test with a temporary confirmed Supabase Auth user. The create wizard successfully wrote a real event, then exposed a PostgREST ambiguity in the organizer workspace because `event_organizers` now has both `user_id` and `invited_by` relationships to `users`. Updated the adapter to select `users:users!event_organizers_user_id_fkey(...)`; after hot reload, the new activity management workspace rendered the event, owner, finance setup, and `event.created` audit entry successfully.
+
+Validated boundaries:
+
+- Concurrent payment review, check-in, and seat-lock races allow exactly one winner.
+- Atomic event creation writes event, owner collaborator, finance settings, optional collection-code version, and audit log together.
+- Public and unlisted event capacity usage is derived from active registration quantities through a narrow aggregate RPC instead of a denormalized event column.
+- Registration capacity and duplicate-registration protection remain correct.
+- Payment review, check-in, and refund RPC state transitions complete with audit behavior.
+- The distributed rate-limit RPC counts atomically for `service_role` and rejects anonymous callers.
+- Payment/refund proof Storage policies enforce ownership, role separation, malformed-path rejection, replacement blocking, and object immutability.
+
+Conclusion:
+
+- The clean-dev commercial v0.1 database baseline is reachable and the complete opt-in RPC/Storage suite passes 25/25.
+- The schema drift found during validation is now represented by a committed, repeatable migration rather than an undocumented Dashboard-only repair.

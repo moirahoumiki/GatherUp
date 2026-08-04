@@ -1,6 +1,7 @@
 import { events, findRegistration, registrations, type GatherEvent, type Registration } from "@/lib/mock-data";
 import { findUserByAuthUserId, toPublicCheckInStatus } from "@/lib/server/api";
 import { reportDataAccessFailure, shouldUseMockData } from "@/lib/data-mode";
+import { getActiveRegistrationCounts } from "@/lib/event-registration-counts";
 import { createSupabaseServerClient, getSupabaseServerClient } from "@/lib/supabase/server";
 
 export type RegistrationRow = {
@@ -111,7 +112,6 @@ type EventRow = {
   registration_deadline: string | null;
   price_cents: number;
   capacity: number;
-  registered_count: number;
   accept_waitlist: boolean;
   description: string | null;
   status: string;
@@ -154,7 +154,7 @@ function mapPaymentStatus(status: string): Registration["paymentStatus"] {
   return "待审核";
 }
 
-function rowToEvent(row: EventRow): GatherEvent {
+function rowToEvent(row: EventRow, registeredCount = 0): GatherEvent {
   return {
     id: row.id,
     publicCode: row.public_code,
@@ -169,7 +169,7 @@ function rowToEvent(row: EventRow): GatherEvent {
     deadline: formatDate(row.registration_deadline),
     price: Math.round(row.price_cents / 100),
     capacity: row.capacity,
-    registered: row.registered_count ?? 0,
+    registered: registeredCount,
     paid: 0,
     seated: 0,
     status: row.status === "completed" ? "已结束" : "报名中",
@@ -310,7 +310,7 @@ export async function getMyOrders(): Promise<MyOrdersData> {
     const registrationRows = (registrationData ?? []) as RegistrationRow[];
     const { data: waitlistData } = await supabase
       .from("waitlist_entries")
-      .select("id, event_id, desired_quantity, status, priority_position, note, invited_at, invitation_expires_at, created_at, events(id, public_code, name, category, template, custom_type_label, city, venue_name, address, starts_at, registration_deadline, price_cents, capacity, registered_count, accept_waitlist, description, status, allow_multi_person_registration, max_people_per_registration, order_number_prefix, wechat_group_img)")
+      .select("id, event_id, desired_quantity, status, priority_position, note, invited_at, invitation_expires_at, created_at, events(id, public_code, name, category, template, custom_type_label, city, venue_name, address, starts_at, registration_deadline, price_cents, capacity, accept_waitlist, description, status, allow_multi_person_registration, max_people_per_registration, order_number_prefix, wechat_group_img)")
       .eq("user_id", appUser.id)
       .in("status", ["waiting", "invited"])
       .order("created_at", { ascending: false });
@@ -331,16 +331,29 @@ export async function getMyOrders(): Promise<MyOrdersData> {
 
     const { data: eventData, error: eventError } = await supabase
       .from("events")
-      .select("id, public_code, name, category, template, custom_type_label, city, venue_name, address, starts_at, registration_deadline, price_cents, capacity, registered_count, accept_waitlist, description, status, allow_multi_person_registration, max_people_per_registration, order_number_prefix, wechat_group_img")
+      .select("id, public_code, name, category, template, custom_type_label, city, venue_name, address, starts_at, registration_deadline, price_cents, capacity, accept_waitlist, description, status, allow_multi_person_registration, max_people_per_registration, order_number_prefix, wechat_group_img")
       .in("id", eventIds);
 
     if (eventError) {
       return emptySupabaseMyOrders();
     }
 
+    const registeredCounts = await getActiveRegistrationCounts(supabase, eventIds);
+
+    for (const invitation of waitlistInvitations) {
+      if (invitation.event) {
+        invitation.event.registered = registeredCounts.get(invitation.eventId) ?? 0;
+      }
+    }
+
     return {
       registrations: registrationRows.map(rowToRegistration),
-      eventsById: new Map(((eventData ?? []) as EventRow[]).map((event) => [event.id, rowToEvent(event)])),
+      eventsById: new Map(
+        ((eventData ?? []) as EventRow[]).map((event) => [
+          event.id,
+          rowToEvent(event, registeredCounts.get(event.id) ?? 0)
+        ])
+      ),
       waitlistInvitations,
       source: "supabase"
     };
@@ -392,7 +405,7 @@ export async function getOrderDetail(orderNumber: string): Promise<OrderDetailDa
 
     const { data: eventData, error: eventError } = await supabase
       .from("events")
-        .select("id, public_code, name, category, template, custom_type_label, city, venue_name, address, starts_at, registration_deadline, price_cents, capacity, registered_count, accept_waitlist, description, status, allow_multi_person_registration, max_people_per_registration, order_number_prefix, wechat_group_img")
+      .select("id, public_code, name, category, template, custom_type_label, city, venue_name, address, starts_at, registration_deadline, price_cents, capacity, accept_waitlist, description, status, allow_multi_person_registration, max_people_per_registration, order_number_prefix, wechat_group_img")
       .eq("id", registration.eventId)
       .single();
 
@@ -404,6 +417,7 @@ export async function getOrderDetail(orderNumber: string): Promise<OrderDetailDa
       return null;
     }
 
+    const registeredCounts = await getActiveRegistrationCounts(supabase, [registration.eventId]);
     let seatSelection: OrderDetailData["seatSelection"];
 
     if (registration.paymentStatus === "付款已确认") {
@@ -442,7 +456,7 @@ export async function getOrderDetail(orderNumber: string): Promise<OrderDetailDa
     }
 
     return {
-      event: rowToEvent(eventData as EventRow),
+      event: rowToEvent(eventData as EventRow, registeredCounts.get(registration.eventId) ?? 0),
       registration,
       refundRequest,
       seatSelection,

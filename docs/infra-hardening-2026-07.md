@@ -47,3 +47,12 @@
 ```bash
 GATHERUP_RUN_RPC_INTEGRATION=1 GATHERUP_RPC_INTEGRATION_TARGET=clean-dev GATHERUP_RPC_INTEGRATION_ALLOWED_REF=oxbrxkllftyevlzmiydt npm run test:integration:rpc
 ```
+
+## 2026-07-19 验证闭环
+
+- 已确认 validation 项目当时处于暂停状态；从 Dashboard 恢复后，Codex 终端可正常访问 Supabase。
+- 已在 clean-dev 执行 `20260705000100_api_rate_limits.sql`，独立限流 RPC 集成测试通过 2/2。
+- 原子活动创建真实测试暴露旧库 `event_organizers` 生命周期 enum/字段漂移；新增并执行幂等迁移 `20260719000000_reconcile_event_organizer_lifecycle.sql` 后，活动创建测试通过 4/4。
+- 生产构建暴露应用仍读取并不存在于规范 schema 的 `events.registered_count`；现已改为通过 `get_public_event_registration_counts` 聚合有效报名数量，并在 clean-dev 验证匿名调用只返回活动 ID 与人数，不暴露报名明细。
+- 浏览器真实创建活动后，管理台首次读取暴露 `event_organizers -> users` 双外键歧义；数据适配器现显式绑定 `event_organizers_user_id_fkey`，并记录组合查询错误。修复后创建向导可直接进入新活动管理台。
+- 最终完整 RPC/并发/Storage RLS 集成套件通过 25/25；2026-07-16 的网络阻塞记录保留为历史事实，但不再是当前 blocker。

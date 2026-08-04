@@ -15,6 +15,7 @@ import {
   type GatherEvent
 } from "@/lib/mock-data";
 import { reportDataAccessFailure, shouldUseMockData } from "@/lib/data-mode";
+import { getActiveRegistrationCounts } from "@/lib/event-registration-counts";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
 
 export type EventRow = {
@@ -34,7 +35,6 @@ export type EventRow = {
   payment_code_img: string | null;
   wechat_group_img: string | null;
   capacity: number;
-  registered_count: number;
   accept_waitlist: boolean;
   description: string | null;
   status: string;
@@ -138,7 +138,7 @@ function mapSetupStatus(status: string): EventSetup["setupStatus"] {
   return "报名已开放";
 }
 
-export function eventRowToGatherEvent(row: EventRow): GatherEvent {
+export function eventRowToGatherEvent(row: EventRow, registeredCount = 0): GatherEvent {
   return {
     id: row.id,
     publicCode: row.public_code,
@@ -153,7 +153,7 @@ export function eventRowToGatherEvent(row: EventRow): GatherEvent {
     deadline: formatDateTime(row.registration_deadline),
     price: Math.round(row.price_cents / 100),
     capacity: row.capacity,
-    registered: row.registered_count ?? 0,
+    registered: registeredCount,
     paid: 0,
     seated: 0,
     status: mapStatus(row.status),
@@ -226,7 +226,7 @@ export async function getPublicEvents(): Promise<GatherEvent[]> {
     const supabase = getSupabaseServerClient();
     const { data, error } = await supabase
       .from("events")
-      .select("id, public_code, name, category, template, custom_type_label, city, venue_name, address, starts_at, registration_deadline, price_cents, custom_form_config, payment_code_img, wechat_group_img, capacity, registered_count, accept_waitlist, description, status, allow_multi_person_registration, max_people_per_registration, order_number_prefix")
+      .select("id, public_code, name, category, template, custom_type_label, city, venue_name, address, starts_at, registration_deadline, price_cents, custom_form_config, payment_code_img, wechat_group_img, capacity, accept_waitlist, description, status, allow_multi_person_registration, max_people_per_registration, order_number_prefix")
       .eq("visibility", "public")
       .order("starts_at", { ascending: true });
 
@@ -236,7 +236,13 @@ export async function getPublicEvents(): Promise<GatherEvent[]> {
       return [];
     }
 
-    return (data ?? []).map((row) => eventRowToGatherEvent(row as EventRow));
+    const rows = (data ?? []) as EventRow[];
+    const registeredCounts = await getActiveRegistrationCounts(
+      supabase,
+      rows.map((row) => row.id)
+    );
+
+    return rows.map((row) => eventRowToGatherEvent(row, registeredCounts.get(row.id) ?? 0));
   } catch (error) {
     reportDataAccessFailure("getPublicEvents", error);
 
@@ -253,7 +259,7 @@ export async function getPublicEventDetail(eventId: string): Promise<EventDetail
     const supabase = getSupabaseServerClient();
     const eventQuery = supabase
       .from("events")
-      .select("id, public_code, name, category, template, custom_type_label, city, venue_name, address, starts_at, registration_deadline, price_cents, custom_form_config, payment_code_img, wechat_group_img, capacity, registered_count, accept_waitlist, description, status, allow_multi_person_registration, max_people_per_registration, order_number_prefix");
+      .select("id, public_code, name, category, template, custom_type_label, city, venue_name, address, starts_at, registration_deadline, price_cents, custom_form_config, payment_code_img, wechat_group_img, capacity, accept_waitlist, description, status, allow_multi_person_registration, max_people_per_registration, order_number_prefix");
     const { data: eventData, error: eventError } = await (isUuid(eventId)
       ? eventQuery.eq("id", eventId).single()
       : eventQuery.eq("public_code", eventId).single());
@@ -266,8 +272,10 @@ export async function getPublicEventDetail(eventId: string): Promise<EventDetail
       return null;
     }
 
-    const event = eventRowToGatherEvent(eventData as EventRow);
-    const setup = eventRowToSetup(eventData as EventRow);
+    const eventRow = eventData as EventRow;
+    const registeredCounts = await getActiveRegistrationCounts(supabase, [eventRow.id]);
+    const event = eventRowToGatherEvent(eventRow, registeredCounts.get(eventRow.id) ?? 0);
+    const setup = eventRowToSetup(eventRow);
     const { data: announcementData } = await supabase
       .from("announcements")
       .select("id, event_id, title, body, status, published_at")

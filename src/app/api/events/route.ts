@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 
-import { asRecord, findUserByAuthUserId, getNumber, getString, jsonError, normalizeJsonInput } from "@/lib/server/api";
+import { asRecord, getNumber, getString, jsonError, normalizeJsonInput } from "@/lib/server/api";
 import { enforceRateLimit } from "@/lib/server/rate-limit";
-import { getAuthenticatedUser, getSupabaseServiceClient } from "@/lib/supabase/server";
+import { getAuthenticatedSupabaseClient } from "@/lib/supabase/server";
 
 export const runtime = "nodejs";
 
@@ -58,9 +58,9 @@ export async function POST(request: Request) {
     return rateLimitResponse;
   }
 
-  const authUser = await getAuthenticatedUser(request);
+  const authContext = await getAuthenticatedSupabaseClient(request);
 
-  if (!authUser) {
+  if (!authContext) {
     return jsonError("请使用 Supabase 登录后再创建真实活动。", 401);
   }
 
@@ -82,90 +82,79 @@ export async function POST(request: Request) {
   }
 
   try {
-    const supabase = getSupabaseServiceClient();
-    const owner = await findUserByAuthUserId(supabase, authUser.id);
-
-    if (!owner?.id) {
-      return jsonError("找不到主办方用户，请先创建或同步 GatherUp 账号。", 404);
-    }
-
     const price = getNumber(rulesInput, ["price"], getNumber(eventInput, ["price"], 0));
     const allowMulti = rulesInput.allowMulti === true || rulesInput.allowMulti === "允许";
     const paymentCodeImg =
       getString(body, ["payment_code_img", "paymentCodeImg"]) ||
       getString(setupInput, ["payment_code_img", "paymentCodeImg", "paymentCodeUrl"]);
     const wechatGroupImg =
-      getString(body, ["wechat_group_img", "wechatGroupImg"]) || getString(setupInput, ["wechat_group_img", "wechatGroupImg"]);
+      getString(body, ["wechat_group_img", "wechatGroupImg"]) ||
+      getString(setupInput, ["wechat_group_img", "wechatGroupImg"]);
     const customFormConfig = normalizeJsonInput(
       body.custom_form_config ?? body.customFormConfig ?? eventInput.custom_form_config ?? eventInput.customFormConfig
     );
+    const { data, error } = await authContext.supabase.rpc("create_event_atomic", {
+      p_public_code: publicCode,
+      p_name: getString(eventInput, ["name"]) || "未命名活动",
+      p_category: mapEnum(getString(eventInput, ["category"]), categoryMap, "community"),
+      p_template: mapEnum(getString(eventInput, ["template"]), templateMap, "basic_registration"),
+      p_custom_type_label: getString(eventInput, ["customTypeLabel", "custom_type_label"]) || null,
+      p_city: getString(eventInput, ["city"]) || "待确认",
+      p_venue_name: getString(eventInput, ["venue", "venueName", "venue_name"]) || "待确认",
+      p_address: getString(eventInput, ["address"]) || null,
+      p_starts_at: toIsoDateTime(getString(eventInput, ["startsAt", "starts_at"])),
+      p_registration_deadline: toIsoDateTime(getString(eventInput, ["deadline", "registration_deadline"])),
+      p_capacity: Math.max(1, getNumber(rulesInput, ["capacity"], getNumber(eventInput, ["capacity"], 1))),
+      p_price_cents: Math.max(0, Math.round(price * 100)),
+      p_description: getString(eventInput, ["description"]) || null,
+      p_payment_instructions: getString(setupInput, ["paymentNote", "payment_note", "payment_instructions"]) || null,
+      p_custom_form_config: customFormConfig,
+      p_payment_code_img: paymentCodeImg || null,
+      p_wechat_group_img: wechatGroupImg || null,
+      p_allow_multi_person_registration: allowMulti,
+      p_max_people_per_registration: allowMulti ? Math.max(2, getNumber(rulesInput, ["maxPeoplePerOrder"], 4)) : 1,
+      p_order_number_prefix:
+        getString(rulesInput, ["orderPrefix", "order_number_prefix"]) || publicCode.replace(/^GU-/, "").slice(0, 8),
+      p_fee_mode: mapEnum(getString(rulesInput, ["feeMode"]), feeModeMap, price > 0 ? "paid" : "free"),
+      p_settlement_rule: getString(rulesInput, ["settlementRule", "settlement_rule"]) || null,
+      p_payment_method: getString(setupInput, ["paymentMethod", "payment_method"]) || "wechat"
+    });
 
-    const { data: event, error: eventError } = await supabase
-      .from("events")
-      .insert({
-        public_code: publicCode,
-        organizer_id: owner.id,
-        name: getString(eventInput, ["name"]) || "未命名活动",
-        category: mapEnum(getString(eventInput, ["category"]), categoryMap, "community"),
-        template: mapEnum(getString(eventInput, ["template"]), templateMap, "basic_registration"),
-        custom_type_label: getString(eventInput, ["customTypeLabel", "custom_type_label"]) || null,
-        city: getString(eventInput, ["city"]) || "待确认",
-        venue_name: getString(eventInput, ["venue", "venueName", "venue_name"]) || "待确认",
-        address: getString(eventInput, ["address"]) || null,
-        starts_at: toIsoDateTime(getString(eventInput, ["startsAt", "starts_at"])),
-        registration_deadline: toIsoDateTime(getString(eventInput, ["deadline", "registration_deadline"])),
-        capacity: Math.max(1, getNumber(rulesInput, ["capacity"], getNumber(eventInput, ["capacity"], 1))),
-        price_cents: Math.max(0, Math.round(price * 100)),
-        description: getString(eventInput, ["description"]) || null,
-        payment_instructions: getString(setupInput, ["paymentNote", "payment_note", "payment_instructions"]) || null,
-        custom_form_config: customFormConfig,
-        payment_code_img: paymentCodeImg || null,
-        wechat_group_img: wechatGroupImg || null,
-        allow_multi_person_registration: allowMulti,
-        max_people_per_registration: allowMulti ? Math.max(2, getNumber(rulesInput, ["maxPeoplePerOrder"], 4)) : 1,
-        order_number_prefix: getString(rulesInput, ["orderPrefix", "order_number_prefix"]) || publicCode.replace(/^GU-/, "").slice(0, 8),
-        status: "draft"
-      })
-      .select("id, public_code")
-      .single();
-
-    if (eventError || !event) {
-      return jsonError(eventError?.message ?? "活动创建失败。", 500);
+    if (error) {
+      return jsonError(error.message, 500);
     }
 
-    await supabase.from("event_organizers").insert({
-      event_id: event.id,
-      user_id: owner.id,
-      role: "owner"
-    });
+    const result = asRecord(data);
 
-    await supabase.from("event_finance_settings").insert({
-      event_id: event.id,
-      fee_mode: mapEnum(getString(rulesInput, ["feeMode"]), feeModeMap, price > 0 ? "paid" : "free"),
-      revenue_source: price > 0 ? "registration_orders" : "none",
-      settlement_rule: getString(rulesInput, ["settlementRule", "settlement_rule"]) || null
-    });
+    if (result.success !== true) {
+      const errorCode = typeof result.error_code === "string" ? result.error_code : "EVENT_CREATE_FAILED";
+      const statusMap: Record<string, number> = {
+        UNAUTHORIZED: 401,
+        PROFILE_NOT_FOUND: 404,
+        INVALID_PUBLIC_CODE: 400,
+        INVALID_EVENT_NAME: 400,
+        INVALID_EVENT_LIMITS: 400,
+        INVALID_MULTI_PERSON_LIMIT: 400,
+        INVALID_EVENT_INPUT: 400,
+        PUBLIC_CODE_CONFLICT: 409
+      };
 
-    if (paymentCodeImg) {
-      await supabase.from("collection_code_versions").insert({
-        event_id: event.id,
-        version_number: 1,
-        status: "active",
-        method: getString(setupInput, ["paymentMethod", "payment_method"]) || "wechat",
-        display_name: "组织者收款码",
-        qr_file_url: paymentCodeImg,
-        instructions: getString(setupInput, ["paymentNote", "payment_note"]) || null,
-        uploaded_by: owner.id,
-        active_from: new Date().toISOString()
-      });
+      return NextResponse.json(
+        {
+          ok: false,
+          error_code: errorCode,
+          message: typeof result.message === "string" ? result.message : "活动创建失败。"
+        },
+        { status: statusMap[errorCode] ?? 500 }
+      );
     }
 
     return NextResponse.json({
       ok: true,
-      event_id: event.id,
-      public_code: event.public_code,
-      custom_form_config: customFormConfig,
-      payment_code_img: paymentCodeImg || null
+      event_id: result.event_id,
+      public_code: result.public_code,
+      custom_form_config: result.custom_form_config,
+      payment_code_img: result.payment_code_img
     });
   } catch (error) {
     return jsonError(error instanceof Error ? error.message : "活动创建接口暂时不可用。", 500);
