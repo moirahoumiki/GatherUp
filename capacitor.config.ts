@@ -9,12 +9,9 @@ const config: CapacitorConfig = {
   server: {
     androidScheme: "https",
     iosScheme: "gatherup",
-    ...(devServerUrl
-      ? {
-          url: devServerUrl,
-          cleartext: true
-        }
-      : {})
+    url: devServerUrl || "https://gather-up-nu.vercel.app",
+    allowNavigation: ["gather-up-nu.vercel.app"],
+    ...(devServerUrl ? { cleartext: true } : {})
   },
   ios: {
     contentInset: "automatic",

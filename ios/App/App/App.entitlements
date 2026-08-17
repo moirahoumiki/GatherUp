@@ -8,7 +8,7 @@
 	</array>
 	<key>com.apple.developer.associated-domains</key>
 	<array>
-		<string>applinks:app.gatherup.com</string>
+		<string>applinks:gather-up-nu.vercel.app</string>
 	</array>
 </dict>
 </plist>
