@@ -1,0 +1,344 @@
+/* ============================================================
+   Component: FORMS
+   input / textarea / select / checkbox / radio / switch
+   States: hover / focus-visible / error / disabled / readonly
+   ============================================================ */
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.field__label,
+.label {
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-bold);
+  color: var(--fg-secondary);
+}
+
+.field__label--required::after {
+  content: " *";
+  color: var(--danger-solid);
+}
+
+.hint {
+  font-size: var(--fs-xs);
+  color: var(--fg-tertiary);
+  line-height: var(--lh-snug);
+}
+
+.hint.is-error {
+  color: var(--danger-fg);
+  font-weight: var(--fw-bold);
+}
+
+/* ---------- Text controls ---------- */
+
+.input,
+.select,
+.textarea {
+  width: 100%;
+  height: 46px;
+  padding: 0 18px;
+  background: var(--bg-surface);
+  color: var(--fg-primary);
+  border: 2px solid var(--border-default);
+  border-radius: var(--r-lg);
+  font-family: inherit;
+  font-size: var(--fs-md);
+  font-weight: var(--fw-medium);
+  transition:
+    border-color var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out),
+    background var(--dur-fast) var(--ease-out);
+}
+
+.textarea {
+  height: auto;
+  min-height: 96px;
+  padding: 13px 18px;
+  line-height: var(--lh-normal);
+  resize: vertical;
+}
+
+.input::placeholder,
+.textarea::placeholder {
+  color: var(--fg-disabled);
+  font-weight: var(--fw-regular);
+}
+
+.input:hover:not(:disabled):not(:focus),
+.select:hover:not(:disabled):not(:focus),
+.textarea:hover:not(:disabled):not(:focus) {
+  border-color: var(--border-strong);
+}
+
+.input:focus,
+.select:focus,
+.textarea:focus,
+.input:focus-visible,
+.select:focus-visible,
+.textarea:focus-visible {
+  outline: none;
+  border-color: var(--brand-400);
+  box-shadow: var(--shadow-focus);
+}
+
+.input.is-error,
+.select.is-error,
+.textarea.is-error,
+.input[aria-invalid="true"],
+.select[aria-invalid="true"],
+.textarea[aria-invalid="true"] {
+  border-color: var(--danger-solid);
+}
+
+.input.is-error:focus,
+.textarea.is-error:focus,
+.input[aria-invalid="true"]:focus,
+.textarea[aria-invalid="true"]:focus {
+  box-shadow: var(--shadow-focus-danger);
+}
+
+.input:disabled,
+.select:disabled,
+.textarea:disabled {
+  background: var(--bg-sunken);
+  color: var(--fg-disabled);
+  border-color: var(--border-subtle);
+  cursor: not-allowed;
+}
+
+.input:read-only:not(:disabled),
+.textarea:read-only:not(:disabled) {
+  background: var(--bg-sunken);
+  color: var(--fg-secondary);
+}
+
+/* ---------- Select ---------- */
+
+.select {
+  appearance: none;
+  padding-right: 40px;
+  cursor: pointer;
+  background-image: linear-gradient(45deg, transparent 50%, var(--fg-tertiary) 50%),
+    linear-gradient(135deg, var(--fg-tertiary) 50%, transparent 50%);
+  background-position: calc(100% - 20px) 21px, calc(100% - 14px) 21px;
+  background-size: 6px 6px, 6px 6px;
+  background-repeat: no-repeat;
+}
+
+.select:disabled {
+  cursor: not-allowed;
+}
+
+/* ---------- Search field ---------- */
+
+.search {
+  position: relative;
+  width: 100%;
+}
+
+.search__icon {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: grid;
+  place-items: center;
+  color: var(--fg-tertiary);
+  pointer-events: none;
+}
+
+.search .input {
+  padding-left: 46px;
+}
+
+.search__clear {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--r-full);
+  color: var(--fg-tertiary);
+  cursor: pointer;
+  transition: background var(--dur-fast) var(--ease-out);
+}
+
+.search__clear:hover {
+  background: var(--bg-hover);
+  color: var(--fg-primary);
+}
+
+.search__clear:focus-visible {
+  outline: none;
+  box-shadow: var(--shadow-focus);
+}
+
+/* ---------- Checkbox & radio ---------- */
+
+.check {
+  display: inline-flex;
+  align-items: flex-start;
+  gap: var(--sp-3);
+  cursor: pointer;
+  font-size: var(--fs-md);
+  line-height: 1.4;
+}
+
+.check__input {
+  appearance: none;
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+  margin-top: 1px;
+  background: var(--bg-surface);
+  border: 2px solid var(--border-strong);
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  transition:
+    background var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out);
+}
+
+.check__input[type="radio"] {
+  border-radius: var(--r-full);
+}
+
+.check:hover .check__input:not(:disabled) {
+  border-color: var(--brand-300);
+}
+
+.check__input:focus-visible {
+  outline: none;
+  box-shadow: var(--shadow-focus);
+}
+
+.check__input:checked {
+  background: var(--brand-500);
+  border-color: var(--brand-500);
+}
+
+/* Checkmark glyph */
+.check__input[type="checkbox"]:checked {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23fff' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3.2 8.5l3.1 3.1 6.5-6.9'/%3E%3C/svg%3E");
+  background-size: 15px 15px;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+/* Radio inner dot */
+.check__input[type="radio"]:checked {
+  background-image: radial-gradient(circle, #fff 0 4px, transparent 4.5px);
+}
+
+.check__input:indeterminate {
+  background: var(--brand-500);
+  border-color: var(--brand-500);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23fff' stroke-width='2.6' stroke-linecap='round'%3E%3Cpath d='M4 8h8'/%3E%3C/svg%3E");
+  background-size: 15px 15px;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.check__input:disabled {
+  background: var(--bg-sunken);
+  border-color: var(--border-subtle);
+  cursor: not-allowed;
+}
+
+.check__input:disabled + .check__text,
+.check:has(.check__input:disabled) {
+  color: var(--fg-disabled);
+  cursor: not-allowed;
+}
+
+.check__text {
+  font-weight: var(--fw-medium);
+}
+
+.check__desc {
+  display: block;
+  margin-top: 2px;
+  font-size: var(--fs-xs);
+  color: var(--fg-tertiary);
+  font-weight: var(--fw-regular);
+}
+
+.check.is-error .check__input {
+  border-color: var(--danger-solid);
+}
+
+/* ---------- Choice card (radio/checkbox rendered as a selectable tile) ---------- */
+
+.choice {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  padding: var(--sp-4) var(--sp-5);
+  border: 2px solid var(--border-default);
+  border-radius: var(--r-xl);
+  background: var(--bg-surface);
+  cursor: pointer;
+  transition:
+    border-color var(--dur-fast) var(--ease-out),
+    background var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out);
+}
+
+.choice:hover {
+  border-color: var(--brand-300);
+}
+
+.choice:focus-visible,
+.choice:has(:focus-visible) {
+  outline: none;
+  box-shadow: var(--shadow-focus);
+}
+
+.choice.is-selected,
+.choice:has(:checked) {
+  border-color: var(--brand-500);
+  background: var(--brand-50);
+}
+
+.choice.is-disabled,
+.choice:has(:disabled) {
+  opacity: 0.55;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* ---------- Fieldset ---------- */
+
+.fieldset {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+  border: 0;
+}
+
+.fieldset__legend {
+  font-size: var(--fs-lg);
+  font-weight: var(--fw-extra);
+  letter-spacing: var(--ls-tight);
+  margin-bottom: var(--sp-1);
+}
+
+/* ---------- Responsive ---------- */
+
+@media (max-width: 620px) {
+  /* 16px prevents iOS Safari zoom-on-focus */
+  .input,
+  .select,
+  .textarea {
+    font-size: 16px;
+  }
+}

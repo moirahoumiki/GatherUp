@@ -16,6 +16,9 @@ import {
   type AuthSession
 } from "@/lib/auth";
 import { NotificationBell } from "@/components/notification-bell";
+import { initCapacitor } from "@/lib/mobile/capacitor-init";
+import { disposeDeepLinkListener, initDeepLinkListener } from "@/lib/mobile/deep-link";
+import { registerPushNotifications } from "@/lib/mobile/push";
 import { getSupabaseBrowserClient, isSupabaseConfigured } from "@/lib/supabase/client";
 import { getCurrentSupabaseProfile } from "@/lib/supabase/profile";
 
@@ -24,6 +27,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const router = useRouter();
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const [session, setSession] = useState<AuthSession | null>(null);
+  const [isOffline, setIsOffline] = useState(false);
   const isWorkspace = pathname.startsWith("/organizer") || pathname.startsWith("/admin") || pathname.startsWith("/dev");
   const shellClassName = `app-shell ${isWorkspace ? "workspace-shell" : "community-shell"}`;
 
@@ -31,6 +35,47 @@ export function AppShell({ children }: { children: ReactNode }) {
     const isActive = href === "/" ? pathname === href : pathname.startsWith(href);
     return isActive ? "active" : undefined;
   }
+
+  useEffect(() => {
+    void initCapacitor();
+  }, []);
+
+  useEffect(() => {
+    setIsOffline(!navigator.onLine);
+
+    function handleOnlineChange() {
+      setIsOffline(!navigator.onLine);
+    }
+
+    window.addEventListener("online", handleOnlineChange);
+    window.addEventListener("offline", handleOnlineChange);
+
+    return () => {
+      window.removeEventListener("online", handleOnlineChange);
+      window.removeEventListener("offline", handleOnlineChange);
+    };
+  }, []);
+
+  useEffect(() => {
+    initDeepLinkListener({
+      onAppleOAuthCallback() {
+        router.push("/login");
+      },
+      router
+    });
+
+    return () => {
+      disposeDeepLinkListener();
+    };
+  }, [router]);
+
+  useEffect(() => {
+    void registerPushNotifications({
+      onNavigate(route) {
+        router.push(route);
+      }
+    });
+  }, [router]);
 
   useEffect(() => {
     let isCancelled = false;
@@ -133,6 +178,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           <nav aria-label="法律条款">
             <Link href="/terms">服务条款</Link>
             <Link href="/privacy">隐私政策</Link>
+            <Link href="/support">支持与反馈</Link>
           </nav>
         </footer>
       </div>
@@ -202,22 +248,28 @@ export function AppShell({ children }: { children: ReactNode }) {
         </div>
       </header>
 
+      {isOffline && (
+        <div className="network-status-banner" role="status" aria-live="polite">
+          当前网络不可用，正在显示已加载内容；网络恢复后会自动刷新。
+        </div>
+      )}
+
       <main className="page-shell">{children}</main>
 
       <nav className="mobile-nav" aria-label="移动端导航">
-        <Link href="/">
+        <Link className={navClassName("/")} href="/">
           <CalendarRange size={18} />
           广场
         </Link>
-        <Link href="/venues">
+        <Link className={navClassName("/venues")} href="/venues">
           <MapPinned size={18} />
           场地
         </Link>
-        <Link href="/me">
+        <Link className={navClassName("/me")} href="/me">
           <UserRound size={18} />
           我的
         </Link>
-        <Link href="/organizer">
+        <Link className={navClassName("/organizer")} href="/organizer">
           <LayoutDashboard size={18} />
           工作台
         </Link>
@@ -228,6 +280,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         <nav aria-label="法律条款">
           <Link href="/terms">服务条款</Link>
           <Link href="/privacy">隐私政策</Link>
+          <Link href="/support">支持与反馈</Link>
         </nav>
       </footer>
     </div>

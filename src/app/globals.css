@@ -64,6 +64,10 @@ body {
   text-rendering: optimizeLegibility;
 }
 
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
 /* paper grain */
 body::before {
   content: "";
@@ -86,6 +90,24 @@ select,
 textarea,
 small {
   font: inherit;
+}
+
+input,
+select,
+textarea {
+  font-size: 16px;
+}
+
+button,
+a,
+[role="button"] {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+img,
+a {
+  -webkit-touch-callout: none;
 }
 
 input:focus-visible,
@@ -172,6 +194,7 @@ h3 {
   min-height: 100vh;
   flex-direction: column;
   background: var(--bg);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
 .page-shell {
@@ -262,8 +285,8 @@ h3 {
 .icon-button,
 .avatar-button {
   display: grid;
-  width: 36px;
-  height: 36px;
+  width: 44px;
+  height: 44px;
   place-items: center;
   border: 0;
   border-radius: 50%;
@@ -435,6 +458,16 @@ h3 {
   transform: translateY(-1px);
 }
 
+.button.danger {
+  background: #7f2c21;
+  color: #ffffff;
+}
+
+.button.danger:hover {
+  background: #6a2118;
+  transform: translateY(-1px);
+}
+
 .button:disabled {
   cursor: not-allowed;
   opacity: 0.45;
@@ -444,8 +477,26 @@ h3 {
   width: 100%;
 }
 
+.button.apple-signin {
+  background: #000000;
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.button.apple-signin:hover {
+  background: #1f1f1f;
+}
+
+.apple-signin-logo {
+  display: inline-grid;
+  min-width: 16px;
+  place-items: center;
+  font-size: 18px;
+  line-height: 1;
+}
+
 .button.compact {
-  min-height: 36px;
+  min-height: 44px;
   padding: 0 14px;
   font-size: 14px;
 }
@@ -1437,12 +1488,13 @@ h3 {
   gap: 32px;
   padding: clamp(24px, 5vw, 64px);
   background: var(--bg);
+  overscroll-behavior-y: contain;
 }
 
 .login-panel {
   display: grid;
   gap: 28px;
-  width: min(440px, 100%);
+  width: min(460px, 100%);
   padding: 0;
 }
 
@@ -1512,7 +1564,7 @@ h3 {
 }
 
 .auth-tabs button {
-  min-height: 34px;
+  min-height: 44px;
   border: 0;
   border-radius: 8px;
   background: transparent;
@@ -3438,6 +3490,10 @@ h3 {
   text-align: left;
 }
 
+.g2-hero-actions {
+  margin-top: 18px;
+}
+
 .g2-hero-tag {
   margin: 0 0 12px;
   color: var(--muted);
@@ -3640,7 +3696,7 @@ h3 {
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  padding: 14px clamp(20px, 6vw, 48px);
+  padding: 14px clamp(20px, 6vw, 48px) calc(env(safe-area-inset-bottom, 0px) + 14px);
   border-top: 1px solid var(--line);
   background: rgba(247, 246, 241, 0.88);
   backdrop-filter: saturate(180%) blur(20px);
@@ -3666,7 +3722,7 @@ h3 {
 
 .g2-cta-action {
   display: inline-flex;
-  height: 48px;
+  min-height: 50px;
   align-items: center;
   gap: 8px;
   padding: 0 28px;
@@ -3745,6 +3801,19 @@ h3 {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
   gap: 32px;
+}
+
+.network-status-banner {
+  position: sticky;
+  top: 56px;
+  z-index: 55;
+  width: 100%;
+  padding: 10px 24px;
+  border-bottom: 1px solid var(--line);
+  background: rgba(150, 102, 42, 0.14);
+  color: #553c19;
+  font-size: 13px;
+  font-weight: 500;
 }
 
 .g2-badge {
@@ -3919,7 +3988,7 @@ html.reveal-ready .reveal-item.is-revealed {
     z-index: 60;
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    padding: 8px 8px calc(env(safe-area-inset-bottom, 0px) + 8px);
+    padding: 8px 8px calc(env(safe-area-inset-bottom, 0px) + 10px);
     border-top: 1px solid var(--line);
     background: rgba(247, 246, 241, 0.92);
     backdrop-filter: saturate(180%) blur(20px);
@@ -3927,7 +3996,7 @@ html.reveal-ready .reveal-item.is-revealed {
 
   .mobile-nav a {
     display: grid;
-    min-height: 48px;
+    min-height: 50px;
     place-items: center;
     gap: 2px;
     border-radius: 10px;
@@ -3937,6 +4006,7 @@ html.reveal-ready .reveal-item.is-revealed {
 
   .mobile-nav a.active {
     color: var(--accent);
+    background: rgba(46, 94, 62, 0.09);
   }
 
   .page-shell {
@@ -3945,7 +4015,7 @@ html.reveal-ready .reveal-item.is-revealed {
 
   .g2-page {
     width: min(100% - 48px, 680px);
-    padding-bottom: 150px;
+    padding-bottom: 170px;
   }
 }
 
@@ -4043,6 +4113,19 @@ html.reveal-ready .reveal-item.is-revealed {
     align-items: flex-start;
     flex-direction: column;
     gap: 12px;
+  }
+
+  .g2-share-button {
+    min-height: 44px;
+    padding: 0 16px;
+  }
+
+  .order-actions {
+    width: 100%;
+  }
+
+  .order-actions .button {
+    width: 100%;
   }
 
   .verification-disclosure-body {
@@ -4146,6 +4229,65 @@ html.reveal-ready .reveal-item.is-revealed {
 
 .legal-link:hover {
   text-decoration: underline;
+}
+
+.faq-list {
+  margin: 20px 0 0;
+  padding-left: 20px;
+  display: grid;
+  gap: 10px;
+}
+
+.faq-list li {
+  color: var(--muted);
+  font-size: 15px;
+}
+
+.feedback-box {
+  margin-top: 20px;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-m);
+  background: var(--surface);
+}
+
+.confirm-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(26, 23, 18, 0.4);
+}
+
+.confirm-card {
+  width: min(520px, 100%);
+  padding: 20px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-l);
+  background: var(--surface);
+  box-shadow: var(--shadow-lift);
+  display: grid;
+  gap: 14px;
+}
+
+.confirm-card h3 {
+  margin: 0;
+}
+
+.g2-share-button {
+  margin-top: 16px;
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  gap: 6px;
+  padding: 0 14px;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
 }
 
 

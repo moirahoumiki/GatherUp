@@ -1,0 +1,332 @@
+/* ============================================================
+   Component: BUTTON
+   Variants: primary / secondary / ghost / teal / danger / danger-soft
+   Sizes:    sm / md / lg / xl
+   States:   hover / focus-visible / active / disabled / loading
+   ============================================================ */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-2);
+  border: 2px solid transparent;
+  border-radius: var(--r-full);
+  font-family: inherit;
+  font-weight: var(--fw-bold);
+  white-space: nowrap;
+  text-align: center;
+  cursor: pointer;
+  user-select: none;
+  transition:
+    transform var(--dur-fast) var(--ease),
+    box-shadow var(--dur-fast) var(--ease-out),
+    background var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out);
+}
+
+.btn:active {
+  transform: scale(0.96);
+}
+
+.btn:focus-visible {
+  outline: none;
+  box-shadow: var(--shadow-focus);
+}
+
+/* ---------- Sizes ---------- */
+
+.btn--sm {
+  height: 34px;
+  padding: 0 var(--sp-4);
+  font-size: var(--fs-sm);
+}
+
+.btn--md {
+  height: 42px;
+  padding: 0 22px;
+  font-size: var(--fs-md);
+}
+
+.btn--lg {
+  height: 50px;
+  padding: 0 30px;
+  font-size: var(--fs-lg);
+}
+
+.btn--xl {
+  height: 58px;
+  padding: 0 38px;
+  font-size: var(--fs-lg);
+}
+
+/* Default size when no modifier is supplied */
+.btn:not(.btn--sm):not(.btn--md):not(.btn--lg):not(.btn--xl) {
+  height: 42px;
+  padding: 0 22px;
+  font-size: var(--fs-md);
+}
+
+/* ---------- Variants ---------- */
+
+.btn--primary {
+  background: var(--brand-500);
+  color: #fff;
+  box-shadow: var(--shadow-brand);
+}
+
+.btn--primary:hover:not(:disabled):not(.is-loading) {
+  background: var(--brand-600);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-brand-hover);
+}
+
+.btn--primary:active:not(:disabled) {
+  transform: scale(0.96);
+  box-shadow: var(--shadow-sm);
+}
+
+.btn--secondary {
+  background: var(--bg-surface);
+  color: var(--fg-primary);
+  border-color: var(--border-default);
+  box-shadow: var(--shadow-sm);
+}
+
+.btn--secondary:hover:not(:disabled):not(.is-loading) {
+  border-color: var(--brand-300);
+  color: var(--brand-600);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.btn--secondary:active:not(:disabled) {
+  transform: scale(0.96);
+  box-shadow: var(--shadow-sm);
+}
+
+.btn--ghost {
+  background: transparent;
+  color: var(--fg-secondary);
+}
+
+.btn--ghost:hover:not(:disabled):not(.is-loading) {
+  background: var(--bg-hover);
+  color: var(--fg-primary);
+}
+
+/* Teal = affirmative secondary action (approve / confirm) */
+.btn--teal {
+  background: var(--teal-500);
+  color: #fff;
+  box-shadow: var(--shadow-teal);
+}
+
+.btn--teal:hover:not(:disabled):not(.is-loading) {
+  background: var(--teal-600);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.btn--danger {
+  background: var(--danger-solid);
+  color: #fff;
+  box-shadow: var(--shadow-danger);
+}
+
+.btn--danger:hover:not(:disabled):not(.is-loading) {
+  filter: brightness(0.93);
+  transform: translateY(-2px);
+}
+
+.btn--danger:focus-visible {
+  box-shadow: var(--shadow-focus-danger);
+}
+
+.btn--danger-soft {
+  background: var(--danger-bg);
+  color: var(--danger-fg);
+  border-color: var(--danger-br);
+}
+
+.btn--danger-soft:hover:not(:disabled):not(.is-loading) {
+  background: var(--danger-br);
+}
+
+.btn--danger-soft:focus-visible {
+  box-shadow: var(--shadow-focus-danger);
+}
+
+/* ---------- Shape modifiers ---------- */
+
+.btn--icon {
+  padding: 0;
+  width: 42px;
+  flex-shrink: 0;
+}
+
+.btn--icon.btn--sm {
+  width: 34px;
+}
+.btn--icon.btn--lg {
+  width: 50px;
+}
+.btn--icon.btn--xl {
+  width: 58px;
+}
+
+.btn--block {
+  width: 100%;
+}
+
+/* ---------- Disabled ---------- */
+
+.btn:disabled,
+.btn.is-disabled,
+.btn[aria-disabled="true"] {
+  opacity: 0.45;
+  box-shadow: none;
+  transform: none;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* ---------- Loading ----------
+   Hides label via transparent text, renders a spinner centred on top.
+   Keeps the button width stable so layout does not shift. */
+
+.btn.is-loading {
+  position: relative;
+  color: transparent !important;
+  pointer-events: none;
+  transform: none;
+}
+
+.btn.is-loading::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 1.15em;
+  height: 1.15em;
+  margin: -0.575em 0 0 -0.575em;
+  border: 2px solid currentColor;
+  border-radius: var(--r-full);
+  border-top-color: transparent;
+  animation: btn-spin 0.7s linear infinite;
+}
+
+/* Spinner colour has to be recovered per-variant since the label
+   colour is forced transparent. */
+.btn--primary.is-loading::after,
+.btn--teal.is-loading::after,
+.btn--danger.is-loading::after {
+  border-color: rgba(255, 255, 255, 0.85);
+  border-top-color: transparent;
+}
+
+.btn--secondary.is-loading::after,
+.btn--ghost.is-loading::after {
+  border-color: var(--fg-secondary);
+  border-top-color: transparent;
+}
+
+.btn--danger-soft.is-loading::after {
+  border-color: var(--danger-fg);
+  border-top-color: transparent;
+}
+
+@keyframes btn-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ---------- Icon-only circular control (topbar etc.) ---------- */
+
+.icon-btn {
+  display: inline-grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border-radius: var(--r-full);
+  color: var(--fg-secondary);
+  background: transparent;
+  cursor: pointer;
+  transition:
+    background var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out),
+    transform var(--dur-fast) var(--ease);
+}
+
+.icon-btn:hover {
+  background: var(--bg-hover);
+  color: var(--fg-primary);
+}
+
+.icon-btn:active {
+  transform: scale(0.92);
+}
+
+.icon-btn:focus-visible {
+  outline: none;
+  box-shadow: var(--shadow-focus);
+}
+
+.icon-btn:disabled {
+  opacity: 0.45;
+  pointer-events: none;
+}
+
+/* ---------- Segmented control ---------- */
+
+.seg {
+  display: inline-flex;
+  gap: var(--sp-1);
+  padding: var(--sp-1);
+  border-radius: var(--r-full);
+  background: var(--bg-sunken);
+  max-width: 100%;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.seg::-webkit-scrollbar {
+  display: none;
+}
+
+.seg__item {
+  padding: 7px 18px;
+  border-radius: var(--r-full);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-bold);
+  color: var(--fg-tertiary);
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out);
+}
+
+.seg__item:hover {
+  color: var(--fg-primary);
+}
+
+.seg__item:focus-visible {
+  outline: none;
+  box-shadow: var(--shadow-focus);
+}
+
+.seg__item.is-active {
+  background: var(--bg-surface);
+  color: var(--brand-600);
+  box-shadow: var(--shadow-sm);
+}
+
+.seg__item:disabled {
+  opacity: 0.45;
+  pointer-events: none;
+}

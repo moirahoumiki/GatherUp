@@ -1,5 +1,7 @@
 import type { NextConfig } from "next";
 
+const isCapacitorStaticExport = process.env.NEXT_CAPACITOR_EXPORT === "1";
+
 const contentSecurityPolicy = [
   "default-src 'self'",
   "script-src 'self' 'unsafe-inline'",
@@ -14,6 +16,8 @@ const contentSecurityPolicy = [
 ].join("; ");
 
 const nextConfig: NextConfig = {
+  output: isCapacitorStaticExport ? "export" : undefined,
+  trailingSlash: isCapacitorStaticExport ? true : undefined,
   // Exposes a non-secret opt-in flag to both server and client bundles so
   // isPrototypeAuthEnabled() can evaluate consistently everywhere.
   env: {
@@ -36,6 +40,7 @@ const nextConfig: NextConfig = {
     ];
   },
   images: {
+    unoptimized: isCapacitorStaticExport,
     remotePatterns: [
       {
         protocol: "https",

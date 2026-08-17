@@ -1,0 +1,431 @@
+/* ============================================================
+   GatherUp Design System — Layer 1: TOKENS
+   Direction B "Warm Gathering" (design-explore/direction-b.html)
+
+   Single source of truth for all design values.
+   No selectors other than :root / [data-theme] belong in this file.
+
+   Theming strategy:
+     · [data-theme="dark"]  → explicit opt-in (user toggle, persisted)
+     · [data-theme="light"] → explicit opt-out of system dark
+     · prefers-color-scheme → fallback when no data-theme is set
+   ============================================================ */
+
+/* ---------- LIGHT (default) ---------- */
+:root {
+  /* Neutral ramp — warm beige-gray, not cool gray */
+  --n-0: #ffffff;
+  --n-25: #fffdfb;
+  --n-50: #fdf8f4;
+  --n-100: #f8f0e9;
+  --n-150: #f2e6db;
+  --n-200: #e9d9cc;
+  --n-300: #d8c2b1;
+  --n-400: #b9a08c;
+  --n-500: #947c67;
+  --n-600: #75604e;
+  --n-700: #5a483a;
+  --n-800: #40332a;
+  --n-900: #2b211b;
+  --n-950: #1a1310;
+
+  /* Brand — coral orange (warm, inviting) */
+  --brand-50: #fff1ec;
+  --brand-100: #ffe1d6;
+  --brand-200: #ffc5b0;
+  --brand-300: #ffa286;
+  --brand-400: #ff7d59;
+  --brand-500: #f95f38;
+  --brand-600: #e64620;
+  --brand-700: #bd3417;
+  --brand-800: #962a13;
+  --brand-900: #7a2513;
+
+  /* Secondary — teal (balances the warmth; success / confirm actions) */
+  --teal-50: #e8f8f4;
+  --teal-100: #cbefe7;
+  --teal-200: #9adfd0;
+  --teal-300: #5fc9b3;
+  --teal-400: #2fae95;
+  --teal-500: #189179;
+  --teal-600: #0f7562;
+  --teal-700: #0d5e4f;
+
+  /* Accents — sun yellow / lavender (illustrative) */
+  --sun-100: #fff3cf;
+  --sun-200: #ffe49b;
+  --sun-300: #ffd15e;
+  --sun-400: #f7b62c;
+  --sun-500: #db9410;
+
+  --lav-100: #efeafd;
+  --lav-200: #ddd2fb;
+  --lav-300: #c2b0f6;
+  --lav-400: #a288ee;
+  --lav-500: #8265dd;
+
+  /* Semantic colors — each with bg / fg / border / solid */
+  --success-bg: #e2f7f0;
+  --success-fg: #0d6b58;
+  --success-br: #9de0cd;
+  --success-solid: #189179;
+
+  --warning-bg: #fff4d9;
+  --warning-fg: #8a6008;
+  --warning-br: #ffd98e;
+  --warning-solid: #e0a01a;
+
+  --danger-bg: #ffe9e5;
+  --danger-fg: #ad2f1c;
+  --danger-br: #ffb8a8;
+  --danger-solid: #e04a2c;
+
+  --info-bg: #eeeafe;
+  --info-fg: #58399f;
+  --info-br: #cbbcf8;
+  --info-solid: #7a5ad1;
+
+  /* Surfaces */
+  --bg-app: var(--n-50);
+  --bg-surface: var(--n-0);
+  --bg-sunken: var(--n-100);
+  --bg-hover: var(--n-100);
+  --bg-inverse: var(--n-900);
+  --bg-warm: linear-gradient(160deg, #fff5ee 0%, #fdf0f6 45%, #eef7f5 100%);
+
+  /* Foregrounds */
+  --fg-primary: var(--n-900);
+  --fg-secondary: var(--n-600);
+  --fg-tertiary: var(--n-500);
+  --fg-disabled: var(--n-400);
+  --fg-inverse: #fff;
+  --fg-brand: var(--brand-600);
+
+  /* Borders */
+  --border-subtle: var(--n-150);
+  --border-default: var(--n-200);
+  --border-strong: var(--n-300);
+
+  /* Elevation — B's primary layering device: soft, wide, warm-tinted */
+  --shadow-sm: 0 2px 6px rgba(112, 76, 48, 0.06);
+  --shadow-md: 0 6px 18px rgba(112, 76, 48, 0.09), 0 2px 6px rgba(112, 76, 48, 0.05);
+  --shadow-lg: 0 16px 40px rgba(112, 76, 48, 0.13), 0 4px 12px rgba(112, 76, 48, 0.07);
+  --shadow-xl: 0 28px 68px rgba(112, 76, 48, 0.17), 0 8px 20px rgba(112, 76, 48, 0.09);
+  --shadow-brand: 0 8px 22px rgba(233, 74, 38, 0.28);
+  --shadow-brand-hover: 0 12px 28px rgba(233, 74, 38, 0.34);
+  --shadow-teal: 0 8px 22px rgba(24, 145, 121, 0.26);
+  --shadow-danger: 0 8px 22px rgba(224, 74, 44, 0.26);
+  --shadow-focus: 0 0 0 4px var(--brand-100);
+  --shadow-focus-danger: 0 0 0 4px var(--danger-br);
+
+  /* Scrim (modal / drawer backdrop) */
+  --scrim: rgba(43, 33, 27, 0.48);
+
+  /* Skeleton */
+  --skeleton-base: var(--n-100);
+  --skeleton-shine: var(--n-50);
+}
+
+/* ---------- DARK ---------- */
+/* Applied via explicit [data-theme="dark"] and, below, via system preference. */
+[data-theme="dark"] {
+  --n-0: #191310;
+  --n-25: #1d1613;
+  --n-50: #241b17;
+  --n-100: #2e231d;
+  --n-150: #3a2c24;
+  --n-200: #4a382e;
+  --n-300: #634c3e;
+  --n-400: #8a6c58;
+  --n-500: #ad8d76;
+  --n-600: #ceb09a;
+  --n-700: #e2ccba;
+  --n-800: #f0e2d5;
+  --n-900: #fdf4ec;
+  --n-950: #ffffff;
+
+  --brand-50: #3a1a10;
+  --brand-100: #4d2115;
+  --brand-200: #6b2d1c;
+  --brand-300: #984025;
+  --brand-400: #d55c33;
+  --brand-500: #ff7d59;
+  --brand-600: #ff9576;
+  --brand-700: #ffb098;
+  --brand-800: #ffcbba;
+  --brand-900: #ffe1d6;
+
+  --teal-50: #0d2b26;
+  --teal-100: #123b32;
+  --teal-200: #175446;
+  --teal-300: #1f7864;
+  --teal-400: #2fae95;
+  --teal-500: #4fc9ae;
+  --teal-600: #7bdcc4;
+  --teal-700: #a6ebd9;
+
+  --sun-100: #3a2c0c;
+  --sun-200: #513d0f;
+  --sun-300: #7d5f18;
+  --sun-400: #d9a52a;
+  --sun-500: #f5c95e;
+
+  --lav-100: #2a2245;
+  --lav-200: #3b2f63;
+  --lav-300: #57468f;
+  --lav-400: #8f77e0;
+  --lav-500: #b6a3f2;
+
+  --success-bg: #0f3229;
+  --success-fg: #74dcbf;
+  --success-br: #1c5647;
+  --success-solid: #2fae95;
+
+  --warning-bg: #372711;
+  --warning-fg: #ffd280;
+  --warning-br: #5e4318;
+  --warning-solid: #dfa42a;
+
+  --danger-bg: #3a1a13;
+  --danger-fg: #ffab95;
+  --danger-br: #67291c;
+  --danger-solid: #e75c3d;
+
+  --info-bg: #271f47;
+  --info-fg: #c0abfa;
+  --info-br: #423372;
+  --info-solid: #8f77e0;
+
+  --bg-app: var(--n-25);
+  --bg-surface: var(--n-50);
+  --bg-sunken: var(--n-100);
+  --bg-hover: var(--n-100);
+  --bg-inverse: var(--n-900);
+  --bg-warm: linear-gradient(160deg, #2e201a 0%, #2c1d24 45%, #1c2a27 100%);
+
+  --fg-primary: var(--n-900);
+  --fg-secondary: var(--n-600);
+  --fg-tertiary: var(--n-500);
+  --fg-disabled: var(--n-400);
+  --fg-inverse: var(--n-0);
+  --fg-brand: var(--brand-600);
+
+  --border-subtle: var(--n-150);
+  --border-default: var(--n-200);
+  --border-strong: var(--n-300);
+
+  --shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.35);
+  --shadow-md: 0 6px 18px rgba(0, 0, 0, 0.45), 0 2px 6px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.55), 0 4px 12px rgba(0, 0, 0, 0.35);
+  --shadow-xl: 0 28px 68px rgba(0, 0, 0, 0.62), 0 8px 20px rgba(0, 0, 0, 0.4);
+  --shadow-brand: 0 8px 22px rgba(255, 125, 89, 0.3);
+  --shadow-brand-hover: 0 12px 28px rgba(255, 125, 89, 0.38);
+  --shadow-teal: 0 8px 22px rgba(47, 174, 149, 0.28);
+  --shadow-danger: 0 8px 22px rgba(231, 92, 61, 0.28);
+  --shadow-focus: 0 0 0 4px var(--brand-200);
+  --shadow-focus-danger: 0 0 0 4px var(--danger-br);
+
+  --scrim: rgba(10, 7, 5, 0.66);
+
+  --skeleton-base: var(--n-100);
+  --skeleton-shine: var(--n-150);
+}
+
+/* System preference fallback: only when the user has not chosen a theme.
+   :root:not([data-theme]) keeps an explicit data-theme="light" winning. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    --n-0: #191310;
+    --n-25: #1d1613;
+    --n-50: #241b17;
+    --n-100: #2e231d;
+    --n-150: #3a2c24;
+    --n-200: #4a382e;
+    --n-300: #634c3e;
+    --n-400: #8a6c58;
+    --n-500: #ad8d76;
+    --n-600: #ceb09a;
+    --n-700: #e2ccba;
+    --n-800: #f0e2d5;
+    --n-900: #fdf4ec;
+    --n-950: #ffffff;
+
+    --brand-50: #3a1a10;
+    --brand-100: #4d2115;
+    --brand-200: #6b2d1c;
+    --brand-300: #984025;
+    --brand-400: #d55c33;
+    --brand-500: #ff7d59;
+    --brand-600: #ff9576;
+    --brand-700: #ffb098;
+    --brand-800: #ffcbba;
+    --brand-900: #ffe1d6;
+
+    --teal-50: #0d2b26;
+    --teal-100: #123b32;
+    --teal-200: #175446;
+    --teal-300: #1f7864;
+    --teal-400: #2fae95;
+    --teal-500: #4fc9ae;
+    --teal-600: #7bdcc4;
+    --teal-700: #a6ebd9;
+
+    --sun-100: #3a2c0c;
+    --sun-200: #513d0f;
+    --sun-300: #7d5f18;
+    --sun-400: #d9a52a;
+    --sun-500: #f5c95e;
+
+    --lav-100: #2a2245;
+    --lav-200: #3b2f63;
+    --lav-300: #57468f;
+    --lav-400: #8f77e0;
+    --lav-500: #b6a3f2;
+
+    --success-bg: #0f3229;
+    --success-fg: #74dcbf;
+    --success-br: #1c5647;
+    --success-solid: #2fae95;
+
+    --warning-bg: #372711;
+    --warning-fg: #ffd280;
+    --warning-br: #5e4318;
+    --warning-solid: #dfa42a;
+
+    --danger-bg: #3a1a13;
+    --danger-fg: #ffab95;
+    --danger-br: #67291c;
+    --danger-solid: #e75c3d;
+
+    --info-bg: #271f47;
+    --info-fg: #c0abfa;
+    --info-br: #423372;
+    --info-solid: #8f77e0;
+
+    --bg-app: var(--n-25);
+    --bg-surface: var(--n-50);
+    --bg-sunken: var(--n-100);
+    --bg-hover: var(--n-100);
+    --bg-inverse: var(--n-900);
+    --bg-warm: linear-gradient(160deg, #2e201a 0%, #2c1d24 45%, #1c2a27 100%);
+
+    --fg-primary: var(--n-900);
+    --fg-secondary: var(--n-600);
+    --fg-tertiary: var(--n-500);
+    --fg-disabled: var(--n-400);
+    --fg-inverse: var(--n-0);
+    --fg-brand: var(--brand-600);
+
+    --border-subtle: var(--n-150);
+    --border-default: var(--n-200);
+    --border-strong: var(--n-300);
+
+    --shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.35);
+    --shadow-md: 0 6px 18px rgba(0, 0, 0, 0.45), 0 2px 6px rgba(0, 0, 0, 0.3);
+    --shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.55), 0 4px 12px rgba(0, 0, 0, 0.35);
+    --shadow-xl: 0 28px 68px rgba(0, 0, 0, 0.62), 0 8px 20px rgba(0, 0, 0, 0.4);
+    --shadow-brand: 0 8px 22px rgba(255, 125, 89, 0.3);
+    --shadow-brand-hover: 0 12px 28px rgba(255, 125, 89, 0.38);
+    --shadow-teal: 0 8px 22px rgba(47, 174, 149, 0.28);
+    --shadow-danger: 0 8px 22px rgba(231, 92, 61, 0.28);
+    --shadow-focus: 0 0 0 4px var(--brand-200);
+    --shadow-focus-danger: 0 0 0 4px var(--danger-br);
+
+    --scrim: rgba(10, 7, 5, 0.66);
+
+    --skeleton-base: var(--n-100);
+    --skeleton-shine: var(--n-150);
+  }
+}
+
+/* ---------- Typography / spacing / shape / motion (theme-independent) ---------- */
+:root {
+  /* Font stack. --font-gu-sans is injected by next/font in layout.tsx.
+     Nunito is the Direction B display face; system CJK fallbacks follow. */
+  --font-sans: var(--font-gu-sans, "Nunito"), "Quicksand", -apple-system, BlinkMacSystemFont,
+    "PingFang SC", "Noto Sans SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  --font-display: var(--font-sans);
+
+  /* Type scale — 1.2 ratio, 15px body base (reading-friendly) */
+  --fs-xs: 12px;
+  --fs-sm: 13px;
+  --fs-md: 15px;
+  --fs-lg: 17px;
+  --fs-xl: 20px;
+  --fs-2xl: 24px;
+  --fs-3xl: 29px;
+  --fs-4xl: 35px;
+  --fs-5xl: 44px;
+  --fs-6xl: 56px;
+
+  --fw-regular: 400;
+  --fw-medium: 500;
+  --fw-semibold: 600;
+  --fw-bold: 700;
+  --fw-extra: 800;
+
+  --lh-tight: 1.2;
+  --lh-snug: 1.35;
+  --lh-normal: 1.65;
+  --lh-relaxed: 1.85;
+
+  --ls-tight: -0.02em;
+  --ls-normal: 0;
+  --ls-wide: 0.02em;
+
+  /* Spacing scale — 4px base */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 20px;
+  --sp-6: 24px;
+  --sp-7: 28px;
+  --sp-8: 32px;
+  --sp-10: 40px;
+  --sp-12: 48px;
+  --sp-16: 64px;
+  --sp-20: 80px;
+  --sp-24: 96px;
+
+  /* Radii — large and soft */
+  --r-sm: 8px;
+  --r-md: 12px;
+  --r-lg: 16px;
+  --r-xl: 20px;
+  --r-2xl: 28px;
+  --r-3xl: 36px;
+  --r-full: 999px;
+
+  /* Motion */
+  --dur-fast: 140ms;
+  --dur-base: 240ms;
+  --dur-slow: 400ms;
+  --ease: cubic-bezier(0.34, 1.4, 0.64, 1); /* slight overshoot */
+  --ease-out: cubic-bezier(0.22, 0.61, 0.36, 1);
+
+  /* Layout */
+  --layout-max: 1200px;
+  --topbar-h: 64px;
+  --mobile-nav-h: 64px;
+
+  /* Z-index scale */
+  --z-base: 1;
+  --z-sticky: 80;
+  --z-topbar: 90;
+  --z-drawer: 180;
+  --z-modal: 200;
+  --z-toast: 300;
+}
+
+/* ============================================================
+   BREAKPOINTS (reference — CSS custom properties cannot be used
+   in media queries, so these are documented constants used
+   consistently across every stylesheet in this system)
+
+     --bp-xs:  480px   phone
+     --bp-sm:  620px   large phone
+     --bp-md:  880px   tablet portrait
+     --bp-lg: 1080px   tablet landscape / small laptop
+     --bp-xl: 1280px   desktop
+   ============================================================ */

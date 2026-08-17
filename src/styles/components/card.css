@@ -1,0 +1,425 @@
+/* ============================================================
+   Component: CARD
+
+   CONVERGENCE NOTE
+   The legacy stylesheet carried 20+ ad-hoc card variants
+   (content-card, order-card, metric-card, choice-card, info-card,
+   local-event-card, review-card, …). This system provides exactly
+   three semantic variants. Do not add a fourth — compose instead.
+
+     .card              surface      · neutral container, sm shadow
+     .card--interactive interactive  · clickable, lifts on hover
+     .card--highlight   highlight    · always-elevated, key regions
+
+   Structural slots (optional): __head / __body / __foot / --pad
+   ============================================================ */
+
+.card {
+  position: relative;
+  background: var(--bg-surface);
+  border-radius: var(--r-2xl);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Variant 2 — interactive */
+.card--interactive {
+  display: block;
+  cursor: pointer;
+  color: inherit;
+  transition:
+    transform var(--dur-base) var(--ease),
+    box-shadow var(--dur-base) var(--ease-out);
+}
+
+.card--interactive:hover {
+  transform: translateY(-6px);
+  box-shadow: var(--shadow-xl);
+}
+
+.card--interactive:active {
+  transform: translateY(-2px) scale(0.995);
+  box-shadow: var(--shadow-md);
+}
+
+.card--interactive:focus-visible {
+  outline: none;
+  box-shadow: var(--shadow-xl), var(--shadow-focus);
+}
+
+/* Variant 3 — highlight */
+.card--highlight {
+  box-shadow: var(--shadow-lg);
+}
+
+/* Illustrative surface (gradient wash) — a modifier, not a new variant */
+.card--warm {
+  background: var(--bg-warm);
+  overflow: hidden;
+}
+
+/* ---------- Slots ---------- */
+
+.card--pad {
+  padding: var(--sp-6);
+}
+
+.card__head {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: var(--sp-5) var(--sp-6);
+}
+
+.card__title {
+  font-size: var(--fs-xl);
+  font-weight: var(--fw-extra);
+  letter-spacing: var(--ls-tight);
+}
+
+.card__body {
+  padding: 0 var(--sp-6) var(--sp-6);
+}
+
+.card__foot {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: 0 var(--sp-6) var(--sp-6);
+}
+
+/* ---------- Event card (composed on .card--interactive) ---------- */
+
+.event-card {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.event-card__cover {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--sp-2);
+  position: relative;
+  height: 158px;
+  padding: var(--sp-4);
+  overflow: hidden;
+  background: linear-gradient(150deg, var(--brand-100), var(--lav-200));
+}
+
+/* Cover colourway rotation — keeps a grid of cards visually varied
+   without requiring per-event artwork. */
+.event-card__cover--a {
+  background: linear-gradient(150deg, var(--brand-100), var(--lav-200));
+}
+.event-card__cover--b {
+  background: linear-gradient(150deg, var(--sun-200), var(--brand-100));
+}
+.event-card__cover--c {
+  background: linear-gradient(150deg, var(--teal-100), var(--sun-200));
+}
+.event-card__cover--d {
+  background: linear-gradient(150deg, var(--lav-200), var(--teal-100));
+}
+.event-card__cover--e {
+  background: linear-gradient(150deg, var(--n-150), var(--lav-100));
+}
+.event-card__cover--f {
+  background: linear-gradient(150deg, var(--brand-200), var(--sun-200));
+}
+
+.event-card__glyph {
+  position: absolute;
+  right: 14px;
+  bottom: -12px;
+  font-size: 76px;
+  line-height: 1;
+  opacity: 0.9;
+  transform: rotate(-8deg);
+  pointer-events: none;
+}
+
+.event-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  flex: 1;
+  padding: var(--sp-5);
+}
+
+.event-card__name {
+  font-size: var(--fs-xl);
+  font-weight: var(--fw-extra);
+  letter-spacing: var(--ls-tight);
+  line-height: var(--lh-snug);
+}
+
+.event-card__meta {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-medium);
+  color: var(--fg-secondary);
+}
+
+.event-card__meta > div {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+}
+
+.event-card__meta svg {
+  flex-shrink: 0;
+  color: var(--fg-tertiary);
+}
+
+.event-card__desc {
+  font-size: var(--fs-sm);
+  line-height: var(--lh-normal);
+  color: var(--fg-tertiary);
+}
+
+.event-card__foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  margin-top: auto;
+  padding-top: var(--sp-4);
+}
+
+/* ---------- Price ---------- */
+
+.price {
+  font-size: var(--fs-2xl);
+  font-weight: var(--fw-extra);
+  letter-spacing: var(--ls-tight);
+  line-height: 1.1;
+}
+
+.price small {
+  font-size: var(--fs-md);
+  margin-right: 1px;
+}
+
+.price--free {
+  font-size: var(--fs-xl);
+  font-weight: var(--fw-extra);
+  color: var(--teal-500);
+}
+
+/* ---------- Avatar & stacked faces ---------- */
+
+.avatar {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  flex-shrink: 0;
+  border-radius: var(--r-full);
+  border: 2px solid var(--bg-surface);
+  background: linear-gradient(140deg, var(--teal-300), var(--teal-500));
+  color: #fff;
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-extra);
+  box-shadow: var(--shadow-sm);
+}
+
+.avatar--lg {
+  width: 56px;
+  height: 56px;
+  font-size: var(--fs-lg);
+}
+
+.avatar--brand {
+  background: linear-gradient(140deg, var(--brand-400), var(--brand-600));
+}
+
+.face-stack {
+  display: flex;
+}
+
+.face {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  margin-left: -9px;
+  border-radius: var(--r-full);
+  border: 2px solid var(--bg-surface);
+  color: #fff;
+  font-size: 11px;
+  font-weight: var(--fw-extra);
+  background: var(--n-400);
+}
+
+.face:first-child {
+  margin-left: 0;
+}
+
+.face--teal {
+  background: var(--teal-400);
+}
+.face--lav {
+  background: var(--lav-400);
+}
+.face--sun {
+  background: var(--sun-400);
+}
+.face--brand {
+  background: var(--brand-400);
+}
+
+/* ---------- Metric card (composed on .card) ---------- */
+
+.metric {
+  padding: var(--sp-6);
+  position: relative;
+  overflow: hidden;
+}
+
+.metric__icon {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  margin-bottom: var(--sp-4);
+  border-radius: var(--r-lg);
+  background: var(--bg-sunken);
+  font-size: var(--fs-xl);
+}
+
+.metric__label {
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-bold);
+  color: var(--fg-tertiary);
+}
+
+.metric__value {
+  margin-top: var(--sp-1);
+  font-size: var(--fs-4xl);
+  font-weight: var(--fw-extra);
+  letter-spacing: -0.025em;
+  line-height: 1.1;
+}
+
+.metric__value small {
+  font-size: var(--fs-lg);
+}
+
+.metric__foot {
+  margin-top: var(--sp-2);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-bold);
+}
+
+/* ---------- Fact row (icon + label + value) ---------- */
+
+.fact {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sp-4);
+  padding: var(--sp-4) 0;
+}
+
+.fact + .fact {
+  border-top: 1px solid var(--border-subtle);
+}
+
+.fact__icon {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  border-radius: var(--r-lg);
+  background: var(--bg-sunken);
+  font-size: var(--fs-xl);
+}
+
+.fact__value {
+  font-size: var(--fs-md);
+  font-weight: var(--fw-bold);
+}
+
+.fact__sub {
+  margin-top: 2px;
+  font-size: var(--fs-sm);
+  color: var(--fg-tertiary);
+}
+
+/* ---------- Todo / action row ---------- */
+
+.todo {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+  padding: var(--sp-4);
+  border-radius: var(--r-xl);
+  transition: background var(--dur-fast) var(--ease-out);
+}
+
+.todo:hover {
+  background: var(--bg-sunken);
+}
+
+.todo__icon {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  border-radius: var(--r-lg);
+  background: var(--bg-sunken);
+  font-size: var(--fs-lg);
+}
+
+.todo__main {
+  flex: 1;
+  min-width: 0;
+}
+
+.todo__title {
+  font-size: var(--fs-md);
+  font-weight: var(--fw-bold);
+}
+
+.todo__sub {
+  margin-top: 2px;
+  font-size: var(--fs-sm);
+  color: var(--fg-tertiary);
+}
+
+/* ---------- Responsive ---------- */
+
+@media (max-width: 620px) {
+  .card--pad,
+  .card__head,
+  .card__body,
+  .card__foot {
+    padding-left: var(--sp-5);
+    padding-right: var(--sp-5);
+  }
+
+  .card {
+    border-radius: var(--r-xl);
+  }
+
+  .event-card__cover {
+    height: 140px;
+  }
+
+  .metric__value {
+    font-size: var(--fs-3xl);
+  }
+
+  .todo {
+    flex-wrap: wrap;
+  }
+
+  .todo > .btn {
+    width: 100%;
+  }
+}

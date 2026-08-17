@@ -1,0 +1,191 @@
+/* ============================================================
+   Component: BADGE / status pill / progress / alert
+   ============================================================ */
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 13px;
+  border-radius: var(--r-full);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-extra);
+  white-space: nowrap;
+  background: var(--n-100);
+  color: var(--n-600);
+}
+
+.badge__dot {
+  width: 6px;
+  height: 6px;
+  flex-shrink: 0;
+  border-radius: var(--r-full);
+  background: currentColor;
+}
+
+.badge--neutral {
+  background: var(--n-100);
+  color: var(--n-600);
+}
+.badge--brand {
+  background: var(--brand-100);
+  color: var(--brand-700);
+}
+.badge--success {
+  background: var(--success-bg);
+  color: var(--success-fg);
+}
+.badge--warning {
+  background: var(--warning-bg);
+  color: var(--warning-fg);
+}
+.badge--danger {
+  background: var(--danger-bg);
+  color: var(--danger-fg);
+}
+.badge--info {
+  background: var(--info-bg);
+  color: var(--info-fg);
+}
+.badge--sun {
+  background: var(--sun-100);
+  color: var(--sun-500);
+}
+
+.badge--lg {
+  height: 34px;
+  padding: 0 18px;
+  font-size: var(--fs-sm);
+}
+
+.badge--sm {
+  height: 22px;
+  padding: 0 10px;
+  font-size: 11px;
+}
+
+/* Outline treatment — for placement on coloured surfaces */
+.badge--outline {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  color: var(--fg-secondary);
+}
+
+/* ---------- Progress ---------- */
+
+.progress {
+  height: 10px;
+  overflow: hidden;
+  border-radius: var(--r-full);
+  background: var(--n-100);
+}
+
+.progress > span {
+  display: block;
+  height: 100%;
+  border-radius: var(--r-full);
+  background: linear-gradient(90deg, var(--brand-400), var(--brand-500));
+  transition: width var(--dur-slow) var(--ease-out);
+}
+
+.progress--teal > span {
+  background: linear-gradient(90deg, var(--teal-300), var(--teal-500));
+}
+
+.progress--sun > span {
+  background: linear-gradient(90deg, var(--sun-300), var(--sun-400));
+}
+
+.progress--sm {
+  height: 6px;
+}
+
+/* ---------- Alert / inline notice ---------- */
+
+.alert {
+  display: flex;
+  gap: var(--sp-3);
+  padding: var(--sp-4) var(--sp-5);
+  border-radius: var(--r-xl);
+  background: var(--info-bg);
+  color: var(--info-fg);
+}
+
+.alert__icon {
+  flex-shrink: 0;
+  font-size: var(--fs-xl);
+  line-height: 1.2;
+}
+
+.alert__title {
+  font-weight: var(--fw-extra);
+}
+
+.alert__body {
+  margin-top: 2px;
+  font-size: var(--fs-sm);
+  opacity: 0.9;
+}
+
+.alert--success {
+  background: var(--success-bg);
+  color: var(--success-fg);
+}
+.alert--warning {
+  background: var(--warning-bg);
+  color: var(--warning-fg);
+}
+.alert--danger {
+  background: var(--danger-bg);
+  color: var(--danger-fg);
+}
+.alert--info {
+  background: var(--info-bg);
+  color: var(--info-fg);
+}
+
+/* ---------- Step dots ---------- */
+
+.steps {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+}
+
+.step-dot {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  border-radius: var(--r-full);
+  background: var(--n-100);
+  color: var(--fg-tertiary);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-extra);
+}
+
+.step-dot.is-current {
+  background: var(--brand-500);
+  color: #fff;
+  box-shadow: var(--shadow-brand);
+}
+
+.step-dot.is-done {
+  background: var(--teal-200);
+  color: var(--teal-700);
+}
+
+.step-line {
+  flex: 1;
+  height: 3px;
+  border-radius: var(--r-full);
+  background: var(--n-100);
+}
+
+@media (max-width: 620px) {
+  .alert {
+    padding: var(--sp-4);
+  }
+}
