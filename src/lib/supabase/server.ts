@@ -3,9 +3,16 @@ import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
 
 import { isSupabaseConfigured } from "@/lib/supabase/client";
+import { type Database } from "@/lib/supabase/database.types";
 
-let serverClient: SupabaseClient | null = null;
-let adminClient: SupabaseClient | null = null;
+let serverClient: SupabaseClient<Database> | null = null;
+let adminClient: SupabaseClient<Database> | null = null;
+
+export type AuthenticatedSupabaseContext = {
+  accessToken: string;
+  user: NonNullable<Awaited<ReturnType<SupabaseClient<Database>["auth"]["getUser"]>>["data"]["user"]>;
+  supabase: SupabaseClient<Database>;
+};
 
 export function getSupabaseServerClient() {
   if (!isSupabaseConfigured()) {
@@ -13,7 +20,7 @@ export function getSupabaseServerClient() {
   }
 
   if (!serverClient) {
-    serverClient = createClient(
+    serverClient = createClient<Database>(
       process.env.NEXT_PUBLIC_SUPABASE_URL as string,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string,
       {
@@ -36,7 +43,7 @@ export async function createSupabaseServerClient() {
 
   const cookieStore = await cookies();
 
-  return createServerClient(
+  return createServerClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL as string,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string,
     {
@@ -68,7 +75,7 @@ export function getSupabaseServiceClient() {
   }
 
   if (!adminClient) {
-    adminClient = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, serviceRoleKey, {
+    adminClient = createClient<Database>(process.env.NEXT_PUBLIC_SUPABASE_URL, serviceRoleKey, {
       auth: {
         persistSession: false,
         autoRefreshToken: false,
@@ -85,7 +92,7 @@ export function getSupabaseUserClient(accessToken: string) {
     throw new Error("Supabase is not configured. Add NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY.");
   }
 
-  return createClient(
+  return createClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL as string,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string,
     {
@@ -137,7 +144,7 @@ export async function getAuthenticatedUser(request: Request) {
   }
 
   const cookieStore = await cookies();
-  const supabase = createServerClient(
+  const supabase = createServerClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL as string,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string,
     {

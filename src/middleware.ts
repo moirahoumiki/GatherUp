@@ -2,6 +2,7 @@ import { createServerClient } from "@supabase/ssr";
 import { NextRequest, NextResponse } from "next/server";
 
 import { getSafeInternalPath, isPublicRoutePath } from "@/lib/auth";
+import { type Database } from "@/lib/supabase/database.types";
 
 function buildLoginUrl(request: NextRequest) {
   const loginUrl = request.nextUrl.clone();
@@ -29,7 +30,7 @@ export async function middleware(request: NextRequest) {
     return supabaseResponse;
   }
 
-  const supabase = createServerClient(
+  const supabase = createServerClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL as string,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string,
     {

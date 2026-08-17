@@ -94,6 +94,14 @@ describe("registration and payment proof API contracts", () => {
   const dataMode = readSource("src/lib/data-mode.ts");
   const serverApi = readSource("src/lib/server/api.ts");
   const supabaseServer = readSource("src/lib/supabase/server.ts");
+  const eventService = readSource("src/lib/services/event.service.ts");
+  const orderService = readSource("src/lib/services/order.service.ts");
+  const refundService = readSource("src/lib/services/refund.service.ts");
+  const waitlistService = readSource("src/lib/services/waitlist.service.ts");
+  const notificationService = readSource("src/lib/services/notification.service.ts");
+  const adminReviewService = readSource("src/lib/services/admin-review.service.ts");
+  const exportService = readSource("src/lib/services/export.service.ts");
+  const expenseService = readSource("src/lib/services/expense.service.ts");
 
   it("keeps route authentication unified across Bearer and Supabase SSR cookie sessions", () => {
     expectSource(supabaseServer, "export async function getAuthenticatedUser(request: Request)");
@@ -227,21 +235,18 @@ describe("registration and payment proof API contracts", () => {
 
   it("keeps event publishing on an authenticated edit-permission API path", () => {
     expectSource(eventPublishRoute, "getAuthenticatedSupabaseClient(request)");
-    expectSource(eventPublishRoute, "getSupabaseServiceClient");
     expectSource(eventPublishRoute, "enforceRateLimit(request");
     expectSource(eventPublishRoute, 'keyPrefix: "events:publish"');
-    expectSource(eventPublishRoute, "canEditEvent(authContext.supabase, eventId)");
-    expectSource(eventPublishRoute, '.select("id, organizer_id, price_cents, payment_code_img, review_status")');
-    expectSource(eventPublishRoute, "paidEventVerificationStatuses.includes(String(verification.status))");
-    expectSource(eventPublishRoute, "verification.force_review_required === true");
-    expectSource(eventPublishRoute, "收费活动需要主办方完成认证");
-    expectSource(
-      eventPublishRoute,
-      '["pending", "changes_requested", "rejected", "suspended"].includes(String(event.review_status))'
-    );
-    expectSource(eventPublishRoute, "该活动仍在平台审核中或未通过审核");
-    expectSource(eventPublishRoute, 'status: "registration_open"');
-    expectSource(eventPublishRoute, '.in("status", ["draft", "interest_collecting", "registration_scheduled"])');
+    expectSource(eventPublishRoute, 'from "@/lib/services"');
+    expectSource(eventPublishRoute, "publishEventFromRequestBody");
+    expectSource(eventPublishRoute, "return publishEventFromRequestBody(body, authContext)");
+
+    expectSource(eventService, "canEditEvent(authContext.supabase, eventId)");
+    expectSource(eventService, '.select("id, organizer_id, price_cents, payment_code_img, review_status")');
+    expectSource(eventService, "paidEventVerificationStatuses.includes(String(verification.status))");
+    expectSource(eventService, "verification.force_review_required === true");
+    expectSource(eventService, "收费活动需要主办方完成认证");
+    expectSource(eventService, 'status: "registration_open"');
 
     expectSource(organizerEventPage, "status={event.status}");
     expectSource(organizerEventActions, 'fetch("/api/events/publish"');
@@ -252,16 +257,16 @@ describe("registration and payment proof API contracts", () => {
     expectSource(eventUpdateRoute, "getAuthenticatedSupabaseClient(request)");
     expectSource(eventUpdateRoute, "enforceRateLimit(request");
     expectSource(eventUpdateRoute, 'keyPrefix: "events:update"');
-    expectSource(eventUpdateRoute, "canEditEvent(authContext.supabase, eventId)");
-    expectSource(eventUpdateRoute, '.not("status", "in", "(cancelled,expired,refunded)")');
-    expectSource(eventUpdateRoute, "capacity < activeRegistrationCount");
-    expectSource(eventUpdateRoute, "reviewSensitiveStatuses");
-    expectSource(eventUpdateRoute, "reviewSensitiveChanges");
-    expectSource(eventUpdateRoute, 'review_status: requiresReview ? "pending" : currentEvent.review_status');
-    expectSource(eventUpdateRoute, '.from("review_requests")');
-    expectSource(eventUpdateRoute, 'target_type: "event"');
-    expectSource(eventUpdateRoute, "review_required: requiresReview");
-    expectSource(eventUpdateRoute, '.from("events")');
+    expectSource(eventUpdateRoute, "updateEventFromRequestBody");
+    expectSource(eventUpdateRoute, "return updateEventFromRequestBody(body, authContext)");
+
+    expectSource(eventService, "canEditEvent(authContext.supabase, eventId)");
+    expectSource(eventService, '.not("status", "in", "(cancelled,expired,refunded)")');
+    expectSource(eventService, "capacity < activeRegistrationCount");
+    expectSource(eventService, "reviewSensitiveStatuses");
+    expectSource(eventService, "reviewSensitiveChanges");
+    expectSource(eventService, '.from("review_requests")');
+    expectSource(eventService, "review_required: requiresReview");
 
     expectSource(organizerEventPage, "<EventBasicsEditor event={event} />");
     expectSource(eventBasicsEditor, 'fetch("/api/events/update"');
@@ -274,12 +279,14 @@ describe("registration and payment proof API contracts", () => {
     expectSource(eventOrganizerRoute, "getAuthenticatedSupabaseClient(request)");
     expectSource(eventOrganizerRoute, "enforceRateLimit(request");
     expectSource(eventOrganizerRoute, 'keyPrefix: "events:organizers"');
-    expectSource(eventOrganizerRoute, 'authContext.supabase.rpc("manage_event_organizer_atomic"');
-    expectSource(eventOrganizerRoute, "p_action: action");
-    expectSource(eventOrganizerRoute, "p_permissions: permissions");
-    expectSource(eventOrganizerRoute, 'p_user_agent: request.headers.get("user-agent") ?? "unknown"');
+    expectSource(eventOrganizerRoute, "manageEventOrganizerFromRequestBody");
+    expectSource(eventOrganizerRoute, "return manageEventOrganizerFromRequestBody");
     expectSource(eventOrganizerRoute, "export async function DELETE(request: Request)");
     expectSource(eventOrganizerRoute, "export async function PATCH(request: Request)");
+    expectSource(eventService, 'authContext.supabase.rpc("manage_event_organizer_atomic"');
+    expectSource(eventService, "p_action: action");
+    expectSource(eventService, "p_permissions: permissions");
+    expectSource(eventService, "p_user_agent: userAgent");
     assert.doesNotMatch(eventOrganizerRoute, /owner:\s*"owner"/);
     assert.doesNotMatch(eventOrganizerRoute, /getSupabaseServiceClient/);
     assert.doesNotMatch(eventOrganizerRoute, /\.from\("event_organizers"\)/);
@@ -300,10 +307,10 @@ describe("registration and payment proof API contracts", () => {
     expectSource(eventOrganizerRespondRoute, "getAuthenticatedSupabaseClient(request)");
     expectSource(eventOrganizerRespondRoute, "enforceRateLimit(request");
     expectSource(eventOrganizerRespondRoute, 'keyPrefix: "events:organizers-respond"');
-    expectSource(eventOrganizerRespondRoute, 'authContext.supabase.rpc("respond_event_organizer_invitation_atomic"');
-    expectSource(eventOrganizerRespondRoute, "p_event_id: eventId");
-    expectSource(eventOrganizerRespondRoute, "p_response: response");
-    expectSource(eventOrganizerRespondRoute, 'p_user_agent: request.headers.get("user-agent") ?? "unknown"');
+    expectSource(eventOrganizerRespondRoute, "respondEventOrganizerInviteFromRequestBody");
+    expectSource(eventService, 'authContext.supabase.rpc("respond_event_organizer_invitation_atomic"');
+    expectSource(eventService, "p_event_id: eventId");
+    expectSource(eventService, "p_response: response");
     assert.doesNotMatch(eventOrganizerRespondRoute, /getSupabaseServiceClient/);
     assert.doesNotMatch(eventOrganizerRespondRoute, /\.from\("event_organizers"\)/);
     assert.doesNotMatch(eventOrganizerRespondRoute, /\.from\("audit_logs"\)/);
@@ -313,19 +320,21 @@ describe("registration and payment proof API contracts", () => {
     expectSource(paymentProofRoute, "getAuthenticatedUser(request)");
     expectSource(paymentProofRoute, "enforceRateLimit(request");
     expectSource(paymentProofRoute, 'keyPrefix: "orders:payment-proof"');
-    expectSource(paymentProofRoute, "findUserByAuthUserId(supabase, authUser.id)");
-    expectSource(paymentProofRoute, "registration.user_id !== appUser.id");
-    expectSource(paymentProofRoute, '.eq("registration_id", registration.id)');
-    expectSource(paymentProofRoute, 'from("payment_proofs").insert');
+    expectSource(paymentProofRoute, "submitPaymentProofFromRequestBody");
+    expectSource(orderService, "findUserByAuthUserId(supabase, authUser.id)");
+    expectSource(orderService, "registration.user_id !== appUser.id");
+    expectSource(orderService, '.eq("registration_id", registration.id)');
+    expectSource(orderService, 'from("payment_proofs").insert');
   });
 
   it("keeps organizer payment review on the authenticated Supabase RPC path", () => {
     expectSource(paymentReviewRoute, "getAuthenticatedSupabaseClient(request)");
     expectSource(paymentReviewRoute, "enforceRateLimit(request");
     expectSource(paymentReviewRoute, 'keyPrefix: "orders:review"');
-    expectSource(paymentReviewRoute, 'authContext.supabase.rpc("review_payment_atomic"');
-    expectSource(paymentReviewRoute, "p_registration_id: isUuid(orderId) ? orderId : null");
-    expectSource(paymentReviewRoute, "p_order_number: isUuid(orderId) ? null : orderId");
+    expectSource(paymentReviewRoute, "reviewOrderPaymentFromRequestBody");
+    expectSource(orderService, 'authContext.supabase.rpc("review_payment_atomic"');
+    expectSource(orderService, "p_registration_id: isUuid(orderId) ? orderId : null");
+    expectSource(orderService, "p_order_number: isUuid(orderId) ? null : orderId");
 
     assert.doesNotMatch(paymentReviewRoute, /getSupabaseServiceClient/);
     assert.doesNotMatch(paymentReviewRoute, /\.from\("registrations"\)\s*\n\s*\.update/);
@@ -337,13 +346,14 @@ describe("registration and payment proof API contracts", () => {
     expectSource(orderVerifyRoute, "getAuthenticatedSupabaseClient(request)");
     expectSource(orderVerifyRoute, "enforceRateLimit(request");
     expectSource(orderVerifyRoute, 'keyPrefix: "orders:verify"');
-    expectSource(orderVerifyRoute, 'typeof body.order_number === "string"');
-    expectSource(orderVerifyRoute, '.from("registrations")');
-    expectSource(orderVerifyRoute, '.select("check_in_code")');
-    expectSource(orderVerifyRoute, '.eq("order_number", submittedOrderNumber)');
-    expectSource(orderVerifyRoute, 'authContext.supabase.rpc("check_in_order_atomic"');
-    expectSource(orderVerifyRoute, "p_check_in_code: checkInCode");
-    expectSource(orderVerifyRoute, "attendee_count");
+    expectSource(orderVerifyRoute, "verifyOrderFromRequestBody");
+    expectSource(orderService, 'typeof body.order_number === "string"');
+    expectSource(orderService, '.from("registrations")');
+    expectSource(orderService, '.select("check_in_code")');
+    expectSource(orderService, '.eq("order_number", submittedOrderNumber)');
+    expectSource(orderService, 'authContext.supabase.rpc("check_in_order_atomic"');
+    expectSource(orderService, "p_check_in_code: checkInCode");
+    expectSource(orderService, "attendee_count");
 
     assert.doesNotMatch(orderVerifyRoute, /getSupabaseServiceClient/);
     assert.doesNotMatch(orderVerifyRoute, /\.from\("registrations"\)\s*\n\s*\.update/);
@@ -360,13 +370,14 @@ describe("registration and payment proof API contracts", () => {
 
     for (const route of [exportAttendeesRoute, exportFinanceRoute]) {
       expectSource(route, "getAuthenticatedSupabaseClient(request)");
-      expectSource(route, "getSupabaseServiceClient()");
+      expectSource(route, 'from "@/lib/services"');
       assert.doesNotMatch(route, /canManageEventByAuthUserId/);
     }
 
-    expectSource(exportAttendeesRoute, "canManageEvent(authContext.supabase, event.id)");
-    expectSource(exportFinanceRoute, "canManageEventFinance(authContext.supabase, event.id)");
-    assert.doesNotMatch(exportFinanceRoute, /canManageEvent\(authContext\.supabase, event\.id\)/);
+    expectSource(exportAttendeesRoute, "return exportAttendees(eventId, authContext)");
+    expectSource(exportFinanceRoute, "return exportFinance(eventId, authContext)");
+    expectSource(exportService, "canManageEvent(authContext.supabase, event.id)");
+    expectSource(exportService, "canManageEventFinance(authContext.supabase, event.id)");
   });
 
   it("keeps dev status checks authenticated and read-only", () => {
@@ -388,13 +399,14 @@ describe("registration and payment proof API contracts", () => {
     expectSource(orderRefundRoute, "getAuthenticatedSupabaseClient(request)");
     expectSource(orderRefundRoute, "enforceRateLimit(request");
     expectSource(orderRefundRoute, 'keyPrefix: "orders:refund"');
-    expectSource(orderRefundRoute, 'getString(body, ["order_number", "orderNumber"])');
-    expectSource(orderRefundRoute, '.from("registrations")');
-    expectSource(orderRefundRoute, '.select("id")');
-    expectSource(orderRefundRoute, '.eq("order_number", orderNumber)');
-    expectSource(orderRefundRoute, 'authContext.supabase.rpc("request_refund_atomic"');
-    expectSource(orderRefundRoute, "p_registration_id: registrationId");
-    expectSource(orderRefundRoute, "p_reason: reason");
+    expectSource(orderRefundRoute, "requestRefundFromRequestBody");
+    expectSource(refundService, 'getString(body, ["order_number", "orderNumber"])');
+    expectSource(refundService, '.from("registrations")');
+    expectSource(refundService, '.select("id")');
+    expectSource(refundService, '.eq("order_number", orderNumber)');
+    expectSource(refundService, 'authContext.supabase.rpc("request_refund_atomic"');
+    expectSource(refundService, "p_registration_id: registrationId");
+    expectSource(refundService, "p_reason: reason");
     expectSource(participantOrderActions, 'fetch("/api/orders/refund"');
     expectSource(participantOrderActions, "order_number: registration.orderNumber");
     expectSource(participantOrderActions, "reason");
@@ -409,9 +421,10 @@ describe("registration and payment proof API contracts", () => {
     expectSource(orderRefundReviewRoute, "getAuthenticatedSupabaseClient(request)");
     expectSource(orderRefundReviewRoute, "enforceRateLimit(request");
     expectSource(orderRefundReviewRoute, 'keyPrefix: "orders:refund-review"');
-    expectSource(orderRefundReviewRoute, 'authContext.supabase.rpc("review_refund_request_atomic"');
-    expectSource(orderRefundReviewRoute, "p_refund_request_id: refundRequestId");
-    expectSource(orderRefundReviewRoute, "p_decision: decision");
+    expectSource(orderRefundReviewRoute, "reviewRefundFromRequestBody");
+    expectSource(refundService, 'authContext.supabase.rpc("review_refund_request_atomic"');
+    expectSource(refundService, "p_refund_request_id: refundRequestId");
+    expectSource(refundService, "p_decision: decision");
     expectSource(refundReviewPanel, 'fetch("/api/orders/refund/review"');
     expectSource(refundReviewPanel, 'result === "APPROVED"');
 
@@ -425,15 +438,16 @@ describe("registration and payment proof API contracts", () => {
     expectSource(orderRefundProofRoute, "getAuthenticatedSupabaseClient(request)");
     expectSource(orderRefundProofRoute, "enforceRateLimit(request");
     expectSource(orderRefundProofRoute, 'keyPrefix: "orders:refund-proof"');
-    expectSource(orderRefundProofRoute, 'replace(/^refund-proofs\\//, "")');
-    expectSource(orderRefundProofRoute, "pathMatchesRefundProof(storagePath, eventId, refundRequest.id)");
-    expectSource(orderRefundProofRoute, '.schema("storage")');
-    expectSource(orderRefundProofRoute, '.from("objects")');
-    expectSource(orderRefundProofRoute, '.eq("bucket_id", "refund-proofs")');
-    expectSource(orderRefundProofRoute, '.eq("name", storagePath)');
-    expectSource(orderRefundProofRoute, 'authContext.supabase.rpc("record_refund_proof_atomic"');
-    expectSource(orderRefundProofRoute, "p_refund_request_id: refundRequestId");
-    expectSource(orderRefundProofRoute, "p_file_url: storagePath");
+    expectSource(orderRefundProofRoute, "uploadRefundProofFromRequestBody");
+    expectSource(refundService, 'replace(/^refund-proofs\\//, "")');
+    expectSource(refundService, "pathMatchesRefundProof(storagePath, eventId, refundRequest.id)");
+    expectSource(refundService, '.schema("storage")');
+    expectSource(refundService, '.from("objects")');
+    expectSource(refundService, '.eq("bucket_id", "refund-proofs")');
+    expectSource(refundService, '.eq("name", storagePath)');
+    expectSource(refundService, 'authContext.supabase.rpc("record_refund_proof_atomic"');
+    expectSource(refundService, "p_refund_request_id: refundRequestId");
+    expectSource(refundService, "p_file_url: storagePath");
     expectSource(refundReviewPanel, '.from("refund-proofs")');
     expectSource(refundReviewPanel, 'fetch("/api/orders/refund/proof"');
     expectSource(refundReviewPanel, "refund_request_id: refundRequest.id");
@@ -450,9 +464,10 @@ describe("registration and payment proof API contracts", () => {
     expectSource(orderRefundConfirmRoute, "getAuthenticatedSupabaseClient(request)");
     expectSource(orderRefundConfirmRoute, "enforceRateLimit(request");
     expectSource(orderRefundConfirmRoute, 'keyPrefix: "orders:refund-confirm"');
-    expectSource(orderRefundConfirmRoute, 'authContext.supabase.rpc("confirm_refund_receipt_atomic"');
-    expectSource(orderRefundConfirmRoute, "p_refund_request_id: refundRequestId");
-    expectSource(orderRefundConfirmRoute, "p_decision: decision");
+    expectSource(orderRefundConfirmRoute, "confirmRefundReceiptFromRequestBody");
+    expectSource(refundService, 'authContext.supabase.rpc("confirm_refund_receipt_atomic"');
+    expectSource(refundService, "p_refund_request_id: refundRequestId");
+    expectSource(refundService, "p_decision: decision");
     expectSource(participantOrderActions, 'fetch("/api/orders/refund/confirm"');
     expectSource(participantOrderActions, "refund_request_id: refundRequest.id");
     expectSource(participantOrderActions, 'confirmRefundReceipt("CONFIRMED")');
@@ -475,9 +490,10 @@ describe("registration and payment proof API contracts", () => {
     expectSource(orderRefundDisputeRoute, "getAuthenticatedSupabaseClient(request)");
     expectSource(orderRefundDisputeRoute, "enforceRateLimit(request");
     expectSource(orderRefundDisputeRoute, 'keyPrefix: "orders:refund-dispute"');
-    expectSource(orderRefundDisputeRoute, 'authContext.supabase.rpc("resolve_refund_dispute_atomic"');
-    expectSource(orderRefundDisputeRoute, "p_refund_request_id: refundRequestId");
-    expectSource(orderRefundDisputeRoute, "p_resolution: resolution");
+    expectSource(orderRefundDisputeRoute, "resolveRefundDisputeFromRequestBody");
+    expectSource(refundService, 'authContext.supabase.rpc("resolve_refund_dispute_atomic"');
+    expectSource(refundService, "p_refund_request_id: refundRequestId");
+    expectSource(refundService, "p_resolution: resolution");
     expectSource(refundReviewPanel, 'fetch("/api/orders/refund/dispute"');
     expectSource(refundReviewPanel, 'resolveDispute(refundRequest, "CONFIRM_REFUNDED")');
     expectSource(refundReviewPanel, 'resolveDispute(refundRequest, "REOPEN_PROOF")');
@@ -489,16 +505,13 @@ describe("registration and payment proof API contracts", () => {
   });
 
   it("keeps payment proof files bound to the private Storage object path", () => {
-    expectSource(paymentProofRoute, 'replace(/^payment-proofs\\//, "")');
-    expectSource(
-      paymentProofRoute,
-      "pathMatchesProof(storagePath, registration.event_id, registration.id, payment.id)"
-    );
-    expectSource(paymentProofRoute, '.schema("storage")');
-    expectSource(paymentProofRoute, '.from("objects")');
-    expectSource(paymentProofRoute, '.eq("bucket_id", "payment-proofs")');
-    expectSource(paymentProofRoute, '.eq("name", storagePath)');
-    expectSource(paymentProofRoute, "找不到已上传的付款截图文件");
+    expectSource(orderService, 'replace(/^payment-proofs\\//, "")');
+    expectSource(orderService, "pathMatchesProof(storagePath, registration.event_id, registration.id, payment.id)");
+    expectSource(orderService, '.schema("storage")');
+    expectSource(orderService, '.from("objects")');
+    expectSource(orderService, '.eq("bucket_id", "payment-proofs")');
+    expectSource(orderService, '.eq("name", storagePath)');
+    expectSource(orderService, "找不到已上传的付款截图文件");
   });
 
   it("keeps the browser upload aligned with the Storage RLS path contract", () => {
@@ -611,12 +624,13 @@ describe("registration and payment proof API contracts", () => {
     expectSource(adminOrganizerVerificationRoute, "export async function GET(request: Request)");
     expectSource(adminOrganizerVerificationRoute, "export async function POST(request: Request)");
     expectSource(adminOrganizerVerificationRoute, "requirePlatformAdmin(request)");
-    expectSource(adminOrganizerVerificationRoute, "getSupabaseServiceClient()");
     expectSource(adminOrganizerVerificationRoute, "enforceRateLimit(request");
     expectSource(adminOrganizerVerificationRoute, 'keyPrefix: "admin:organizer-verifications"');
-    expectSource(adminOrganizerVerificationRoute, '.from("organizer_verifications")');
-    expectSource(adminOrganizerVerificationRoute, '.from("audit_logs").insert');
-    expectSource(adminOrganizerVerificationRoute, "organizer_verification.");
+    expectSource(adminOrganizerVerificationRoute, "listOrganizerVerifications");
+    expectSource(adminOrganizerVerificationRoute, "reviewOrganizerVerification");
+    expectSource(adminReviewService, 'from("organizer_verifications")');
+    expectSource(adminReviewService, '.from("audit_logs").insert');
+    expectSource(adminReviewService, "organizer_verification.");
     expectSource(
       adminPage,
       'import { AdminVerificationReviewPanel } from "@/components/admin-verification-review-panel";'
@@ -634,15 +648,16 @@ describe("registration and payment proof API contracts", () => {
     expectSource(adminEventReviewRoute, "export async function GET(request: Request)");
     expectSource(adminEventReviewRoute, "export async function POST(request: Request)");
     expectSource(adminEventReviewRoute, "requirePlatformAdmin(request)");
-    expectSource(adminEventReviewRoute, "getSupabaseServiceClient()");
     expectSource(adminEventReviewRoute, "enforceRateLimit(request");
     expectSource(adminEventReviewRoute, 'keyPrefix: "admin:event-reviews"');
-    expectSource(adminEventReviewRoute, '.from("review_requests")');
-    expectSource(adminEventReviewRoute, '.eq("target_type", "event")');
-    expectSource(adminEventReviewRoute, '.from("events")');
-    expectSource(adminEventReviewRoute, "review_status: nextStatus");
-    expectSource(adminEventReviewRoute, '.from("audit_logs").insert');
-    expectSource(adminEventReviewRoute, "event_review.");
+    expectSource(adminEventReviewRoute, "listEventReviews");
+    expectSource(adminEventReviewRoute, "reviewEventReviewRequest");
+    expectSource(adminReviewService, '.from("review_requests")');
+    expectSource(adminReviewService, '.eq("target_type", "event")');
+    expectSource(adminReviewService, '.from("events")');
+    expectSource(adminReviewService, "review_status: nextStatus");
+    expectSource(adminReviewService, '.from("audit_logs").insert');
+    expectSource(adminReviewService, "event_review.");
     expectSource(adminPage, 'import { AdminEventReviewPanel } from "@/components/admin-event-review-panel";');
     expectSource(adminPage, "<AdminEventReviewPanel />");
     expectSource(adminEventReviewPanel, 'fetch("/api/admin/event-reviews"');
@@ -728,11 +743,12 @@ describe("registration and payment proof API contracts", () => {
     expectSource(expenseRoute, "getAuthenticatedSupabaseClient(request)");
     expectSource(expenseRoute, "enforceRateLimit(request");
     expectSource(expenseRoute, 'keyPrefix: "expenses:create"');
-    expectSource(expenseRoute, "canManageEventFinance(authContext.supabase, eventId)");
-    expectSource(expenseRoute, '.from("event_expenses")');
-    expectSource(expenseRoute, "findUserByAuthUserId(authContext.supabase, authContext.user.id)");
-    expectSource(expenseRoute, '餐饮茶歇: "food"');
-    expectSource(expenseRoute, '交通快递: "transport"');
+    expectSource(expenseRoute, "createExpenseFromRequestBody");
+    expectSource(expenseService, "canManageEventFinance(authContext.supabase, eventId)");
+    expectSource(expenseService, '.from("event_expenses")');
+    expectSource(expenseService, "findUserByAuthUserId(authContext.supabase, authContext.user.id)");
+    expectSource(expenseService, '餐饮茶歇: "food"');
+    expectSource(expenseService, '交通快递: "transport"');
 
     expectSource(organizerFinancePage, "<ExpenseLedger eventId={event.id} expenses={expenses} />");
     expectSource(expenseLedger, 'fetch("/api/expenses"');
@@ -742,23 +758,25 @@ describe("registration and payment proof API contracts", () => {
 
   it("keeps organizer expense proofs bound to the private Storage path and finance API", () => {
     expectSource(expenseProofRoute, "getAuthenticatedSupabaseClient(request)");
-    expectSource(expenseProofRoute, "getSupabaseServiceClient()");
     expectSource(expenseProofRoute, "enforceRateLimit(request");
     expectSource(expenseProofRoute, 'keyPrefix: "expenses:proof"');
-    expectSource(expenseProofRoute, 'replace(/^expense-proofs\\//, "")');
-    expectSource(expenseProofRoute, "canManageEventFinance(authContext.supabase, eventId)");
-    expectSource(expenseProofRoute, "findUserByAuthUserId(authContext.supabase, authContext.user.id)");
-    expectSource(expenseProofRoute, '.eq("bucket_id", "expense-proofs")');
-    expectSource(expenseProofRoute, '.from("event_expenses")');
-    expectSource(expenseProofRoute, "proof_url: storagePath");
-    expectSource(expenseProofRoute, "writeExpenseProofAudit");
-    expectSource(expenseProofRoute, 'action: "expense_proof.uploaded"');
+    expectSource(expenseProofRoute, "uploadExpenseProofFromRequestBody");
+    expectSource(expenseProofRoute, "voidExpenseProofFromRequestBody");
+    expectSource(expenseService, "getSupabaseServiceClient()");
+    expectSource(expenseService, 'replace(/^expense-proofs\\//, "")');
+    expectSource(expenseService, "canManageEventFinance(authContext.supabase, eventId)");
+    expectSource(expenseService, "findUserByAuthUserId(authContext.supabase, authContext.user.id)");
+    expectSource(expenseService, '.eq("bucket_id", "expense-proofs")');
+    expectSource(expenseService, '.from("event_expenses")');
+    expectSource(expenseService, "proof_url: storagePath");
+    expectSource(expenseService, "writeExpenseProofAudit");
+    expectSource(expenseService, 'action: "expense_proof.uploaded"');
     expectSource(expenseProofRoute, "export async function DELETE(request: Request)");
-    expectSource(expenseProofRoute, "只有活动主办或财务协作者可以作废支出凭证。");
-    expectSource(expenseProofRoute, "proof_url: null");
-    expectSource(expenseProofRoute, '.eq("proof_url", expense.proof_url)');
-    expectSource(expenseProofRoute, 'action: "expense_proof.voided"');
-    expectSource(expenseProofRoute, '.from("audit_logs").insert');
+    expectSource(expenseService, "只有活动主办或财务协作者可以作废支出凭证。");
+    expectSource(expenseService, "proof_url: null");
+    expectSource(expenseService, '.eq("proof_url", expense.proof_url)');
+    expectSource(expenseService, 'action: "expense_proof.voided"');
+    expectSource(expenseService, '.from("audit_logs").insert');
 
     expectSource(organizerFinancePage, "<ExpenseProofList eventId={event.id} expenses={expenses} />");
     expectSource(expenseProofList, '.from("expense-proofs")');
@@ -772,16 +790,18 @@ describe("registration and payment proof API contracts", () => {
     expectSource(seatLockRoute, "getAuthenticatedSupabaseClient(request)");
     expectSource(seatLockRoute, "enforceRateLimit(request");
     expectSource(seatLockRoute, 'keyPrefix: "seats:lock"');
-    expectSource(seatLockRoute, 'authContext.supabase.rpc("create_seat_lock_atomic"');
-    expectSource(seatLockRoute, "p_registration_id: registrationId");
-    expectSource(seatLockRoute, "p_seat_id: seatId");
+    expectSource(seatLockRoute, "lockSeatFromRequestBody");
+    expectSource(orderService, 'authContext.supabase.rpc("create_seat_lock_atomic"');
+    expectSource(orderService, "p_registration_id: registrationId");
+    expectSource(orderService, "p_seat_id: seatId");
 
     expectSource(seatConfirmRoute, "getAuthenticatedSupabaseClient(request)");
     expectSource(seatConfirmRoute, "enforceRateLimit(request");
     expectSource(seatConfirmRoute, 'keyPrefix: "seats:confirm"');
-    expectSource(seatConfirmRoute, 'authContext.supabase.rpc("confirm_seat_assignment_atomic"');
-    expectSource(seatConfirmRoute, "p_seat_lock_id: seatLockId");
-    expectSource(seatConfirmRoute, "p_attendee_id: attendeeId");
+    expectSource(seatConfirmRoute, "confirmSeatFromRequestBody");
+    expectSource(orderService, 'authContext.supabase.rpc("confirm_seat_assignment_atomic"');
+    expectSource(orderService, "p_seat_lock_id: seatLockId");
+    expectSource(orderService, "p_attendee_id: attendeeId");
 
     assert.doesNotMatch(seatLockRoute, /getSupabaseServiceClient/);
     assert.doesNotMatch(seatConfirmRoute, /getSupabaseServiceClient/);
@@ -816,15 +836,17 @@ describe("registration and payment proof API contracts", () => {
     expectSource(waitlistInviteRoute, "getAuthenticatedSupabaseClient(request)");
     expectSource(waitlistInviteRoute, "enforceRateLimit(request");
     expectSource(waitlistInviteRoute, 'keyPrefix: "waitlist:invite"');
-    expectSource(waitlistInviteRoute, 'authContext.supabase.rpc("invite_waitlist_entry_atomic"');
-    expectSource(waitlistInviteRoute, "p_waitlist_entry_id: waitlistEntryId");
-    expectSource(waitlistInviteRoute, "INVALID_WAITLIST_STATUS");
+    expectSource(waitlistInviteRoute, "inviteWaitlistFromRequestBody");
+    expectSource(waitlistService, 'authContext.supabase.rpc("invite_waitlist_entry_atomic"');
+    expectSource(waitlistService, "p_waitlist_entry_id: waitlistEntryId");
+    expectSource(waitlistService, "INVALID_WAITLIST_STATUS");
     expectSource(waitlistConvertRoute, "getAuthenticatedSupabaseClient(request)");
     expectSource(waitlistConvertRoute, "enforceRateLimit(request");
     expectSource(waitlistConvertRoute, 'keyPrefix: "waitlist:convert"');
-    expectSource(waitlistConvertRoute, 'authContext.supabase.rpc("convert_waitlist_entry_atomic"');
-    expectSource(waitlistConvertRoute, "p_waitlist_entry_id: waitlistEntryId");
-    expectSource(waitlistConvertRoute, "WAITLIST_INVITATION_EXPIRED");
+    expectSource(waitlistConvertRoute, "convertWaitlistFromRequestBody");
+    expectSource(waitlistService, 'authContext.supabase.rpc("convert_waitlist_entry_atomic"');
+    expectSource(waitlistService, "p_waitlist_entry_id: waitlistEntryId");
+    expectSource(waitlistService, "WAITLIST_INVITATION_EXPIRED");
     expectSource(registrationFlow, 'fetch("/api/waitlist"');
     expectSource(registrationFlow, "capacityFull");
     expectSource(registrationFlow, "event.acceptWaitlist !== false");
@@ -875,13 +897,15 @@ describe("registration and payment proof API contracts", () => {
     expectSource(notificationRoute, "getAuthenticatedSupabaseClient(request)");
     expectSource(notificationRoute, "enforceRateLimit(request");
     expectSource(notificationRoute, 'keyPrefix: "notifications:read"');
-    expectSource(notificationRoute, "findUserByAuthUserId(authContext.supabase, authContext.user.id)");
-    expectSource(notificationRoute, '.from("notification_deliveries")');
-    expectSource(notificationRoute, '.eq("recipient_id", appUser.id)');
-    expectSource(notificationRoute, '.eq("channel", "in_app")');
-    expectSource(notificationRoute, '.is("read_at", null)');
-    expectSource(notificationRoute, 'authContext.supabase.rpc("mark_notification_deliveries_read"');
-    expectSource(notificationRoute, "p_mark_all: markAll");
+    expectSource(notificationRoute, "listNotifications(request, authContext)");
+    expectSource(notificationRoute, "markNotificationsRead(body, authContext)");
+    expectSource(notificationService, "findUserByAuthUserId(authContext.supabase, authContext.user.id)");
+    expectSource(notificationService, '.from("notification_deliveries")');
+    expectSource(notificationService, '.eq("recipient_id", appUser.id)');
+    expectSource(notificationService, '.eq("channel", "in_app")');
+    expectSource(notificationService, '.is("read_at", null)');
+    expectSource(notificationService, 'authContext.supabase.rpc("mark_notification_deliveries_read"');
+    expectSource(notificationService, "p_mark_all: markAll");
 
     assert.doesNotMatch(notificationRoute, /getSupabaseServiceClient/);
     assert.doesNotMatch(notificationRoute, /\.from\("notification_deliveries"\)\s*\n\s*\.update/);

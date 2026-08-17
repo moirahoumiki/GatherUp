@@ -75,10 +75,11 @@ describe("route auth rules", () => {
     assert.equal(getSafeInternalPath("/login?next=/organizer"), "/");
   });
 
-  it("keeps only login, terms, privacy, and public event detail routes public", () => {
+  it("keeps only login, legal/support, and public event detail routes public", () => {
     assert.equal(isPublicRoutePath("/login"), true);
     assert.equal(isPublicRoutePath("/terms"), true);
     assert.equal(isPublicRoutePath("/privacy"), true);
+    assert.equal(isPublicRoutePath("/support"), true);
     assert.equal(isPublicRoutePath("/events/event-1"), true);
     assert.equal(isPublicRoutePath("/events/event-1/"), true);
     assert.equal(isPublicRoutePath("/events/event-1/register"), false);
@@ -91,6 +92,7 @@ describe("route auth rules", () => {
       "/events/[eventId]",
       "/login",
       "/privacy",
+      "/support",
       "/terms"
     ]);
     const protectedRoutes = new Set([

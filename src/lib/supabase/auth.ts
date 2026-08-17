@@ -1,4 +1,5 @@
 import { createPublicIdFromEmail, isValidEmail, isValidPassword, normalizeEmail, type AuthUser } from "@/lib/auth";
+import { requestAppleIdentityToken } from "@/lib/mobile/apple-auth";
 import { getSupabaseBrowserClient, isSupabaseConfigured } from "@/lib/supabase/client";
 import { createStablePublicId, ensureSupabaseProfile } from "@/lib/supabase/profile";
 
@@ -78,6 +79,7 @@ async function syncProfileFromAuthUser(input: {
   authUserId: string;
   email: string;
   metadata: Record<string, unknown> | null | undefined;
+  provider?: "email" | "apple";
 }): Promise<SupabaseAuthResult> {
   const metadataName = input.metadata?.name || input.metadata?.full_name || input.metadata?.display_name;
   const avatarUrl = input.metadata?.avatar_url || input.metadata?.picture;
@@ -86,7 +88,7 @@ async function syncProfileFromAuthUser(input: {
     email: input.email,
     name: typeof metadataName === "string" ? metadataName : "GatherUp 用户",
     avatarUrl: typeof avatarUrl === "string" ? avatarUrl : null,
-    provider: "email"
+    provider: input.provider ?? "email"
   });
 
   if (!profileResult.ok) {
@@ -97,6 +99,62 @@ async function syncProfileFromAuthUser(input: {
     ok: true,
     account: profileResult.account
   };
+}
+
+function buildAppleDisplayName(givenName: string | null, familyName: string | null) {
+  const parts = [givenName, familyName].filter((part): part is string => Boolean(part && part.trim()));
+  return parts.length > 0 ? parts.join(" ").trim() : null;
+}
+
+export async function signInWithApple(): Promise<SupabaseAuthResult> {
+  if (!isSupabaseConfigured()) {
+    return unavailableResult();
+  }
+
+  const appleResult = await requestAppleIdentityToken();
+  if (!appleResult.ok) {
+    return {
+      ok: false,
+      message: appleResult.message
+    };
+  }
+
+  const supabase = getSupabaseBrowserClient();
+  const { data, error } = await supabase.auth.signInWithIdToken({
+    provider: "apple",
+    token: appleResult.identityToken
+  });
+
+  if (error || !data.user) {
+    return {
+      ok: false,
+      message: mapSupabaseError(error?.message)
+    };
+  }
+
+  const rawUserMetadata = (data.user.user_metadata ?? {}) as Record<string, unknown>;
+  const nextMetadata: Record<string, unknown> = {
+    ...rawUserMetadata
+  };
+  const appleName = buildAppleDisplayName(appleResult.givenName, appleResult.familyName);
+  if (!nextMetadata.name && appleName) {
+    nextMetadata.name = appleName;
+  }
+
+  const userEmail = data.user.email ?? appleResult.email;
+  if (!userEmail) {
+    return {
+      ok: false,
+      message: "Apple 登录成功，但未获取到邮箱信息。请在 Apple 账号中允许共享邮箱后重试。"
+    };
+  }
+
+  return syncProfileFromAuthUser({
+    authUserId: data.user.id,
+    email: userEmail,
+    metadata: nextMetadata,
+    provider: "apple"
+  });
 }
 
 export async function signInWithSupabasePassword(email: string, password: string): Promise<SupabaseAuthResult> {
