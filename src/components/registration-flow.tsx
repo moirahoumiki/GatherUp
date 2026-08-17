@@ -26,6 +26,8 @@ import {
   type FormField
 } from "@/lib/form-schema";
 import { getSupabaseBrowserClient, isSupabaseConfigured } from "@/lib/supabase/client";
+import { isNativePlatform } from "@/lib/mobile/env";
+import { pickCompressedImage } from "@/lib/mobile/upload";
 
 type RegistrationFlowProps = {
   event: GatherEvent;
@@ -102,6 +104,7 @@ export function RegistrationFlow({ event, initialStep, setup }: RegistrationFlow
   const [message, setMessage] = useState("");
   const [isJoiningWaitlist, setIsJoiningWaitlist] = useState(false);
   const [waitlistStatus, setWaitlistStatus] = useState("");
+  const [isPickingNativeProof, setIsPickingNativeProof] = useState(false);
 
   const orderNumber = createdOrderNumber || `${event.orderPrefix}-0029`;
   const amount = event.price * quantity;
@@ -409,6 +412,25 @@ export function RegistrationFlow({ event, initialStep, setup }: RegistrationFlow
     }
   }
 
+  async function pickNativePaymentProof() {
+    if (!isNativePlatform()) return;
+
+    setIsPickingNativeProof(true);
+    try {
+      const file = await pickCompressedImage({ quality: 72, source: "prompt" });
+      if (!file) {
+        return;
+      }
+      setPaymentProofFile(file);
+      setScreenshotName(file.name);
+      setMessage("已选择移动端图片，可直接提交给组织者确认。");
+    } catch {
+      setMessage("调用系统相机/相册失败，请重试或改用网页文件选择。");
+    } finally {
+      setIsPickingNativeProof(false);
+    }
+  }
+
   return (
     <>
       <section className="page-header">
@@ -685,6 +707,13 @@ export function RegistrationFlow({ event, initialStep, setup }: RegistrationFlow
                   }}
                 />
               </label>
+
+              {isNativePlatform() && (
+                <button className="button secondary" type="button" disabled={isPickingNativeProof} onClick={() => void pickNativePaymentProof()}>
+                  <FileImage size={17} />
+                  {isPickingNativeProof ? "读取中…" : "从相机/相册选择"}
+                </button>
+              )}
 
               {message && <p className="validation-note">{message}</p>}
 

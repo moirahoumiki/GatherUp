@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { FileImage, Trash2, Upload } from "lucide-react";
 
 import { type EventExpense } from "@/lib/mock-data";
+import { isNativePlatform } from "@/lib/mobile/env";
+import { pickCompressedImage } from "@/lib/mobile/upload";
 import { getSupabaseBrowserClient, isSupabaseConfigured } from "@/lib/supabase/client";
 
 type ExpenseProofListProps = {
@@ -23,6 +25,7 @@ export function ExpenseProofList({ eventId, expenses }: ExpenseProofListProps) {
     return new Map(expenses.map((expense) => [expense.id, expense.proof]));
   });
   const [busyExpenseId, setBusyExpenseId] = useState("");
+  const [nativePickingExpenseId, setNativePickingExpenseId] = useState("");
   const [notice, setNotice] = useState("");
 
   useEffect(() => {
@@ -128,6 +131,23 @@ export function ExpenseProofList({ eventId, expenses }: ExpenseProofListProps) {
     }
   }
 
+  async function pickAndUploadNativeProof(expense: EventExpense) {
+    if (!isNativePlatform()) return;
+
+    setNativePickingExpenseId(expense.id);
+    setNotice("");
+    try {
+      const file = await pickCompressedImage({ quality: 72, source: "prompt" });
+      if (file) {
+        await uploadProof(expense, file);
+      }
+    } catch {
+      setNotice("系统相机/相册调用失败，请稍后重试。");
+    } finally {
+      setNativePickingExpenseId("");
+    }
+  }
+
   return (
     <div className="notice-list">
       {notice && <p className="inline-notice">{notice}</p>}
@@ -166,6 +186,17 @@ export function ExpenseProofList({ eventId, expenses }: ExpenseProofListProps) {
                   }}
                 />
               </label>
+              {isNativePlatform() && (
+                <button
+                  className="button secondary compact"
+                  type="button"
+                  disabled={isBusy || nativePickingExpenseId === expense.id}
+                  onClick={() => void pickAndUploadNativeProof(expense)}
+                >
+                  <Upload size={15} />
+                  {nativePickingExpenseId === expense.id ? "读取中" : "相机/相册"}
+                </button>
+              )}
             </div>
           </div>
         );

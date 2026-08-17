@@ -4,6 +4,8 @@ import { useState } from "react";
 import { Check, RefreshCcw, Upload, X } from "lucide-react";
 
 import type { EventRefundRequest } from "@/lib/organizer-data";
+import { isNativePlatform } from "@/lib/mobile/env";
+import { pickCompressedImage } from "@/lib/mobile/upload";
 import { getSupabaseBrowserClient, isSupabaseConfigured } from "@/lib/supabase/client";
 
 type RefundReviewPanelProps = {
@@ -44,6 +46,7 @@ function statusLabel(status: string) {
 export function RefundReviewPanel({ eventId, refundRequests }: RefundReviewPanelProps) {
   const [rows, setRows] = useState(refundRequests);
   const [busyId, setBusyId] = useState("");
+  const [nativePickingId, setNativePickingId] = useState("");
   const [notice, setNotice] = useState("");
 
   async function getAccessToken() {
@@ -222,6 +225,22 @@ export function RefundReviewPanel({ eventId, refundRequests }: RefundReviewPanel
     }
   }
 
+  async function pickAndUploadNativeProof(refundRequest: EventRefundRequest) {
+    if (!isNativePlatform()) return;
+    setNativePickingId(refundRequest.id);
+    setNotice("");
+    try {
+      const file = await pickCompressedImage({ quality: 72, source: "prompt" });
+      if (file) {
+        await uploadRefundProof(refundRequest, file);
+      }
+    } catch {
+      setNotice("系统相机/相册调用失败，请稍后重试。");
+    } finally {
+      setNativePickingId("");
+    }
+  }
+
   const pendingCount = rows.filter((item) => item.status === "requested").length;
   const disputeCount = rows.filter((item) => item.status === "disputed").length;
 
@@ -269,22 +288,35 @@ export function RefundReviewPanel({ eventId, refundRequests }: RefundReviewPanel
                     </>
                   )}
                   {canUploadProof && (
-                    <label className={`mini-action approve ${isBusy ? "disabled" : ""}`}>
-                      <Upload size={14} />上传凭证
-                      <input
-                        type="file"
-                        accept="image/png,image/jpeg,image/webp,application/pdf"
-                        disabled={isBusy}
-                        onChange={(event) => {
-                          const file = event.target.files?.[0];
-                          event.currentTarget.value = "";
+                    <>
+                      <label className={`mini-action approve ${isBusy ? "disabled" : ""}`}>
+                        <Upload size={14} />上传凭证
+                        <input
+                          type="file"
+                          accept="image/png,image/jpeg,image/webp,application/pdf"
+                          disabled={isBusy}
+                          onChange={(event) => {
+                            const file = event.target.files?.[0];
+                            event.currentTarget.value = "";
 
-                          if (file) {
-                            void uploadRefundProof(refundRequest, file);
-                          }
-                        }}
-                      />
-                    </label>
+                            if (file) {
+                              void uploadRefundProof(refundRequest, file);
+                            }
+                          }}
+                        />
+                      </label>
+                      {isNativePlatform() && (
+                        <button
+                          className="mini-action approve"
+                          disabled={isBusy || nativePickingId === refundRequest.id}
+                          type="button"
+                          onClick={() => void pickAndUploadNativeProof(refundRequest)}
+                        >
+                          <Upload size={14} />
+                          {nativePickingId === refundRequest.id ? "读取中" : "相机/相册"}
+                        </button>
+                      )}
+                    </>
                   )}
                   {canResolveDispute && (
                     <>
