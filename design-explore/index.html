@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GatherUp · UI 设计方向探索</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --ink: #12141a;
+  --ink-soft: #4a4f5c;
+  --ink-mute: #767c8a;
+  --line: #e3e5ea;
+  --bg: #f6f7f9;
+  --surface: #ffffff;
+}
+html { -webkit-font-smoothing: antialiased; scroll-behavior: smooth; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  background: var(--bg); color: var(--ink); line-height: 1.6;
+}
+a { color: inherit; text-decoration: none; }
+
+.masthead {
+  border-bottom: 1px solid var(--line);
+  background: var(--surface);
+  padding: 72px 32px 56px;
+}
+.masthead-inner { max-width: 1100px; margin: 0 auto; }
+.eyebrow {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 12px; font-weight: 700; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--ink-mute); margin-bottom: 20px;
+}
+.eyebrow::before { content: ""; width: 28px; height: 2px; background: var(--ink); }
+h1 {
+  font-size: clamp(34px, 5.2vw, 58px); font-weight: 700;
+  letter-spacing: -.03em; line-height: 1.08;
+}
+.lede { font-size: 18px; color: var(--ink-soft); margin-top: 20px; max-width: 62ch; }
+.meta-row { display: flex; gap: 36px; flex-wrap: wrap; margin-top: 36px; padding-top: 28px; border-top: 1px solid var(--line); }
+.meta-k { font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-mute); }
+.meta-v { font-size: 15px; font-weight: 600; margin-top: 4px; }
+
+.wrap { max-width: 1100px; margin: 0 auto; padding: 56px 32px 96px; }
+.section-label {
+  font-size: 12px; font-weight: 700; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--ink-mute); margin-bottom: 22px;
+}
+
+.cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+.card {
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: 14px; overflow: hidden; display: flex; flex-direction: column;
+  transition: transform .22s cubic-bezier(.2,.7,.3,1), box-shadow .22s cubic-bezier(.2,.7,.3,1);
+}
+.card:hover { transform: translateY(-5px); box-shadow: 0 18px 44px rgba(18,20,26,.13); }
+
+/* ---- 每张卡的预览区用该方案自己的视觉语言 ---- */
+.preview { height: 178px; position: relative; overflow: hidden; padding: 18px; }
+
+/* A: 冷灰 + 靛蓝 + 网格 + 小圆角 */
+.pv-a { background: #f8f9fb; border-bottom: 1px solid #e9ebf0; }
+.pv-a::before {
+  content: ""; position: absolute; inset: 0;
+  background-image: linear-gradient(#dfe1e8 1px, transparent 1px), linear-gradient(90deg, #dfe1e8 1px, transparent 1px);
+  background-size: 18px 18px; opacity: .5;
+}
+.pv-a-ui { position: relative; display: flex; flex-direction: column; gap: 7px; }
+.pv-a-bar { height: 8px; border-radius: 3px; background: #dfe1e8; }
+.pv-a-btn { height: 24px; width: 78px; border-radius: 6px; background: #4a4ede; box-shadow: 0 1px 2px rgba(16,20,32,.1); }
+.pv-a-row { display: flex; gap: 6px; }
+.pv-a-chip { height: 17px; border-radius: 4px; background: #fff; border: 1px solid #dfe1e8; }
+
+/* B: 暖色渐变 + 大圆角 + 柔光 */
+.pv-b { background: linear-gradient(155deg,#fff5ee,#fdf0f6 48%,#eef7f5); border-bottom: 1px solid #f2e6db; }
+.pv-b-blob { position: absolute; border-radius: 50%; filter: blur(34px); }
+.pv-b-b1 { width: 150px; height: 150px; background: #ffa286; top: -48px; right: -22px; opacity: .55; }
+.pv-b-b2 { width: 120px; height: 120px; background: #5fc9b3; bottom: -44px; right: 96px; opacity: .5; }
+.pv-b-b3 { width: 92px; height: 92px; background: #ffd15e; top: 22px; right: 118px; opacity: .42; }
+.pv-b-ui { position: relative; display: flex; flex-direction: column; gap: 9px; }
+.pv-b-bar { height: 9px; border-radius: 999px; background: rgba(255,255,255,.82); }
+.pv-b-btn { height: 30px; width: 96px; border-radius: 999px; background: #f95f38; box-shadow: 0 7px 16px rgba(233,74,38,.34); }
+.pv-b-faces { display: flex; }
+.pv-b-face { width: 24px; height: 24px; border-radius: 999px; border: 2px solid #fff; margin-left: -8px; }
+.pv-b-face:first-child { margin-left: 0; }
+
+/* C: 近黑 + 荧光绿 + 直角 + 硬阴影 */
+.pv-c { background: #111111; border-bottom: 2px solid #111111; }
+.pv-c-ui { position: relative; display: flex; flex-direction: column; gap: 10px; }
+.pv-c-title {
+  font-family: "Archivo Black", Impact, -apple-system, sans-serif;
+  font-size: 40px; font-weight: 900; letter-spacing: -.045em; line-height: .86;
+  color: #c2f503; text-transform: uppercase;
+}
+.pv-c-title .out { -webkit-text-stroke: 2px #c2f503; color: transparent; }
+.pv-c-row { display: flex; gap: 7px; margin-top: 4px; }
+.pv-c-btn { height: 26px; width: 82px; background: #c2f503; border: 2px solid #fff; box-shadow: 3px 3px 0 #fff; }
+.pv-c-chip { height: 26px; width: 58px; border: 2px solid #757575; }
+
+.card-body { padding: 22px; display: flex; flex-direction: column; gap: 12px; flex: 1; }
+.tag {
+  display: inline-flex; align-self: flex-start; align-items: center;
+  font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+  padding: 4px 10px; border-radius: 999px; background: #f1f2f6; color: var(--ink-soft);
+}
+.card-title { font-size: 22px; font-weight: 700; letter-spacing: -.02em; }
+.card-desc { font-size: 14px; color: var(--ink-soft); }
+.attrs { display: flex; flex-direction: column; gap: 7px; margin-top: 4px; padding-top: 14px; border-top: 1px solid var(--line); }
+.attr { display: flex; gap: 10px; font-size: 13px; }
+.attr-k { width: 52px; flex-shrink: 0; color: var(--ink-mute); font-size: 12px; }
+.attr-v { color: var(--ink-soft); }
+.dots { display: flex; gap: 5px; margin-top: 2px; }
+.dot { width: 17px; height: 17px; border-radius: 5px; border: 1px solid rgba(0,0,0,.09); }
+.card-cta {
+  margin-top: auto; padding-top: 18px;
+  display: flex; align-items: center; justify-content: space-between;
+  font-size: 14px; font-weight: 700;
+}
+.arrow { transition: transform .2s cubic-bezier(.2,.7,.3,1); }
+.card:hover .arrow { transform: translateX(5px); }
+
+.compare { margin-top: 64px; }
+table { width: 100%; border-collapse: collapse; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
+th, td { padding: 14px 18px; text-align: left; border-bottom: 1px solid var(--line); font-size: 14px; vertical-align: top; }
+thead th { font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-mute); background: #fafbfc; }
+tbody tr:last-child td { border-bottom: none; }
+td:first-child, th:first-child { font-weight: 600; width: 132px; color: var(--ink); }
+.note {
+  margin-top: 40px; padding: 20px 24px; border-radius: 12px;
+  background: #fff8e8; border: 1px solid #f6ddab; color: #7a5709; font-size: 14px;
+}
+.note b { display: block; margin-bottom: 6px; }
+footer { border-top: 1px solid var(--line); padding: 28px 32px; text-align: center; font-size: 13px; color: var(--ink-mute); }
+
+@media (max-width: 900px) { .cards { grid-template-columns: 1fr; } .masthead { padding: 48px 24px 40px; } .wrap { padding: 40px 24px 64px; } }
+</style>
+</head>
+<body>
+
+<header class="masthead">
+  <div class="masthead-inner">
+    <div class="eyebrow">GatherUp · Commercial v0.1</div>
+    <h1>UI 全新方向探索<br>三套并行候选</h1>
+    <p class="lede">
+      不在「v6 暖纸风」上迭代，而是重建。三套方案在结构、色彩、圆角、阴影、字号阶梯上刻意拉开距离——
+      不是换主色，而是换气质。每套都含完整 token（亮/暗成对）、收敛到 3 个变体的卡片体系、
+      loading / empty / error 状态规范，以及活动广场、活动详情报名、主办工作台三个高保真页面。
+    </p>
+    <div class="meta-row">
+      <div><div class="meta-k">方案数</div><div class="meta-v">3 套</div></div>
+      <div><div class="meta-k">每套页面</div><div class="meta-v">6 个（3 业务 + 3 系统）</div></div>
+      <div><div class="meta-k">暗色模式</div><div class="meta-v">全部成对定义</div></div>
+      <div><div class="meta-k">数据</div><div class="meta-v">真实域模型假数据</div></div>
+      <div><div class="meta-k">依赖</div><div class="meta-v">纯静态 · 内联 CSS</div></div>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="section-label">选择一个方向进入</div>
+
+  <div class="cards">
+
+    <!-- A -->
+    <a class="card" href="direction-a.html">
+      <div class="preview pv-a">
+        <div class="pv-a-ui">
+          <div class="pv-a-bar" style="width:44%"></div>
+          <div class="pv-a-bar" style="width:70%;background:#c7cad6"></div>
+          <div class="pv-a-row">
+            <div class="pv-a-chip" style="width:54px"></div>
+            <div class="pv-a-chip" style="width:44px"></div>
+            <div class="pv-a-chip" style="width:62px"></div>
+          </div>
+          <div class="pv-a-bar" style="width:58%"></div>
+          <div class="pv-a-btn"></div>
+        </div>
+      </div>
+      <div class="card-body">
+        <span class="tag">方向 A</span>
+        <div class="card-title">克制专业型</div>
+        <div class="card-desc">高信息密度、冷静、工具感。侧边栏布局，表格是一等公民，靠 1px 边框而非阴影分层。适合把 GatherUp 定位成「主办方每天要用的运营台」。</div>
+        <div class="dots">
+          <span class="dot" style="background:#4a4ede"></span>
+          <span class="dot" style="background:#f8f9fb"></span>
+          <span class="dot" style="background:#171a24"></span>
+          <span class="dot" style="background:#168347"></span>
+          <span class="dot" style="background:#c07c10"></span>
+          <span class="dot" style="background:#cf3b32"></span>
+        </div>
+        <div class="attrs">
+          <div class="attr"><span class="attr-k">参考</span><span class="attr-v">Linear · Notion · Vercel</span></div>
+          <div class="attr"><span class="attr-k">正文</span><span class="attr-v">13px · 行高 1.55 · SF Pro</span></div>
+          <div class="attr"><span class="attr-k">圆角</span><span class="attr-v">3–14px 小圆角</span></div>
+          <div class="attr"><span class="attr-k">分层</span><span class="attr-v">边框优先，阴影极弱</span></div>
+        </div>
+        <div class="card-cta"><span>进入方案 A</span><span class="arrow">→</span></div>
+      </div>
+    </a>
+
+    <!-- B -->
+    <a class="card" href="direction-b.html">
+      <div class="preview pv-b">
+        <div class="pv-b-blob pv-b-b1"></div>
+        <div class="pv-b-blob pv-b-b2"></div>
+        <div class="pv-b-blob pv-b-b3"></div>
+        <div class="pv-b-ui">
+          <div class="pv-b-bar" style="width:52%"></div>
+          <div class="pv-b-bar" style="width:74%"></div>
+          <div class="pv-b-faces">
+            <span class="pv-b-face" style="background:#2fae95"></span>
+            <span class="pv-b-face" style="background:#a288ee"></span>
+            <span class="pv-b-face" style="background:#f7b62c"></span>
+            <span class="pv-b-face" style="background:#ff7d59"></span>
+          </div>
+          <div class="pv-b-btn"></div>
+        </div>
+      </div>
+      <div class="card-body">
+        <span class="tag">方向 B</span>
+        <div class="card-title">温暖社交型</div>
+        <div class="card-desc">圆润、有色彩、有情绪价值。顶部导航、28px 大圆角、暖调柔光阴影、头像堆叠与插画式空状态。文案口语化——强调「活动是聚人的场景」。</div>
+        <div class="dots">
+          <span class="dot" style="background:#f95f38"></span>
+          <span class="dot" style="background:#189179"></span>
+          <span class="dot" style="background:#f7b62c"></span>
+          <span class="dot" style="background:#a288ee"></span>
+          <span class="dot" style="background:#fdf8f4"></span>
+          <span class="dot" style="background:#2b211b"></span>
+        </div>
+        <div class="attrs">
+          <div class="attr"><span class="attr-k">参考</span><span class="attr-v">Airbnb · Luma · Partiful</span></div>
+          <div class="attr"><span class="attr-k">正文</span><span class="attr-v">15px · 行高 1.65 · Nunito</span></div>
+          <div class="attr"><span class="attr-k">圆角</span><span class="attr-v">8–36px + 全胶囊按钮</span></div>
+          <div class="attr"><span class="attr-k">分层</span><span class="attr-v">柔和暖阴影，无边框</span></div>
+        </div>
+        <div class="card-cta"><span>进入方案 B</span><span class="arrow">→</span></div>
+      </div>
+    </a>
+
+    <!-- C -->
+    <a class="card" href="direction-c.html">
+      <div class="preview pv-c">
+        <div class="pv-c-ui">
+          <div class="pv-c-title">线下<br><span class="out">才算数</span></div>
+          <div class="pv-c-row">
+            <div class="pv-c-btn"></div>
+            <div class="pv-c-chip"></div>
+          </div>
+        </div>
+      </div>
+      <div class="card-body">
+        <span class="tag">方向 C</span>
+        <div class="card-title">大胆现代型</div>
+        <div class="card-desc">强对比、巨大字号、编辑排版感。直角 + 2–3px 粗黑描边 + 硬边偏移阴影，荧光柠檬绿撞近黑。列表带序号标注，像一本活动杂志。面向年轻用户。</div>
+        <div class="dots">
+          <span class="dot" style="background:#c2f503"></span>
+          <span class="dot" style="background:#111111"></span>
+          <span class="dot" style="background:#6d28ff"></span>
+          <span class="dot" style="background:#ff6b1f"></span>
+          <span class="dot" style="background:#ffffff"></span>
+          <span class="dot" style="background:#757575"></span>
+        </div>
+        <div class="attrs">
+          <div class="attr"><span class="attr-k">参考</span><span class="attr-v">Gumroad · Bandcamp · 独立杂志</span></div>
+          <div class="attr"><span class="attr-k">正文</span><span class="attr-v">15px · 标题最大 128px</span></div>
+          <div class="attr"><span class="attr-k">圆角</span><span class="attr-v">0–4px 近乎直角</span></div>
+          <div class="attr"><span class="attr-k">分层</span><span class="attr-v">粗描边 + 硬偏移阴影</span></div>
+        </div>
+        <div class="card-cta"><span>进入方案 C</span><span class="arrow">→</span></div>
+      </div>
+    </a>
+  </div>
+
+  <div class="compare">
+    <div class="section-label">横向对比</div>
+    <table>
+      <thead>
+        <tr><th>维度</th><th>A 克制专业</th><th>B 温暖社交</th><th>C 大胆现代</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>导航结构</td><td>左侧固定侧边栏 + 面包屑顶栏</td><td>顶部居中导航（消费型）</td><td>顶部分栏导航，粗描边分隔</td></tr>
+        <tr><td>主色</td><td>靛蓝 #4a4ede（全局唯一高饱和）</td><td>珊瑚橘 #f95f38 + 青绿/鹅黄/薰衣草</td><td>荧光柠檬 #c2f503 撞近黑 #111</td></tr>
+        <tr><td>中性阶色偏</td><td>冷灰（带蓝调）</td><td>暖米灰（带橙调）</td><td>纯粹黑白灰（无色偏）</td></tr>
+        <tr><td>圆角</td><td>3 / 4 / 6 / 8 / 10 / 14 px</td><td>8 / 12 / 16 / 20 / 28 / 36 px + 胶囊</td><td>0 / 2 / 4 px（近乎直角）</td></tr>
+        <tr><td>分层手段</td><td>1px 边框为主，阴影极弱</td><td>柔和大范围暖调阴影，几乎无边框</td><td>2–3px 粗黑描边 + 硬边偏移阴影（无模糊）</td></tr>
+        <tr><td>正文字号</td><td>13px / 行高 1.55（紧凑）</td><td>15px / 行高 1.65（宽松）</td><td>15px / 行高 1.55</td></tr>
+        <tr><td>最大标题</td><td>34px</td><td>56px</td><td>128px</td></tr>
+        <tr><td>字体气质</td><td>SF Pro + SF Mono（系统、中性）</td><td>Nunito / Quicksand（圆体、亲和）</td><td>Archivo Black + JetBrains Mono（重、编辑）</td></tr>
+        <tr><td>按钮形态</td><td>6px 圆角，4 尺寸档（24/28/32/38）</td><td>全胶囊，4 尺寸档（34/42/50/58）</td><td>直角 + 硬阴影，按压位移 2px</td></tr>
+        <tr><td>数据呈现</td><td>密集表格，等宽数字，右对齐金额</td><td>卡片化表格，行间留白，头像前置</td><td>粗横线表格，巨型指标数字</td></tr>
+        <tr><td>空状态</td><td>线框图标 + 中性文案</td><td>渐变插画 + emoji + 鼓励型口语文案</td><td>巨型描边数字（00 / ? / 500）</td></tr>
+        <tr><td>文案语气</td><td>「12 笔付款待审核，其中 3 笔已超时」</td><td>「有 12 位伙伴在等你确认付款」</td><td>「今天要处理 7 件事」</td></tr>
+        <tr><td>适合定位</td><td>主办方高频运营工具</td><td>参与者社区型产品</td><td>年轻化品牌、强内容调性</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="note">
+    <b>关于这批文件</b>
+    全部位于 <code>design-explore/</code>，为纯静态 HTML + 内联 CSS，不依赖构建、不引用 src/ 下任何代码，也未改动 globals.css。
+    每套方案内部可通过顶部导航在 6 个页面间切换，右上角可切换亮/暗模式；活动卡与「查看详情」可点击跳转到详情页。
+    数据取自项目真实域模型（8 种活动状态、6 个分类、真实活动名与城市价格）。
+  </div>
+</div>
+
+<footer>GatherUp · UI 设计方向探索 · design-explore/</footer>
+
+</body>
+</html>

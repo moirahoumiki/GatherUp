@@ -1,0 +1,1456 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>方向 C · 大胆现代型 — GatherUp 设计探索</title>
+<style>
+/* ============================================================
+   DIRECTION C — "Editorial Bold"
+   气质：强对比 / 巨大字号 / 编辑排版 / 年轻化 / 杂志感
+   与 A、B 的结构性区别：
+     · 直角（radius 0–4px）—— A 是小圆角，B 是大圆角
+     · 硬边偏移阴影 box-shadow: 6px 6px 0 —— 不是柔光
+     · 2–3px 粗黑描边
+     · 荧光柠檬绿 × 近黑 × 电光紫，极高对比
+     · 巨型 display 字号（96px+）与紧字距
+     · 编辑式栅格：不对称、跨栏、序号标注
+     · 全大写标签 + 等宽数字
+   ============================================================ */
+
+/* ---------- TOKENS: LIGHT ---------- */
+:root {
+  /* 中性阶 —— 纯粹黑白灰，无色偏 */
+  --n-0:   #ffffff;
+  --n-50:  #fafafa;
+  --n-100: #f2f2f2;
+  --n-200: #e4e4e4;
+  --n-300: #cfcfcf;
+  --n-400: #a6a6a6;
+  --n-500: #757575;
+  --n-600: #525252;
+  --n-700: #383838;
+  --n-800: #212121;
+  --n-900: #111111;
+  --n-950: #000000;
+
+  /* 主色 —— 荧光柠檬绿（高亮，作为「高亮笔」使用） */
+  --acid-100: #f2ffd1;
+  --acid-200: #e4ff9c;
+  --acid-300: #d4ff4f;
+  --acid-400: #c2f503;
+  --acid-500: #a8d600;
+  --acid-600: #86ab00;
+  --acid-700: #648000;
+
+  /* 副色 —— 电光紫（对比色，用于次级强调） */
+  --volt-100: #ece4ff;
+  --volt-200: #d3c1ff;
+  --volt-300: #b195ff;
+  --volt-400: #8b5cff;
+  --volt-500: #6d28ff;
+  --volt-600: #5518d6;
+  --volt-700: #4212a6;
+
+  /* 第三色 —— 电光橙（危险/紧急，比红更冲） */
+  --flare-100: #ffe8dd;
+  --flare-200: #ffc9ab;
+  --flare-300: #ff9f6b;
+  --flare-400: #ff6b1f;
+  --flare-500: #e54f00;
+  --flare-600: #b83f00;
+
+  /* 语义色 —— 高对比，实心块 */
+  --success-bg: var(--acid-200); --success-fg: #2d3d00; --success-solid: var(--acid-400);
+  --warning-bg: #ffe9a8;        --warning-fg: #5a4200; --warning-solid: #ffc400;
+  --danger-bg:  var(--flare-200);--danger-fg: #7a2600; --danger-solid: var(--flare-400);
+  --info-bg:    var(--volt-100); --info-fg:   var(--volt-700); --info-solid: var(--volt-500);
+
+  /* 表面 */
+  --bg-app:     var(--n-50);
+  --bg-surface: var(--n-0);
+  --bg-sunken:  var(--n-100);
+  --bg-hover:   var(--n-100);
+  --bg-ink:     var(--n-900);
+
+  --fg-primary:   var(--n-900);
+  --fg-secondary: var(--n-600);
+  --fg-tertiary:  var(--n-500);
+  --fg-disabled:  var(--n-400);
+  --fg-on-ink:    var(--n-0);
+  --fg-on-acid:   var(--n-900);
+
+  /* 边框 —— 粗、黑、硬 */
+  --border-hair:   var(--n-200);
+  --border-default: var(--n-900);
+  --border-w:  2px;
+  --border-w-thick: 3px;
+
+  /* 阴影 —— 硬边偏移，无模糊 */
+  --shadow-hard-sm: 3px 3px 0 var(--n-900);
+  --shadow-hard:    6px 6px 0 var(--n-900);
+  --shadow-hard-lg: 10px 10px 0 var(--n-900);
+  --shadow-hard-acid: 6px 6px 0 var(--acid-400);
+  --shadow-hard-volt: 6px 6px 0 var(--volt-500);
+  --shadow-focus: 0 0 0 4px var(--acid-300);
+
+  --skeleton-base: var(--n-200);
+  --skeleton-shine: var(--n-100);
+}
+
+/* ---------- TOKENS: DARK ---------- */
+[data-theme="dark"] {
+  --n-0:   #0a0a0a;
+  --n-50:  #101010;
+  --n-100: #1a1a1a;
+  --n-200: #262626;
+  --n-300: #3d3d3d;
+  --n-400: #5c5c5c;
+  --n-500: #8a8a8a;
+  --n-600: #b0b0b0;
+  --n-700: #d0d0d0;
+  --n-800: #e8e8e8;
+  --n-900: #f7f7f7;
+  --n-950: #ffffff;
+
+  --acid-100: #2a3800;
+  --acid-200: #3d5200;
+  --acid-300: #7a9e00;
+  --acid-400: #c2f503;
+  --acid-500: #d4ff4f;
+  --acid-600: #e4ff9c;
+  --acid-700: #f2ffd1;
+
+  --volt-100: #241542;
+  --volt-200: #351d63;
+  --volt-300: #5227a8;
+  --volt-400: #8b5cff;
+  --volt-500: #a37bff;
+  --volt-600: #c0a3ff;
+  --volt-700: #d9c8ff;
+
+  --flare-100: #3a1600;
+  --flare-200: #5c2400;
+  --flare-300: #9c4000;
+  --flare-400: #ff6b1f;
+  --flare-500: #ff8c4d;
+  --flare-600: #ffab7d;
+
+  --success-bg: var(--acid-200); --success-fg: var(--acid-600); --success-solid: var(--acid-400);
+  --warning-bg: #4a3600;        --warning-fg: #ffd558; --warning-solid: #ffc400;
+  --danger-bg:  var(--flare-200);--danger-fg: var(--flare-600); --danger-solid: var(--flare-400);
+  --info-bg:    var(--volt-200); --info-fg:   var(--volt-600);   --info-solid: var(--volt-400);
+
+  --bg-app:     var(--n-0);
+  --bg-surface: var(--n-50);
+  --bg-sunken:  var(--n-100);
+  --bg-hover:   var(--n-200);
+  --bg-ink:     var(--n-900);
+
+  --fg-primary:   var(--n-900);
+  --fg-secondary: var(--n-600);
+  --fg-tertiary:  var(--n-500);
+  --fg-disabled:  var(--n-400);
+  --fg-on-ink:    var(--n-0);
+  --fg-on-acid:   #0a0a0a;
+
+  --border-hair:   var(--n-200);
+  --border-default: var(--n-900);
+
+  --shadow-hard-sm: 3px 3px 0 var(--n-900);
+  --shadow-hard:    6px 6px 0 var(--n-900);
+  --shadow-hard-lg: 10px 10px 0 var(--n-900);
+  --shadow-hard-acid: 6px 6px 0 var(--acid-400);
+  --shadow-hard-volt: 6px 6px 0 var(--volt-400);
+  --shadow-focus: 0 0 0 4px var(--acid-300);
+
+  --skeleton-base: var(--n-200);
+  --skeleton-shine: var(--n-300);
+}
+
+/* ---------- 排版 / 间距 / 圆角 ---------- */
+:root {
+  --font-sans: "Helvetica Neue", "Archivo", Inter, -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", sans-serif;
+  --font-display: "Archivo Black", "Helvetica Neue", Impact, "PingFang SC", sans-serif;
+  --font-mono: "JetBrains Mono", "SF Mono", ui-monospace, monospace;
+
+  /* 字号阶梯 —— 极端两级分化：正文小，标题巨大 */
+  --fs-xs:  11px;
+  --fs-sm:  13px;
+  --fs-md:  15px;
+  --fs-lg:  18px;
+  --fs-xl:  22px;
+  --fs-2xl: 28px;
+  --fs-3xl: 38px;
+  --fs-4xl: 52px;
+  --fs-5xl: 72px;
+  --fs-6xl: 96px;
+  --fs-7xl: 128px;
+
+  --fw-regular: 400;
+  --fw-medium: 500;
+  --fw-bold: 700;
+  --fw-black: 900;
+
+  --lh-crush: 0.88;   /* 巨型标题 */
+  --lh-tight: 1.05;
+  --lh-snug: 1.3;
+  --lh-normal: 1.55;
+
+  --ls-crush: -0.045em;  /* 巨型标题紧字距 */
+  --ls-tight: -0.025em;
+  --ls-normal: 0;
+  --ls-caps: 0.12em;     /* 全大写标签宽字距 */
+
+  --sp-1: 4px;   --sp-2: 8px;   --sp-3: 12px;  --sp-4: 16px;
+  --sp-5: 20px;  --sp-6: 24px;  --sp-8: 32px;  --sp-10: 40px;
+  --sp-12: 48px; --sp-16: 64px; --sp-20: 80px; --sp-24: 96px;
+
+  /* 圆角 —— 几乎为零 */
+  --r-none: 0; --r-xs: 2px; --r-sm: 4px; --r-md: 6px; --r-full: 999px;
+
+  --dur-fast: 90ms;
+  --dur-base: 150ms;
+  --ease: cubic-bezier(.2,.8,.3,1);
+}
+
+/* ============================================================
+   BASE
+   ============================================================ */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-font-smoothing: antialiased; scroll-behavior: smooth; }
+body {
+  font-family: var(--font-sans);
+  font-size: var(--fs-md);
+  line-height: var(--lh-normal);
+  color: var(--fg-primary);
+  background: var(--bg-app);
+  transition: background var(--dur-base) var(--ease), color var(--dur-base) var(--ease);
+}
+a { color: inherit; text-decoration: none; }
+button { font: inherit; cursor: pointer; border: none; background: none; color: inherit; }
+input, select, textarea { font: inherit; color: inherit; }
+::selection { background: var(--acid-400); color: #111; }
+
+/* ---------- 方案切换条 ---------- */
+.dirbar {
+  position: sticky; top: 0; z-index: 90;
+  background: var(--n-900); color: var(--n-0);
+  display: flex; align-items: center; gap: var(--sp-2);
+  padding: 0 var(--sp-5); height: 44px;
+  font-size: var(--fs-xs); font-weight: var(--fw-bold);
+  text-transform: uppercase; letter-spacing: var(--ls-caps);
+  border-bottom: var(--border-w) solid var(--n-900);
+}
+.dirbar a { color: var(--n-500); padding: 4px 10px; }
+.dirbar a:hover { color: var(--n-0); }
+.dirbar a.is-current { color: #111; background: var(--acid-400); }
+.dirbar .spacer { margin-left: auto; }
+.theme-toggle {
+  padding: 5px 14px; background: var(--n-0); color: var(--n-900);
+  font-size: var(--fs-xs); font-weight: var(--fw-black);
+  text-transform: uppercase; letter-spacing: var(--ls-caps);
+}
+.theme-toggle:hover { background: var(--acid-400); color: #111; }
+
+/* ---------- 顶栏 ---------- */
+.nav {
+  position: sticky; top: 44px; z-index: 80;
+  background: var(--bg-surface);
+  border-bottom: var(--border-w-thick) solid var(--border-default);
+}
+.nav-inner { max-width: 1280px; margin: 0 auto; padding: var(--sp-4) var(--sp-6); display: flex; align-items: center; gap: var(--sp-6); }
+.logo { font-family: var(--font-display); font-size: var(--fs-xl); font-weight: var(--fw-black); letter-spacing: var(--ls-tight); text-transform: uppercase; display: flex; align-items: center; gap: var(--sp-2); }
+.logo-mark {
+  width: 30px; height: 30px; background: var(--acid-400); color: #111;
+  border: var(--border-w) solid var(--border-default);
+  display: grid; place-items: center; font-size: var(--fs-md); font-weight: var(--fw-black);
+}
+.nav-links { display: flex; gap: 0; border-left: var(--border-w) solid var(--border-default); }
+.nav-link {
+  padding: 8px 16px; font-size: var(--fs-xs); font-weight: var(--fw-black);
+  text-transform: uppercase; letter-spacing: var(--ls-caps);
+  color: var(--fg-tertiary);
+  border-right: var(--border-w) solid var(--border-default);
+  transition: all var(--dur-fast) var(--ease);
+}
+.nav-link:hover { background: var(--n-900); color: var(--n-0); }
+.nav-link.is-active { background: var(--acid-400); color: #111; }
+.nav-right { margin-left: auto; display: flex; align-items: center; gap: var(--sp-3); }
+.avatar {
+  width: 36px; height: 36px; background: var(--volt-500); color: #fff;
+  border: var(--border-w) solid var(--border-default);
+  display: grid; place-items: center; font-weight: var(--fw-black); font-size: var(--fs-sm);
+  flex-shrink: 0;
+}
+
+.wrap-page { max-width: 1280px; margin: 0 auto; padding: var(--sp-10) var(--sp-6) var(--sp-24); }
+
+/* ---------- 按钮 —— 直角 + 硬阴影 ---------- */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  border: var(--border-w) solid var(--border-default);
+  font-weight: var(--fw-black); text-transform: uppercase; letter-spacing: var(--ls-caps);
+  white-space: nowrap; border-radius: var(--r-none);
+  transition: transform var(--dur-fast) var(--ease), box-shadow var(--dur-fast) var(--ease), background var(--dur-fast) var(--ease);
+}
+.btn:hover { transform: translate(-2px,-2px); }
+.btn:active { transform: translate(2px,2px); box-shadow: none !important; }
+.btn:focus-visible { outline: none; box-shadow: var(--shadow-focus); }
+.btn-sm { height: 34px; padding: 0 14px; font-size: 10px; }
+.btn-md { height: 42px; padding: 0 20px; font-size: var(--fs-xs); }
+.btn-lg { height: 52px; padding: 0 28px; font-size: var(--fs-sm); }
+.btn-xl { height: 62px; padding: 0 36px; font-size: var(--fs-lg); letter-spacing: -0.01em; }
+
+.btn-primary { background: var(--acid-400); color: #111; box-shadow: var(--shadow-hard-sm); }
+.btn-primary:hover { box-shadow: var(--shadow-hard); }
+.btn-secondary { background: var(--bg-surface); color: var(--fg-primary); box-shadow: var(--shadow-hard-sm); }
+.btn-secondary:hover { background: var(--n-900); color: var(--n-0); box-shadow: var(--shadow-hard); }
+.btn-ink { background: var(--n-900); color: var(--n-0); box-shadow: var(--shadow-hard-acid); }
+.btn-ink:hover { box-shadow: 10px 10px 0 var(--acid-400); }
+.btn-ghost { background: transparent; border-color: transparent; color: var(--fg-secondary); box-shadow: none; }
+.btn-ghost:hover { background: var(--bg-hover); color: var(--fg-primary); transform: none; }
+.btn-danger { background: var(--flare-400); color: #fff; box-shadow: var(--shadow-hard-sm); }
+.btn-danger:hover { box-shadow: var(--shadow-hard); }
+.btn-danger-soft { background: var(--danger-bg); color: var(--danger-fg); box-shadow: var(--shadow-hard-sm); }
+.btn-danger-soft:hover { box-shadow: var(--shadow-hard); }
+.btn:disabled, .btn.is-disabled { opacity: .35; pointer-events: none; box-shadow: none; }
+.btn-icon { padding: 0; width: 42px; }
+.btn-icon.btn-sm { width: 34px; }
+
+/* ---------- 输入 ---------- */
+.field { display: flex; flex-direction: column; gap: 6px; }
+.label { font-size: 10px; font-weight: var(--fw-black); text-transform: uppercase; letter-spacing: var(--ls-caps); color: var(--fg-secondary); }
+.input, .select, .textarea {
+  height: 46px; padding: 0 14px; width: 100%;
+  background: var(--bg-surface); color: var(--fg-primary);
+  border: var(--border-w) solid var(--border-default); border-radius: var(--r-none);
+  font-size: var(--fs-md); font-weight: var(--fw-medium);
+  transition: box-shadow var(--dur-fast) var(--ease);
+}
+.textarea { height: auto; padding: 12px 14px; resize: vertical; }
+.input::placeholder, .textarea::placeholder { color: var(--fg-disabled); }
+.input:focus, .select:focus, .textarea:focus { outline: none; box-shadow: var(--shadow-hard-sm); }
+.input.is-error { border-color: var(--flare-400); box-shadow: 3px 3px 0 var(--flare-400); }
+.hint { font-size: var(--fs-xs); color: var(--fg-tertiary); }
+.hint.is-error { color: var(--flare-500); font-weight: var(--fw-bold); }
+.select { appearance: none; background-image: linear-gradient(45deg,transparent 50%,currentColor 50%),linear-gradient(135deg,currentColor 50%,transparent 50%); background-position: calc(100% - 20px) 21px, calc(100% - 14px) 21px; background-size: 6px 6px,6px 6px; background-repeat: no-repeat; padding-right: 40px; }
+.search-wrap { position: relative; }
+.search-wrap .ico { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); font-weight: var(--fw-black); }
+.search-wrap .input { padding-left: 38px; }
+
+/* ---------- 卡片：3 语义变体 ---------- */
+.card { background: var(--bg-surface); border: var(--border-w) solid var(--border-default); border-radius: var(--r-none); }
+.card-interactive { cursor: pointer; transition: transform var(--dur-base) var(--ease), box-shadow var(--dur-base) var(--ease); }
+.card-interactive:hover { transform: translate(-4px,-4px); box-shadow: var(--shadow-hard); }
+.card-emphasis { box-shadow: var(--shadow-hard); }
+.card-pad { padding: var(--sp-6); }
+.card-head {
+  padding: var(--sp-4) var(--sp-5);
+  border-bottom: var(--border-w) solid var(--border-default);
+  display: flex; align-items: center; gap: var(--sp-3);
+  background: var(--bg-sunken);
+}
+.card-title { font-size: var(--fs-xs); font-weight: var(--fw-black); text-transform: uppercase; letter-spacing: var(--ls-caps); }
+.card-body { padding: var(--sp-5); }
+
+/* ---------- 徽章 —— 实心方块 ---------- */
+.badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  height: 24px; padding: 0 9px; border-radius: var(--r-none);
+  font-size: 10px; font-weight: var(--fw-black);
+  text-transform: uppercase; letter-spacing: var(--ls-caps);
+  border: var(--border-w) solid var(--border-default); white-space: nowrap;
+}
+.badge-neutral { background: var(--bg-surface); color: var(--fg-primary); }
+.badge-ink     { background: var(--n-900); color: var(--n-0); }
+.badge-acid    { background: var(--acid-400); color: #111; }
+.badge-volt    { background: var(--volt-500); color: #fff; }
+.badge-success { background: var(--acid-300); color: #2d3d00; }
+.badge-warning { background: var(--warning-solid); color: #3d2d00; }
+.badge-danger  { background: var(--flare-400); color: #fff; }
+.badge-info    { background: var(--volt-200); color: var(--volt-700); }
+.badge-lg { height: 32px; padding: 0 14px; font-size: var(--fs-xs); }
+
+/* ---------- 表格 —— 编辑式，粗横线 ---------- */
+.table-wrap { overflow-x: auto; }
+table.tbl { width: 100%; border-collapse: collapse; }
+.tbl thead th {
+  text-align: left; padding: var(--sp-3) var(--sp-4);
+  font-size: 10px; font-weight: var(--fw-black);
+  text-transform: uppercase; letter-spacing: var(--ls-caps);
+  border-bottom: var(--border-w-thick) solid var(--border-default);
+  white-space: nowrap;
+}
+.tbl tbody td { padding: var(--sp-4); border-bottom: 1px solid var(--border-hair); vertical-align: middle; }
+.tbl tbody tr { transition: background var(--dur-fast) var(--ease); }
+.tbl tbody tr:hover { background: var(--acid-100); }
+[data-theme="dark"] .tbl tbody tr:hover { background: var(--n-200); }
+.tbl .cell-main { font-weight: var(--fw-bold); }
+.tbl .cell-sub { font-size: var(--fs-xs); color: var(--fg-tertiary); font-family: var(--font-mono); }
+.tbl .right { text-align: right; }
+.num { font-family: var(--font-mono); font-variant-numeric: tabular-nums; font-weight: var(--fw-bold); }
+
+/* ---------- 模态 ---------- */
+.modal-scrim { position: fixed; inset: 0; background: rgba(17,17,17,.72); z-index: 200; display: grid; place-items: center; padding: var(--sp-6); }
+.modal-scrim[hidden] { display: none; }
+.modal {
+  background: var(--bg-surface); border: var(--border-w-thick) solid var(--border-default);
+  box-shadow: var(--shadow-hard-lg); width: 100%; max-width: 480px;
+  animation: snap var(--dur-base) var(--ease);
+}
+@keyframes snap { from { opacity: 0; transform: translate(-10px,-10px); } }
+.modal-head { padding: var(--sp-5); background: var(--acid-400); color: #111; border-bottom: var(--border-w-thick) solid var(--border-default); }
+.modal-title { font-family: var(--font-display); font-size: var(--fs-2xl); font-weight: var(--fw-black); letter-spacing: var(--ls-tight); line-height: var(--lh-tight); }
+.modal-desc { font-size: var(--fs-sm); font-weight: var(--fw-bold); margin-top: 4px; }
+.modal-body { padding: var(--sp-5); }
+.modal-foot { padding: var(--sp-5); border-top: var(--border-w) solid var(--border-default); display: flex; gap: var(--sp-3); }
+.modal-foot .btn { flex: 1; }
+
+/* ---------- 状态 ---------- */
+.skel { background: var(--skeleton-base); position: relative; overflow: hidden; }
+.skel::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg,transparent,var(--skeleton-shine),transparent); animation: shimmer 1.2s infinite; }
+@keyframes shimmer { 100% { transform: translateX(200%); } }
+.skel-line { height: 12px; }
+.skel-title { height: 22px; }
+
+.empty { text-align: center; padding: var(--sp-16) var(--sp-6); }
+.empty-mark {
+  font-family: var(--font-display); font-size: var(--fs-6xl); font-weight: var(--fw-black);
+  line-height: 1; letter-spacing: var(--ls-crush); color: var(--acid-400);
+  -webkit-text-stroke: 2px var(--n-900); margin-bottom: var(--sp-4);
+}
+.empty-title { font-family: var(--font-display); font-size: var(--fs-2xl); font-weight: var(--fw-black); letter-spacing: var(--ls-tight); text-transform: uppercase; margin-bottom: var(--sp-2); }
+.empty-desc { color: var(--fg-tertiary); max-width: 380px; margin: 0 auto var(--sp-6); font-size: var(--fs-sm); }
+
+.alert { display: flex; gap: var(--sp-4); padding: var(--sp-4); border: var(--border-w) solid var(--border-default); }
+.alert-mark { font-size: var(--fs-xl); font-weight: var(--fw-black); flex-shrink: 0; line-height: 1.1; }
+.alert-danger  { background: var(--danger-bg);  color: var(--danger-fg); }
+.alert-warning { background: var(--warning-bg); color: var(--warning-fg); }
+.alert-info    { background: var(--info-bg);    color: var(--info-fg); }
+.alert-acid    { background: var(--acid-200);   color: #2d3d00; }
+.alert-title { font-weight: var(--fw-black); text-transform: uppercase; letter-spacing: var(--ls-caps); font-size: var(--fs-xs); }
+.alert-body { font-size: var(--fs-sm); margin-top: 4px; }
+
+/* ---------- 进度 —— 方块段 ---------- */
+.progress { height: 14px; background: var(--bg-sunken); border: var(--border-w) solid var(--border-default); }
+.progress > span { display: block; height: 100%; background: var(--acid-400); }
+.progress.is-volt > span { background: var(--volt-500); }
+.progress.is-flare > span { background: var(--flare-400); }
+
+/* ---------- 分段 ---------- */
+.seg { display: inline-flex; border: var(--border-w) solid var(--border-default); }
+.seg button {
+  padding: 8px 16px; font-size: 10px; font-weight: var(--fw-black);
+  text-transform: uppercase; letter-spacing: var(--ls-caps);
+  border-right: var(--border-w) solid var(--border-default); color: var(--fg-tertiary);
+  transition: all var(--dur-fast) var(--ease);
+}
+.seg button:last-child { border-right: none; }
+.seg button:hover { background: var(--bg-hover); color: var(--fg-primary); }
+.seg button.is-active { background: var(--n-900); color: var(--n-0); }
+
+/* ---------- 页面 ---------- */
+.page { display: none; }
+.page.is-active { display: block; animation: slide var(--dur-base) var(--ease); }
+@keyframes slide { from { opacity: 0; transform: translateX(-8px); } }
+
+.page-title {
+  font-family: var(--font-display); font-size: var(--fs-5xl);
+  font-weight: var(--fw-black); letter-spacing: var(--ls-crush);
+  line-height: var(--lh-crush); text-transform: uppercase;
+}
+.page-sub { font-size: var(--fs-lg); color: var(--fg-secondary); margin-top: var(--sp-4); max-width: 52ch; }
+.kicker {
+  font-size: 10px; font-weight: var(--fw-black); text-transform: uppercase;
+  letter-spacing: var(--ls-caps); display: inline-flex; align-items: center; gap: var(--sp-2);
+  margin-bottom: var(--sp-3);
+}
+.kicker::before { content: ""; width: 24px; height: 3px; background: var(--acid-400); }
+.section-title {
+  font-family: var(--font-display); font-size: var(--fs-2xl); font-weight: var(--fw-black);
+  letter-spacing: var(--ls-tight); text-transform: uppercase; line-height: var(--lh-tight);
+  margin-bottom: var(--sp-5);
+  display: flex; align-items: baseline; gap: var(--sp-3);
+}
+.section-num { font-family: var(--font-mono); font-size: var(--fs-sm); color: var(--acid-500); font-weight: var(--fw-bold); }
+.rule { height: 3px; background: var(--border-default); margin: var(--sp-8) 0; }
+.rule-thin { height: 1px; background: var(--border-hair); margin: var(--sp-6) 0; }
+
+.grid { display: grid; gap: var(--sp-5); }
+.g-2 { grid-template-columns: repeat(2,1fr); }
+.g-3 { grid-template-columns: repeat(3,1fr); }
+.g-4 { grid-template-columns: repeat(4,1fr); }
+.row { display: flex; align-items: center; gap: var(--sp-3); }
+.row-between { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-3); }
+.wrap { flex-wrap: wrap; }
+.stack { display: flex; flex-direction: column; }
+.gap-1{gap:var(--sp-1)}.gap-2{gap:var(--sp-2)}.gap-3{gap:var(--sp-3)}.gap-4{gap:var(--sp-4)}.gap-5{gap:var(--sp-5)}.gap-6{gap:var(--sp-6)}
+.mt-2{margin-top:var(--sp-2)}.mt-3{margin-top:var(--sp-3)}.mt-4{margin-top:var(--sp-4)}.mt-5{margin-top:var(--sp-5)}.mt-6{margin-top:var(--sp-6)}.mt-8{margin-top:var(--sp-8)}.mt-10{margin-top:var(--sp-10)}
+.mb-2{margin-bottom:var(--sp-2)}.mb-3{margin-bottom:var(--sp-3)}.mb-4{margin-bottom:var(--sp-4)}.mb-5{margin-bottom:var(--sp-5)}.mb-6{margin-bottom:var(--sp-6)}.mb-8{margin-bottom:var(--sp-8)}.mb-10{margin-bottom:var(--sp-10)}
+.muted { color: var(--fg-tertiary); }
+.small { font-size: var(--fs-sm); }
+.xsmall { font-size: var(--fs-xs); }
+.strong { font-weight: var(--fw-bold); }
+.black { font-weight: var(--fw-black); }
+.caps { text-transform: uppercase; letter-spacing: var(--ls-caps); font-weight: var(--fw-black); font-size: 10px; }
+.mono { font-family: var(--font-mono); }
+.hl { background: var(--acid-400); color: #111; padding: 0 6px; }
+
+/* ---------- Hero —— 巨型排版 ---------- */
+.hero { border: var(--border-w-thick) solid var(--border-default); background: var(--bg-ink); color: var(--fg-on-ink); padding: var(--sp-12) var(--sp-10); position: relative; overflow: hidden; margin-bottom: var(--sp-8); }
+.hero-title {
+  font-family: var(--font-display); font-size: var(--fs-7xl);
+  font-weight: var(--fw-black); letter-spacing: var(--ls-crush);
+  line-height: var(--lh-crush); text-transform: uppercase;
+}
+.hero-title .out { -webkit-text-stroke: 3px var(--acid-400); color: transparent; }
+.hero-sub { font-size: var(--fs-xl); max-width: 44ch; margin-top: var(--sp-6); color: var(--n-400); }
+[data-theme="dark"] .hero-sub { color: var(--n-500); }
+.hero-marquee {
+  margin-top: var(--sp-8); padding-top: var(--sp-6);
+  border-top: var(--border-w) solid var(--acid-400);
+  display: flex; gap: var(--sp-10); flex-wrap: wrap;
+}
+.hero-stat-num { font-family: var(--font-display); font-size: var(--fs-4xl); font-weight: var(--fw-black); letter-spacing: var(--ls-crush); line-height: 1; color: var(--acid-400); }
+.hero-stat-lbl { font-size: 10px; font-weight: var(--fw-black); text-transform: uppercase; letter-spacing: var(--ls-caps); margin-top: 6px; color: var(--n-400); }
+
+/* ---------- 活动卡 —— 编辑式，带序号 ---------- */
+.event-card { display: flex; flex-direction: column; }
+.event-index {
+  font-family: var(--font-mono); font-size: var(--fs-xs); font-weight: var(--fw-bold);
+  padding: var(--sp-2) var(--sp-4); border-bottom: var(--border-w) solid var(--border-default);
+  display: flex; justify-content: space-between; align-items: center;
+  background: var(--bg-sunken);
+}
+.event-body { padding: var(--sp-5); flex: 1; display: flex; flex-direction: column; gap: var(--sp-4); }
+.event-name {
+  font-family: var(--font-display); font-size: var(--fs-2xl); font-weight: var(--fw-black);
+  letter-spacing: var(--ls-tight); line-height: 1.05;
+}
+.event-meta { font-size: var(--fs-sm); }
+.event-meta div { display: flex; gap: var(--sp-3); padding: 5px 0; border-bottom: 1px solid var(--border-hair); }
+.event-meta .k { width: 46px; flex-shrink: 0; font-size: 10px; font-weight: var(--fw-black); text-transform: uppercase; letter-spacing: var(--ls-caps); color: var(--fg-tertiary); padding-top: 2px; }
+.event-foot { margin-top: auto; padding: var(--sp-4) var(--sp-5); border-top: var(--border-w) solid var(--border-default); display: flex; align-items: center; justify-content: space-between; }
+.price { font-family: var(--font-display); font-size: var(--fs-3xl); font-weight: var(--fw-black); letter-spacing: var(--ls-crush); line-height: 1; }
+.price small { font-size: var(--fs-lg); }
+.price-free { font-family: var(--font-display); font-size: var(--fs-2xl); font-weight: var(--fw-black); letter-spacing: var(--ls-tight); background: var(--acid-400); color: #111; padding: 2px 10px; }
+
+/* ---------- 色板 ---------- */
+.swatch-grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(112px,1fr)); gap: 0; border: var(--border-w) solid var(--border-default); }
+.swatch { border-right: var(--border-w) solid var(--border-default); border-bottom: var(--border-w) solid var(--border-default); }
+.swatch-chip { height: 64px; }
+.swatch-info { padding: 7px 9px; background: var(--bg-surface); }
+.swatch-name { font-size: 10px; font-weight: var(--fw-black); text-transform: uppercase; letter-spacing: var(--ls-caps); }
+.swatch-val { font-size: 10px; font-family: var(--font-mono); color: var(--fg-tertiary); }
+.spec-row { display: flex; align-items: baseline; gap: var(--sp-5); padding: var(--sp-3) 0; border-bottom: 1px solid var(--border-hair); }
+.spec-key { width: 118px; flex-shrink: 0; font-size: 10px; font-family: var(--font-mono); font-weight: var(--fw-bold); color: var(--acid-500); text-transform: uppercase; }
+
+/* ---------- 详情 ---------- */
+.detail-grid { display: grid; grid-template-columns: 1fr 380px; gap: 0; align-items: start; border: var(--border-w-thick) solid var(--border-default); }
+.detail-left { padding: var(--sp-8); border-right: var(--border-w-thick) solid var(--border-default); }
+.detail-right { padding: var(--sp-6); position: sticky; top: 130px; }
+.detail-title { font-family: var(--font-display); font-size: var(--fs-5xl); font-weight: var(--fw-black); letter-spacing: var(--ls-crush); line-height: var(--lh-crush); text-transform: uppercase; }
+.fact { display: flex; gap: var(--sp-5); padding: var(--sp-4) 0; border-bottom: 1px solid var(--border-hair); }
+.fact-k { width: 80px; flex-shrink: 0; font-size: 10px; font-weight: var(--fw-black); text-transform: uppercase; letter-spacing: var(--ls-caps); color: var(--fg-tertiary); padding-top: 3px; }
+.fact-v { font-size: var(--fs-lg); font-weight: var(--fw-bold); }
+.fact-s { font-size: var(--fs-sm); color: var(--fg-tertiary); margin-top: 3px; }
+.ticket { padding: var(--sp-4); border: var(--border-w) solid var(--border-default); cursor: pointer; display: flex; justify-content: space-between; align-items: center; gap: var(--sp-3); transition: all var(--dur-fast) var(--ease); }
+.ticket:hover { box-shadow: var(--shadow-hard-sm); transform: translate(-2px,-2px); }
+.ticket.is-selected { background: var(--acid-400); color: #111; box-shadow: var(--shadow-hard-sm); }
+
+.steps { display: flex; border: var(--border-w) solid var(--border-default); }
+.step { flex: 1; padding: var(--sp-3); text-align: center; border-right: var(--border-w) solid var(--border-default); }
+.step:last-child { border-right: none; }
+.step-n { font-family: var(--font-mono); font-size: 10px; font-weight: var(--fw-bold); }
+.step-l { font-size: 10px; font-weight: var(--fw-black); text-transform: uppercase; letter-spacing: var(--ls-caps); margin-top: 3px; }
+.step.is-current { background: var(--acid-400); color: #111; }
+.step.is-done { background: var(--n-900); color: var(--n-0); }
+
+/* ---------- 指标 —— 巨型数字 ---------- */
+.metric { padding: var(--sp-5); }
+.metric-label { font-size: 10px; font-weight: var(--fw-black); text-transform: uppercase; letter-spacing: var(--ls-caps); color: var(--fg-tertiary); }
+.metric-value { font-family: var(--font-display); font-size: var(--fs-5xl); font-weight: var(--fw-black); letter-spacing: var(--ls-crush); line-height: .95; margin-top: var(--sp-3); }
+.metric-value small { font-size: var(--fs-xl); }
+.metric-foot { margin-top: var(--sp-3); font-size: var(--fs-xs); font-weight: var(--fw-black); text-transform: uppercase; letter-spacing: var(--ls-caps); }
+
+/* ---------- 待办 ---------- */
+.todo { display: flex; align-items: center; gap: var(--sp-4); padding: var(--sp-4) var(--sp-5); border-bottom: 1px solid var(--border-hair); transition: background var(--dur-fast) var(--ease); }
+.todo:hover { background: var(--acid-100); }
+[data-theme="dark"] .todo:hover { background: var(--n-200); }
+.todo-n { font-family: var(--font-mono); font-size: var(--fs-lg); font-weight: var(--fw-black); width: 30px; flex-shrink: 0; color: var(--fg-disabled); }
+.todo-main { flex: 1; min-width: 0; }
+.todo-title { font-weight: var(--fw-black); font-size: var(--fs-lg); letter-spacing: var(--ls-tight); }
+.todo-sub { font-size: var(--fs-sm); color: var(--fg-tertiary); margin-top: 2px; }
+
+/* ---------- 响应式 ---------- */
+@media (max-width: 1080px) {
+  .detail-grid { grid-template-columns: 1fr; }
+  .detail-left { border-right: none; border-bottom: var(--border-w-thick) solid var(--border-default); }
+  .detail-right { position: static; }
+  .g-4 { grid-template-columns: repeat(2,1fr); }
+  :root { --fs-7xl: 84px; --fs-6xl: 68px; --fs-5xl: 54px; }
+}
+@media (max-width: 880px) {
+  .g-3 { grid-template-columns: repeat(2,1fr); }
+  .nav-links { display: none; }
+  .hero { padding: var(--sp-8) var(--sp-5); }
+  .wrap-page { padding: var(--sp-6) var(--sp-4) var(--sp-16); }
+  :root { --fs-7xl: 58px; --fs-6xl: 48px; --fs-5xl: 40px; --fs-4xl: 34px; }
+}
+@media (max-width: 620px) {
+  .g-2,.g-3,.g-4 { grid-template-columns: 1fr; }
+  .detail-left { padding: var(--sp-5); }
+  :root { --fs-7xl: 44px; --fs-6xl: 38px; --fs-5xl: 32px; --fs-4xl: 28px; --fs-3xl: 24px; }
+}
+</style>
+</head>
+<body>
+
+<nav class="dirbar">
+  <a href="index.html">← 全部</a>
+  <a href="direction-a.html">A 克制专业</a>
+  <a href="direction-b.html">B 温暖社交</a>
+  <a href="direction-c.html" class="is-current">C 大胆现代</a>
+  <span class="spacer"></span>
+  <button class="theme-toggle" onclick="toggleTheme()"><span id="theme-txt">暗色</span></button>
+</nav>
+
+<header class="nav">
+  <div class="nav-inner">
+    <div class="logo"><span class="logo-mark">G</span> GatherUp</div>
+    <div class="nav-links">
+      <button class="nav-link is-active" data-goto="plaza">广场</button>
+      <button class="nav-link" data-goto="detail">详情</button>
+      <button class="nav-link" data-goto="console">工作台</button>
+      <button class="nav-link" data-goto="tokens">Token</button>
+      <button class="nav-link" data-goto="components">组件</button>
+      <button class="nav-link" data-goto="states">状态</button>
+    </div>
+    <div class="nav-right">
+      <button class="btn btn-primary btn-sm">＋ 发起</button>
+      <div class="avatar">MK</div>
+    </div>
+  </div>
+</header>
+
+<div class="wrap-page">
+
+<!-- ==================== 页面 1：广场 ==================== -->
+<section class="page is-active" id="page-plaza">
+
+  <div class="hero">
+    <div class="kicker" style="color:var(--acid-400)">2026 / 06 · 本周精选</div>
+    <h1 class="hero-title">线下<br><span class="out">才算数</span></h1>
+    <p class="hero-sub">24 场正在招募的聚会。观影、咖啡、火锅、招新——报名 30 秒，剩下的交给我们。</p>
+    <div class="row gap-4 mt-8 wrap">
+      <button class="btn btn-primary btn-xl">浏览全部活动</button>
+      <button class="btn btn-secondary btn-xl" style="background:transparent;color:var(--fg-on-ink);border-color:var(--fg-on-ink);box-shadow:none">发起一场 →</button>
+    </div>
+    <div class="hero-marquee">
+      <div><div class="hero-stat-num">24</div><div class="hero-stat-lbl">正在招募</div></div>
+      <div><div class="hero-stat-num">06</div><div class="hero-stat-lbl">座城市</div></div>
+      <div><div class="hero-stat-num">1842</div><div class="hero-stat-lbl">位参与者</div></div>
+      <div><div class="hero-stat-num">98%</div><div class="hero-stat-lbl">好评率</div></div>
+    </div>
+  </div>
+
+  <div class="row-between mb-6 wrap gap-4">
+    <div class="seg">
+      <button class="is-active">全部</button>
+      <button>同好</button>
+      <button>校园</button>
+      <button>会务</button>
+      <button>聚会</button>
+    </div>
+    <div class="row gap-3">
+      <div class="search-wrap" style="width:240px"><span class="ico">⌕</span><input class="input" style="height:42px" placeholder="搜索活动 / 城市"></div>
+      <button class="btn btn-secondary btn-md">筛选 [2]</button>
+    </div>
+  </div>
+
+  <div class="section-title"><span class="section-num">01 —</span> 正在招募</div>
+
+  <div class="grid g-3 mb-10">
+
+    <article class="card card-interactive event-card" data-goto="detail">
+      <div class="event-index"><span>NO.001</span><span class="badge badge-warning">还剩 3 天</span></div>
+      <div class="event-body">
+        <div class="caps muted">同好活动 / 线下观影</div>
+        <h3 class="event-name">《坂本龙一：杰作》线下观影</h3>
+        <div class="event-meta">
+          <div><span class="k">时间</span><span class="strong">06.22 周一 14:30</span></div>
+          <div><span class="k">地点</span><span class="strong">上海 · 百丽宫影城 环贸店</span></div>
+          <div><span class="k">名额</span><span class="strong mono">42 / 60</span></div>
+        </div>
+        <div class="progress"><span style="width:70%"></span></div>
+      </div>
+      <div class="event-foot">
+        <div class="price"><small>¥</small>88</div>
+        <button class="btn btn-primary btn-sm">报名 →</button>
+      </div>
+    </article>
+
+    <article class="card card-interactive event-card">
+      <div class="event-index"><span>NO.002</span><span class="badge badge-success">报名中</span></div>
+      <div class="event-body">
+        <div class="caps muted">同好活动 / 生咖</div>
+        <h3 class="event-name">生日咖试运营小聚</h3>
+        <div class="event-meta">
+          <div><span class="k">时间</span><span class="strong">07.05 周日 12:00</span></div>
+          <div><span class="k">地点</span><span class="strong">南京 · 雾岛咖啡</span></div>
+          <div><span class="k">名额</span><span class="strong mono">36 / 80</span></div>
+        </div>
+        <div class="progress"><span style="width:45%"></span></div>
+      </div>
+      <div class="event-foot">
+        <div class="price"><small>¥</small>45</div>
+        <button class="btn btn-primary btn-sm">报名 →</button>
+      </div>
+    </article>
+
+    <article class="card card-interactive event-card">
+      <div class="event-index"><span>NO.003</span><span class="badge badge-success">报名中</span></div>
+      <div class="event-body">
+        <div class="caps muted">校园活动 / 校园招新</div>
+        <h3 class="event-name">春季社团招新开放日</h3>
+        <div class="event-meta">
+          <div><span class="k">时间</span><span class="strong">07.12 周日 10:00</span></div>
+          <div><span class="k">地点</span><span class="strong">广州 · 岭南大学生活动中心</span></div>
+          <div><span class="k">名额</span><span class="strong mono">186 / 300</span></div>
+        </div>
+        <div class="progress"><span style="width:62%"></span></div>
+      </div>
+      <div class="event-foot">
+        <div class="price-free">免费</div>
+        <button class="btn btn-primary btn-sm">报名 →</button>
+      </div>
+    </article>
+
+    <article class="card card-interactive event-card">
+      <div class="event-index"><span>NO.004</span><span class="badge badge-info">付款确认中</span></div>
+      <div class="event-body">
+        <div class="caps muted">会议会务 / 闭门会议</div>
+        <h3 class="event-name">城市青年消费趋势闭门论坛</h3>
+        <div class="event-meta">
+          <div><span class="k">时间</span><span class="strong">07.18 周六 13:30</span></div>
+          <div><span class="k">地点</span><span class="strong">北京 · 望京会议中心</span></div>
+          <div><span class="k">名额</span><span class="strong mono">74 / 120</span></div>
+        </div>
+        <div class="progress is-volt"><span style="width:62%"></span></div>
+      </div>
+      <div class="event-foot">
+        <div class="price"><small>¥</small>199</div>
+        <button class="btn btn-primary btn-sm">报名 →</button>
+      </div>
+    </article>
+
+    <article class="card card-interactive event-card">
+      <div class="event-index"><span>NO.005</span><span class="badge badge-neutral">待开放</span></div>
+      <div class="event-body">
+        <div class="caps muted">同好活动 / 线下观影</div>
+        <h3 class="event-name">春日同好重映场</h3>
+        <div class="event-meta">
+          <div><span class="k">时间</span><span class="strong">06.29 周一 19:00</span></div>
+          <div><span class="k">地点</span><span class="strong">杭州 · 浙影时代影城</span></div>
+          <div><span class="k">名额</span><span class="strong mono">26 / 32</span></div>
+        </div>
+        <div class="progress is-flare"><span style="width:81%"></span></div>
+      </div>
+      <div class="event-foot">
+        <div class="price"><small>¥</small>72</div>
+        <button class="btn btn-secondary btn-sm">提醒我</button>
+      </div>
+    </article>
+
+    <article class="card card-interactive event-card">
+      <div class="event-index"><span>NO.006</span><span class="badge badge-acid">已成团</span></div>
+      <div class="event-body">
+        <div class="caps muted">好友聚会 / 好友聚餐</div>
+        <h3 class="event-name">周末火锅局</h3>
+        <div class="event-meta">
+          <div><span class="k">时间</span><span class="strong">07.20 周一 18:30</span></div>
+          <div><span class="k">地点</span><span class="strong">成都 · 玉林路附近</span></div>
+          <div><span class="k">名额</span><span class="strong mono">6 / 8</span></div>
+        </div>
+        <div class="progress"><span style="width:75%"></span></div>
+      </div>
+      <div class="event-foot">
+        <div class="price-free">免费</div>
+        <button class="btn btn-primary btn-sm">报名 →</button>
+      </div>
+    </article>
+  </div>
+
+  <div class="section-title"><span class="section-num">02 —</span> 加载状态</div>
+  <div class="grid g-3">
+    <div class="card"><div class="event-index"><div class="skel skel-line" style="width:52px"></div><div class="skel" style="width:64px;height:22px"></div></div><div class="card-pad stack gap-4"><div class="skel skel-line" style="width:44%"></div><div class="skel skel-title" style="width:86%"></div><div class="skel skel-line" style="width:70%"></div><div class="skel" style="height:14px"></div></div></div>
+    <div class="card"><div class="event-index"><div class="skel skel-line" style="width:52px"></div><div class="skel" style="width:64px;height:22px"></div></div><div class="card-pad stack gap-4"><div class="skel skel-line" style="width:38%"></div><div class="skel skel-title" style="width:72%"></div><div class="skel skel-line" style="width:62%"></div><div class="skel" style="height:14px"></div></div></div>
+    <div class="card"><div class="event-index"><div class="skel skel-line" style="width:52px"></div><div class="skel" style="width:64px;height:22px"></div></div><div class="card-pad stack gap-4"><div class="skel skel-line" style="width:48%"></div><div class="skel skel-title" style="width:78%"></div><div class="skel skel-line" style="width:66%"></div><div class="skel" style="height:14px"></div></div></div>
+  </div>
+</section>
+
+<!-- ==================== 页面 2：详情 ==================== -->
+<section class="page" id="page-detail">
+  <button class="btn btn-ghost btn-sm mb-5" data-goto="plaza">← 返回广场</button>
+
+  <div class="detail-grid">
+    <div class="detail-left">
+      <div class="kicker">NO.001 / 同好活动 / 线下观影</div>
+      <h1 class="detail-title">《坂本龙一：<br>杰作》<br>线下观影</h1>
+
+      <div class="row gap-2 mt-6 wrap">
+        <span class="badge badge-warning badge-lg">还剩 3 天截止</span>
+        <span class="badge badge-neutral badge-lg">上海</span>
+        <span class="badge badge-neutral badge-lg">42 / 60 人</span>
+      </div>
+
+      <div class="rule"></div>
+
+      <div class="row gap-4 mb-6">
+        <div class="avatar" style="width:52px;height:52px;font-size:var(--fs-lg)">MK</div>
+        <div style="flex:1">
+          <div class="row gap-2"><span class="black" style="font-size:var(--fs-lg)">比奇堡miki</span><span class="badge badge-acid">✓ 已实名</span></div>
+          <div class="small muted">主办 12 场 · 好评率 98% · 平均 2 小时回复</div>
+        </div>
+        <button class="btn btn-secondary btn-md">关注</button>
+      </div>
+
+      <div class="section-title" style="font-size:var(--fs-xl)"><span class="section-num">01 —</span> 活动信息</div>
+      <div class="mb-8">
+        <div class="fact"><div class="fact-k">时间</div><div><div class="fact-v">2026.06.22 周一 14:30 – 17:00</div><div class="fact-s">报名截止 06.18 23:59 · 还剩 3 天</div></div></div>
+        <div class="fact"><div class="fact-k">地点</div><div><div class="fact-v">百丽宫影城 环贸店 3 号厅</div><div class="fact-s">上海市徐汇区淮海中路 999 号 6 层</div></div></div>
+        <div class="fact"><div class="fact-k">名额</div><div style="flex:1"><div class="fact-v mono">42 / 60 人</div><div class="fact-s">剩余 18 席 · 单笔最多 4 人</div><div class="progress mt-3" style="max-width:300px"><span style="width:70%"></span></div></div></div>
+        <div class="fact"><div class="fact-k">签到</div><div><div class="fact-v">二维码签到</div><div class="fact-s">活动开始前 30 分钟开放</div></div></div>
+        <div class="fact"><div class="fact-k">退款</div><div><div class="fact-v">截止前全额退款</div><div class="fact-s">截止后不支持退款，可转让他人</div></div></div>
+      </div>
+
+      <div class="section-title" style="font-size:var(--fs-xl)"><span class="section-num">02 —</span> 关于这场</div>
+      <p style="font-size:var(--fs-lg);line-height:1.7;color:var(--fg-secondary)">
+        纪录片《坂本龙一：杰作》记录了这位音乐家生命最后阶段的创作现场。本场为同好向的<span class="hl">小规模包场</span>，观影结束后有约 40 分钟自由交流，我们准备了简单茶点。
+      </p>
+      <p class="mt-5" style="font-size:var(--fs-lg);line-height:1.7;color:var(--fg-secondary)">
+        建议提前 15 分钟到场取票。影厅内禁止摄影摄像。交流环节非强制参加，可自由离场。
+      </p>
+
+      <div class="alert alert-info mt-6">
+        <span class="alert-mark">!</span>
+        <div><div class="alert-title">本场为付费包场</div><div class="alert-body">报名后需在 30 分钟内完成付款并上传凭证，主办确认后名额才正式锁定。</div></div>
+      </div>
+
+      <div class="rule-thin"></div>
+
+      <div class="section-title" style="font-size:var(--fs-xl)"><span class="section-num">03 —</span> 已报名 42 人</div>
+      <div class="row wrap gap-2">
+        <span class="badge badge-neutral badge-lg">月见草</span>
+        <span class="badge badge-neutral badge-lg">青柠</span>
+        <span class="badge badge-neutral badge-lg">阿吉</span>
+        <span class="badge badge-neutral badge-lg">Nori</span>
+        <span class="badge badge-neutral badge-lg">小满</span>
+        <span class="badge badge-neutral badge-lg">陈默</span>
+        <span class="badge badge-ink badge-lg">+36 人</span>
+      </div>
+    </div>
+
+    <div class="detail-right">
+      <div class="stack gap-5">
+        <div>
+          <div class="caps muted mb-2">起价 / 每人</div>
+          <div class="price" style="font-size:var(--fs-5xl)"><small>¥</small>88</div>
+        </div>
+
+        <div class="caps">选择票档</div>
+        <div class="stack gap-3">
+          <label class="ticket is-selected">
+            <div><div class="black">标准票 · 单人</div><div class="xsmall">报名后线上确认付款</div></div>
+            <div class="black mono" style="font-size:var(--fs-xl)">¥88</div>
+          </label>
+          <label class="ticket">
+            <div><div class="black">多人同行</div><div class="xsmall muted">最多 4 人 · 座位相邻</div></div>
+            <div class="black mono" style="font-size:var(--fs-xl)">¥88</div>
+          </label>
+        </div>
+
+        <div class="field">
+          <label class="label">报名人数</label>
+          <div class="row gap-2">
+            <button class="btn btn-secondary btn-icon btn-md">−</button>
+            <input class="input mono black" value="2" style="text-align:center;width:72px">
+            <button class="btn btn-secondary btn-icon btn-md">＋</button>
+            <span class="caps muted">剩余 18 席</span>
+          </div>
+        </div>
+
+        <div class="field"><label class="label">联系手机</label><input class="input" value="138 **** 6021"></div>
+        <div class="field"><label class="label">备注（选填）</label><textarea class="textarea" rows="2" placeholder="如需相邻座位请说明"></textarea></div>
+
+        <div class="stack gap-3" style="padding-top:var(--sp-4);border-top:var(--border-w) solid var(--border-default)">
+          <div class="row-between small"><span class="caps muted">标准票 × 2</span><span class="mono black">¥176.00</span></div>
+          <div class="row-between small"><span class="caps muted">平台服务费</span><span class="mono black">¥0.00</span></div>
+          <div class="row-between" style="padding-top:var(--sp-3);border-top:1px solid var(--border-hair)">
+            <span class="caps">合计</span><span class="price" style="font-size:var(--fs-3xl)"><small>¥</small>176</span>
+          </div>
+        </div>
+
+        <button class="btn btn-ink btn-xl" style="width:100%" onclick="openModal()">立即报名 →</button>
+
+        <div>
+          <div class="caps muted mb-3">报名流程</div>
+          <div class="steps">
+            <div class="step is-current"><div class="step-n">01</div><div class="step-l">填写</div></div>
+            <div class="step"><div class="step-n">02</div><div class="step-l">付款</div></div>
+            <div class="step"><div class="step-n">03</div><div class="step-l">审核</div></div>
+            <div class="step"><div class="step-n">04</div><div class="step-l">签到</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== 页面 3：工作台 ==================== -->
+<section class="page" id="page-console">
+  <div class="row-between wrap gap-5 mb-8">
+    <div>
+      <div class="kicker">主办工作台 / 2026.06</div>
+      <h1 class="page-title">今天要<br>处理 7 件事</h1>
+    </div>
+    <div class="row gap-3">
+      <button class="btn btn-secondary btn-md">导出报表</button>
+      <button class="btn btn-primary btn-md">＋ 创建活动</button>
+    </div>
+  </div>
+
+  <div class="alert alert-danger mb-8" style="align-items:center;box-shadow:var(--shadow-hard)">
+    <span class="alert-mark">!!</span>
+    <div style="flex:1">
+      <div class="alert-title">3 笔付款已超过 24 小时未审核</div>
+      <div class="alert-body">超时未处理会导致参与者名额被自动释放。</div>
+    </div>
+    <button class="btn btn-danger btn-md">立即处理</button>
+  </div>
+
+  <div class="grid g-4 mb-10" style="gap:0;border:var(--border-w-thick) solid var(--border-default)">
+    <div class="metric" style="border-right:var(--border-w) solid var(--border-default)">
+      <div class="metric-label">待审核付款</div>
+      <div class="metric-value" style="color:var(--flare-400)">12</div>
+      <div class="metric-foot" style="color:var(--flare-500)">3 笔超时</div>
+    </div>
+    <div class="metric" style="border-right:var(--border-w) solid var(--border-default)">
+      <div class="metric-label">本月报名</div>
+      <div class="metric-value">348<small>人</small></div>
+      <div class="metric-foot">↑ 22% 较上月</div>
+    </div>
+    <div class="metric" style="border-right:var(--border-w) solid var(--border-default)">
+      <div class="metric-label">已确认收入</div>
+      <div class="metric-value"><small>¥</small>28.6<small>K</small></div>
+      <div class="metric-foot muted">待入账 ¥4,180</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">进行中活动</div>
+      <div class="metric-value">05</div>
+      <div class="metric-foot muted">2 场本周开始</div>
+    </div>
+  </div>
+
+  <div class="grid" style="grid-template-columns:1fr 400px;gap:var(--sp-6);align-items:start">
+    <div class="stack gap-8">
+
+      <div class="card card-emphasis">
+        <div class="card-head">
+          <span class="card-title">待办事项</span>
+          <span class="badge badge-danger">7 项阻塞</span>
+          <div class="seg" style="margin-left:auto"><button class="is-active">全部</button><button>阻塞</button></div>
+        </div>
+        <div>
+          <div class="todo">
+            <div class="todo-n">01</div>
+            <div class="todo-main">
+              <div class="todo-title">审核 12 笔付款凭证</div>
+              <div class="todo-sub">坂本龙一观影 · 最早一笔已等待 26 小时</div>
+            </div>
+            <span class="badge badge-danger">超时</span>
+            <button class="btn btn-primary btn-sm">去审核</button>
+          </div>
+          <div class="todo">
+            <div class="todo-n">02</div>
+            <div class="todo-main">
+              <div class="todo-title">配置收款二维码</div>
+              <div class="todo-sub">春日同好重映场 · 未配置无法开放报名</div>
+            </div>
+            <span class="badge badge-warning">待配置</span>
+            <button class="btn btn-secondary btn-sm">去配置</button>
+          </div>
+          <div class="todo">
+            <div class="todo-n">03</div>
+            <div class="todo-main">
+              <div class="todo-title">确认场地档期</div>
+              <div class="todo-sub">闭门论坛 · 望京会议中心待回复</div>
+            </div>
+            <span class="badge badge-info">数调中</span>
+            <button class="btn btn-secondary btn-sm">查看</button>
+          </div>
+          <div class="todo">
+            <div class="todo-n">04</div>
+            <div class="todo-main">
+              <div class="todo-title">发布签到二维码</div>
+              <div class="todo-sub">生日咖小聚 · 07.05 12:00 开始</div>
+            </div>
+            <span class="badge badge-neutral">待发布</span>
+            <button class="btn btn-secondary btn-sm">生成</button>
+          </div>
+          <div class="todo">
+            <div class="todo-n">05</div>
+            <div class="todo-main">
+              <div class="todo-title">补充活动介绍与封面</div>
+              <div class="todo-sub">社团招新开放日 · 完整度 60%</div>
+            </div>
+            <span class="badge badge-neutral">建议</span>
+            <button class="btn btn-ghost btn-sm">稍后</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <span class="card-title">最近报名</span>
+          <button class="btn btn-primary btn-sm" style="margin-left:auto">批量通过</button>
+        </div>
+        <div class="table-wrap">
+          <table class="tbl">
+            <thead><tr><th>订单号</th><th>参与者</th><th>活动</th><th class="right">金额</th><th>状态</th><th class="right">操作</th></tr></thead>
+            <tbody>
+              <tr>
+                <td class="num">GU-24081</td>
+                <td><div class="cell-main">月见草</div><div class="cell-sub">2 人 · 26h ago</div></td>
+                <td class="small">坂本龙一观影</td>
+                <td class="right num">¥176</td>
+                <td><span class="badge badge-danger">超时待审</span></td>
+                <td class="right"><div class="row gap-2" style="justify-content:flex-end"><button class="btn btn-primary btn-sm">通过</button><button class="btn btn-danger-soft btn-sm">驳回</button></div></td>
+              </tr>
+              <tr>
+                <td class="num">GU-24080</td>
+                <td><div class="cell-main">青柠</div><div class="cell-sub">1 人 · 4h ago</div></td>
+                <td class="small">坂本龙一观影</td>
+                <td class="right num">¥88</td>
+                <td><span class="badge badge-warning">待审核</span></td>
+                <td class="right"><div class="row gap-2" style="justify-content:flex-end"><button class="btn btn-primary btn-sm">通过</button><button class="btn btn-danger-soft btn-sm">驳回</button></div></td>
+              </tr>
+              <tr>
+                <td class="num">GU-24079</td>
+                <td><div class="cell-main">阿吉</div><div class="cell-sub">1 人 · 昨天</div></td>
+                <td class="small">生日咖小聚</td>
+                <td class="right num">¥45</td>
+                <td><span class="badge badge-success">已确认</span></td>
+                <td class="right"><button class="btn btn-ghost btn-sm">详情</button></td>
+              </tr>
+              <tr>
+                <td class="num">GU-24078</td>
+                <td><div class="cell-main">Nori</div><div class="cell-sub">4 人 · 昨天</div></td>
+                <td class="small">闭门论坛</td>
+                <td class="right num">¥796</td>
+                <td><span class="badge badge-warning">待审核</span></td>
+                <td class="right"><div class="row gap-2" style="justify-content:flex-end"><button class="btn btn-primary btn-sm">通过</button><button class="btn btn-danger-soft btn-sm">驳回</button></div></td>
+              </tr>
+              <tr>
+                <td class="num">GU-24077</td>
+                <td><div class="cell-main">小满</div><div class="cell-sub">1 人 · 2d ago</div></td>
+                <td class="small">社团招新</td>
+                <td class="right num">免费</td>
+                <td><span class="badge badge-success">已确认</span></td>
+                <td class="right"><button class="btn btn-ghost btn-sm">详情</button></td>
+              </tr>
+              <tr>
+                <td class="num">GU-24076</td>
+                <td><div class="cell-main">陈默</div><div class="cell-sub">2 人 · 3d ago</div></td>
+                <td class="small">周末火锅局</td>
+                <td class="right num">免费</td>
+                <td><span class="badge badge-neutral">已取消</span></td>
+                <td class="right"><button class="btn btn-ghost btn-sm">详情</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="row-between" style="padding:var(--sp-4) var(--sp-5);border-top:var(--border-w) solid var(--border-default)">
+          <span class="caps muted">1–6 / 48</span>
+          <div class="row gap-2"><button class="btn btn-secondary btn-sm is-disabled">上一页</button><button class="btn btn-secondary btn-sm">下一页</button></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="stack gap-6">
+      <div class="card">
+        <div class="card-head"><span class="card-title">筹备进度</span></div>
+        <div class="card-body stack gap-5">
+          <div>
+            <div class="row-between mb-2"><span class="black small">坂本龙一观影</span><span class="mono black small">92%</span></div>
+            <div class="progress"><span style="width:92%"></span></div>
+            <div class="xsmall muted mt-2">仅剩付款审核未完成</div>
+          </div>
+          <div>
+            <div class="row-between mb-2"><span class="black small">春日同好重映场</span><span class="mono black small">45%</span></div>
+            <div class="progress is-flare"><span style="width:45%"></span></div>
+            <div class="xsmall muted mt-2">收款码 · 活动介绍 待补充</div>
+          </div>
+          <div>
+            <div class="row-between mb-2"><span class="black small">闭门论坛</span><span class="mono black small">68%</span></div>
+            <div class="progress is-volt"><span style="width:68%"></span></div>
+            <div class="xsmall muted mt-2">等待场地方确认档期</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="background:var(--bg-ink);color:var(--fg-on-ink);border-color:var(--border-default);box-shadow:var(--shadow-hard-acid)">
+        <div class="card-head" style="background:transparent;border-color:var(--acid-400)"><span class="card-title" style="color:var(--acid-400)">本月财务</span></div>
+        <div class="card-body stack gap-3">
+          <div class="row-between small"><span class="caps" style="opacity:.6">报名收入</span><span class="mono black">¥32,820</span></div>
+          <div class="row-between small"><span class="caps" style="opacity:.6">已确认</span><span class="mono black" style="color:var(--acid-400)">¥28,640</span></div>
+          <div class="row-between small"><span class="caps" style="opacity:.6">待确认</span><span class="mono black" style="color:var(--warning-solid)">¥4,180</span></div>
+          <div class="row-between small"><span class="caps" style="opacity:.6">场地支出</span><span class="mono black">−¥12,400</span></div>
+          <div class="row-between small"><span class="caps" style="opacity:.6">物料支出</span><span class="mono black">−¥2,860</span></div>
+          <div style="padding-top:var(--sp-4);border-top:var(--border-w) solid var(--acid-400)">
+            <div class="caps" style="opacity:.6">净结余</div>
+            <div class="price" style="font-size:var(--fs-4xl);color:var(--acid-400)"><small>¥</small>13,380</div>
+          </div>
+          <button class="btn btn-primary btn-md mt-3" style="width:100%">查看明细</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="empty" style="padding:var(--sp-10) var(--sp-5)">
+          <div class="empty-mark" style="font-size:var(--fs-4xl)">00</div>
+          <div class="empty-title" style="font-size:var(--fs-lg)">今日无待签到</div>
+          <div class="empty-desc">活动开始前 30 分钟，签到入口会出现在这里。</div>
+          <button class="btn btn-secondary btn-sm">查看全部活动</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== 页面 4：Token ==================== -->
+<section class="page" id="page-tokens">
+  <div class="kicker">设计系统 / 01</div>
+  <h1 class="page-title">Design<br>Tokens</h1>
+  <p class="page-sub">纯黑白中性阶 + 荧光柠檬绿 + 电光紫 + 电光橙 · 直角 · 硬边偏移阴影</p>
+
+  <div class="rule"></div>
+
+  <div class="section-title"><span class="section-num">01 —</span> 中性阶 Neutral</div>
+  <div class="swatch-grid mb-10">
+    <div class="swatch"><div class="swatch-chip" style="background:var(--n-0)"></div><div class="swatch-info"><div class="swatch-name">n-0</div><div class="swatch-val">#ffffff</div></div></div>
+    <div class="swatch"><div class="swatch-chip" style="background:var(--n-50)"></div><div class="swatch-info"><div class="swatch-name">n-50</div><div class="swatch-val">#fafafa</div></div></div>
+    <div class="swatch"><div class="swatch-chip" style="background:var(--n-100)"></div><div class="swatch-info"><div class="swatch-name">n-100</div><div class="swatch-val">#f2f2f2</div></div></div>
+    <div class="swatch"><div class="swatch-chip" style="background:var(--n-200)"></div><div class="swatch-info"><div class="swatch-name">n-200</div><div class="swatch-val">#e4e4e4</div></div></div>
+    <div class="swatch"><div class="swatch-chip" style="background:var(--n-300)"></div><div class="swatch-info"><div class="swatch-name">n-300</div><div class="swatch-val">#cfcfcf</div></div></div>
+    <div class="swatch"><div class="swatch-chip" style="background:var(--n-400)"></div><div class="swatch-info"><div class="swatch-name">n-400</div><div class="swatch-val">#a6a6a6</div></div></div>
+    <div class="swatch"><div class="swatch-chip" style="background:var(--n-500)"></div><div class="swatch-info"><div class="swatch-name">n-500</div><div class="swatch-val">#757575</div></div></div>
+    <div class="swatch"><div class="swatch-chip" style="background:var(--n-600)"></div><div class="swatch-info"><div class="swatch-name">n-600</div><div class="swatch-val">#525252</div></div></div>
+    <div class="swatch"><div class="swatch-chip" style="background:var(--n-700)"></div><div class="swatch-info"><div class="swatch-name">n-700</div><div class="swatch-val">#383838</div></div></div>
+    <div class="swatch"><div class="swatch-chip" style="background:var(--n-800)"></div><div class="swatch-info"><div class="swatch-name">n-800</div><div class="swatch-val">#212121</div></div></div>
+    <div class="swatch"><div class="swatch-chip" style="background:var(--n-900)"></div><div class="swatch-info"><div class="swatch-name">n-900</div><div class="swatch-val">#111111</div></div></div>
+    <div class="swatch"><div class="swatch-chip" style="background:var(--n-950)"></div><div class="swatch-info"><div class="swatch-name">n-950</div><div class="swatch-val">#000000</div></div></div>
+  </div>
+
+  <div class="section-title"><span class="section-num">02 —</span> 主色 · 荧光柠檬 Acid</div>
+  <div class="swatch-grid mb-10">
+    <div class="swatch"><div class="swatch-chip" style="background:var(--acid-100)"></div><div class="swatch-info"><div class="swatch-name">acid-100</div><div class="swatch-val">#f2ffd1</div></div></div>
+    <div class="swatch"><div class="swatch-chip" style="background:var(--acid-200)"></div><div class="swatch-info"><div class="swatch-name">acid-200</div><div class="swatch-val">#e4ff9c</div></div></div>
+    <div class="swatch"><div class="swatch-chip" style="background:var(--acid-300)"></div><div class="swatch-info"><div class="swatch-name">acid-300</div><div class="swatch-val">#d4ff4f</div></div></div>
+    <div class="swatch"><div class="swatch-chip" style="background:var(--acid-400)"></div><div class="swatch-info"><div class="swatch-name">acid-400 ★</div><div class="swatch-val">#c2f503</div></div></div>
+    <div class="swatch"><div class="swatch-chip" style="background:var(--acid-500)"></div><div class="swatch-info"><div class="swatch-name">acid-500</div><div class="swatch-val">#a8d600</div></div></div>
+    <div class="swatch"><div class="swatch-chip" style="background:var(--acid-600)"></div><div class="swatch-info"><div class="swatch-name">acid-600</div><div class="swatch-val">#86ab00</div></div></div>
+  </div>
+
+  <div class="grid g-2 mb-10">
+    <div>
+      <div class="section-title" style="font-size:var(--fs-xl)"><span class="section-num">03 —</span> 电光紫 Volt</div>
+      <div class="swatch-grid">
+        <div class="swatch"><div class="swatch-chip" style="background:var(--volt-100)"></div><div class="swatch-info"><div class="swatch-name">volt-100</div><div class="swatch-val">#ece4ff</div></div></div>
+        <div class="swatch"><div class="swatch-chip" style="background:var(--volt-200)"></div><div class="swatch-info"><div class="swatch-name">volt-200</div><div class="swatch-val">#d3c1ff</div></div></div>
+        <div class="swatch"><div class="swatch-chip" style="background:var(--volt-300)"></div><div class="swatch-info"><div class="swatch-name">volt-300</div><div class="swatch-val">#b195ff</div></div></div>
+        <div class="swatch"><div class="swatch-chip" style="background:var(--volt-400)"></div><div class="swatch-info"><div class="swatch-name">volt-400</div><div class="swatch-val">#8b5cff</div></div></div>
+        <div class="swatch"><div class="swatch-chip" style="background:var(--volt-500)"></div><div class="swatch-info"><div class="swatch-name">volt-500</div><div class="swatch-val">#6d28ff</div></div></div>
+        <div class="swatch"><div class="swatch-chip" style="background:var(--volt-600)"></div><div class="swatch-info"><div class="swatch-name">volt-600</div><div class="swatch-val">#5518d6</div></div></div>
+      </div>
+    </div>
+    <div>
+      <div class="section-title" style="font-size:var(--fs-xl)"><span class="section-num">04 —</span> 电光橙 Flare</div>
+      <div class="swatch-grid">
+        <div class="swatch"><div class="swatch-chip" style="background:var(--flare-100)"></div><div class="swatch-info"><div class="swatch-name">flare-100</div><div class="swatch-val">#ffe8dd</div></div></div>
+        <div class="swatch"><div class="swatch-chip" style="background:var(--flare-200)"></div><div class="swatch-info"><div class="swatch-name">flare-200</div><div class="swatch-val">#ffc9ab</div></div></div>
+        <div class="swatch"><div class="swatch-chip" style="background:var(--flare-300)"></div><div class="swatch-info"><div class="swatch-name">flare-300</div><div class="swatch-val">#ff9f6b</div></div></div>
+        <div class="swatch"><div class="swatch-chip" style="background:var(--flare-400)"></div><div class="swatch-info"><div class="swatch-name">flare-400</div><div class="swatch-val">#ff6b1f</div></div></div>
+        <div class="swatch"><div class="swatch-chip" style="background:var(--flare-500)"></div><div class="swatch-info"><div class="swatch-name">flare-500</div><div class="swatch-val">#e54f00</div></div></div>
+        <div class="swatch"><div class="swatch-chip" style="background:var(--flare-600)"></div><div class="swatch-info"><div class="swatch-name">flare-600</div><div class="swatch-val">#b83f00</div></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-title"><span class="section-num">05 —</span> 语义色</div>
+  <div class="grid g-4 mb-10">
+    <div class="card card-pad"><div class="caps mb-3">Success</div><div style="height:48px;background:var(--success-solid);border:var(--border-w) solid var(--border-default)"></div><div style="height:32px;background:var(--success-bg);border:var(--border-w) solid var(--border-default);border-top:none"></div><div class="xsmall muted mt-3">已确认 / 已成团 / 签到</div></div>
+    <div class="card card-pad"><div class="caps mb-3">Warning</div><div style="height:48px;background:var(--warning-solid);border:var(--border-w) solid var(--border-default)"></div><div style="height:32px;background:var(--warning-bg);border:var(--border-w) solid var(--border-default);border-top:none"></div><div class="xsmall muted mt-3">待审核 / 即将截止</div></div>
+    <div class="card card-pad"><div class="caps mb-3">Danger</div><div style="height:48px;background:var(--danger-solid);border:var(--border-w) solid var(--border-default)"></div><div style="height:32px;background:var(--danger-bg);border:var(--border-w) solid var(--border-default);border-top:none"></div><div class="xsmall muted mt-3">超时 / 驳回 / 取消</div></div>
+    <div class="card card-pad"><div class="caps mb-3">Info</div><div style="height:48px;background:var(--info-solid);border:var(--border-w) solid var(--border-default)"></div><div style="height:32px;background:var(--info-bg);border:var(--border-w) solid var(--border-default);border-top:none"></div><div class="xsmall muted mt-3">进行中 / 付款确认中</div></div>
+  </div>
+
+  <div class="grid g-2">
+    <div class="card card-pad">
+      <div class="section-title" style="font-size:var(--fs-xl)"><span class="section-num">06 —</span> 字号阶梯</div>
+      <div class="spec-row"><span class="spec-key">7xl / 128</span><span style="font-family:var(--font-display);font-size:76px;font-weight:900;letter-spacing:-.045em;line-height:.9">线下</span></div>
+      <div class="spec-row"><span class="spec-key">6xl / 96</span><span style="font-family:var(--font-display);font-size:62px;font-weight:900;letter-spacing:-.045em">才算数</span></div>
+      <div class="spec-row"><span class="spec-key">5xl / 72</span><span style="font-family:var(--font-display);font-size:52px;font-weight:900;letter-spacing:-.045em">DESIGN</span></div>
+      <div class="spec-row"><span class="spec-key">4xl / 52</span><span style="font-family:var(--font-display);font-size:42px;font-weight:900;letter-spacing:-.03em">¥13,380</span></div>
+      <div class="spec-row"><span class="spec-key">3xl / 38</span><span style="font-size:34px;font-weight:900;letter-spacing:-.025em">¥88</span></div>
+      <div class="spec-row"><span class="spec-key">2xl / 28</span><span style="font-size:26px;font-weight:900;letter-spacing:-.025em">周末火锅局</span></div>
+      <div class="spec-row"><span class="spec-key">xl / 22</span><span style="font-size:22px;font-weight:700">活动信息</span></div>
+      <div class="spec-row"><span class="spec-key">lg / 18</span><span style="font-size:18px">正文强调与长文</span></div>
+      <div class="spec-row"><span class="spec-key">md / 15</span><span style="font-size:15px">正文基准</span></div>
+      <div class="spec-row"><span class="spec-key">sm / 13</span><span style="font-size:13px">次要信息</span></div>
+      <div class="spec-row"><span class="spec-key">xs / 11</span><span style="font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.12em">全大写标签</span></div>
+    </div>
+    <div class="card card-pad">
+      <div class="section-title" style="font-size:var(--fs-xl)"><span class="section-num">07 —</span> 间距 / 圆角 / 阴影</div>
+      <div class="spec-row"><span class="spec-key">间距 4px</span><div class="row gap-1">
+        <span style="width:4px;height:24px;background:var(--acid-400);border:1px solid var(--n-900)"></span><span style="width:8px;height:24px;background:var(--acid-400);border:1px solid var(--n-900)"></span><span style="width:12px;height:24px;background:var(--acid-400);border:1px solid var(--n-900)"></span><span style="width:16px;height:24px;background:var(--acid-400);border:1px solid var(--n-900)"></span><span style="width:24px;height:24px;background:var(--acid-400);border:1px solid var(--n-900)"></span><span style="width:32px;height:24px;background:var(--acid-400);border:1px solid var(--n-900)"></span><span style="width:48px;height:24px;background:var(--acid-400);border:1px solid var(--n-900)"></span>
+      </div></div>
+      <div class="spec-row"><span class="spec-key">圆角（近零）</span><div class="row gap-3">
+        <span style="width:44px;height:44px;background:var(--n-200);border:var(--border-w) solid var(--n-900);border-radius:0"></span>
+        <span style="width:44px;height:44px;background:var(--n-200);border:var(--border-w) solid var(--n-900);border-radius:2px"></span>
+        <span style="width:44px;height:44px;background:var(--n-200);border:var(--border-w) solid var(--n-900);border-radius:4px"></span>
+        <span style="width:44px;height:44px;background:var(--n-200);border:var(--border-w) solid var(--n-900);border-radius:999px"></span>
+      </div></div>
+      <div class="spec-row"><span class="spec-key">硬阴影</span><div class="row gap-5" style="padding-bottom:12px">
+        <span style="width:56px;height:40px;background:var(--bg-surface);border:var(--border-w) solid var(--n-900);box-shadow:var(--shadow-hard-sm)"></span>
+        <span style="width:56px;height:40px;background:var(--bg-surface);border:var(--border-w) solid var(--n-900);box-shadow:var(--shadow-hard)"></span>
+        <span style="width:56px;height:40px;background:var(--bg-surface);border:var(--border-w) solid var(--n-900);box-shadow:var(--shadow-hard-acid)"></span>
+        <span style="width:56px;height:40px;background:var(--bg-surface);border:var(--border-w) solid var(--n-900);box-shadow:var(--shadow-hard-volt)"></span>
+      </div></div>
+      <div class="spec-row"><span class="spec-key">边框</span><div class="row gap-3">
+        <span style="width:56px;height:36px;border:1px solid var(--border-hair)"></span>
+        <span style="width:56px;height:36px;border:2px solid var(--border-default)"></span>
+        <span style="width:56px;height:36px;border:3px solid var(--border-default)"></span>
+      </div></div>
+      <div class="spec-row"><span class="spec-key">字重</span><div class="row gap-4 wrap"><span style="font-weight:400">400</span><span style="font-weight:500">500</span><span style="font-weight:700">700</span><span style="font-weight:900">900 主力</span></div></div>
+      <div class="spec-row"><span class="spec-key">行高</span><div class="row gap-4 small"><span>0.88 巨标题</span><span>1.05 标题</span><span>1.3 紧</span><span>1.55 正文</span></div></div>
+      <div class="spec-row"><span class="spec-key">字距</span><div class="stack small"><span>-0.045em 巨标题</span><span>+0.12em 全大写标签</span></div></div>
+      <div class="spec-row"><span class="spec-key">字体</span><div class="stack"><span style="font-family:var(--font-display);font-weight:900">Archivo Black — 标题</span><span class="mono xsmall">JetBrains Mono — 数字/单号</span></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== 页面 5：组件 ==================== -->
+<section class="page" id="page-components">
+  <div class="kicker">设计系统 / 02</div>
+  <h1 class="page-title">Compo-<br>nents</h1>
+  <p class="page-sub">直角 + 粗描边 + 硬偏移阴影。按下时位移 2px 并去掉阴影，模拟物理按压。</p>
+
+  <div class="rule"></div>
+
+  <div class="section-title"><span class="section-num">01 —</span> 按钮</div>
+  <div class="card card-pad mb-10">
+    <div class="stack gap-6">
+      <div class="row wrap gap-4" style="align-items:center"><span class="spec-key">Primary</span><button class="btn btn-primary btn-sm">报名</button><button class="btn btn-primary btn-md">立即报名</button><button class="btn btn-primary btn-lg">立即报名</button><button class="btn btn-primary btn-xl">立即报名 →</button><button class="btn btn-primary btn-md is-disabled">已截止</button></div>
+      <div class="row wrap gap-4" style="align-items:center"><span class="spec-key">Secondary</span><button class="btn btn-secondary btn-sm">详情</button><button class="btn btn-secondary btn-md">查看详情</button><button class="btn btn-secondary btn-lg">查看详情</button><button class="btn btn-secondary btn-xl">查看详情</button><button class="btn btn-secondary btn-md is-disabled">查看详情</button></div>
+      <div class="row wrap gap-4" style="align-items:center"><span class="spec-key">Ink 高强调</span><button class="btn btn-ink btn-sm">提交</button><button class="btn btn-ink btn-md">提交报名</button><button class="btn btn-ink btn-lg">提交报名</button><button class="btn btn-ink btn-xl">提交报名 →</button><button class="btn btn-ink btn-md is-disabled">提交</button></div>
+      <div class="row wrap gap-4" style="align-items:center"><span class="spec-key">Ghost</span><button class="btn btn-ghost btn-sm">取消</button><button class="btn btn-ghost btn-md">取消</button><button class="btn btn-ghost btn-lg">取消</button><button class="btn btn-ghost btn-xl">取消</button><button class="btn btn-ghost btn-md is-disabled">取消</button></div>
+      <div class="row wrap gap-4" style="align-items:center"><span class="spec-key">Danger</span><button class="btn btn-danger btn-sm">驳回</button><button class="btn btn-danger btn-md">驳回付款</button><button class="btn btn-danger-soft btn-md">取消报名</button><button class="btn btn-danger-soft btn-lg">取消报名</button><button class="btn btn-danger btn-md is-disabled">驳回</button></div>
+    </div>
+  </div>
+
+  <div class="grid g-2 mb-10">
+    <div>
+      <div class="section-title" style="font-size:var(--fs-xl)"><span class="section-num">02 —</span> 输入</div>
+      <div class="card card-pad stack gap-5">
+        <div class="field"><label class="label">活动名称</label><input class="input" placeholder="例：周末火锅局"></div>
+        <div class="field"><label class="label">已填状态</label><input class="input" value="《坂本龙一：杰作》线下观影"></div>
+        <div class="field"><label class="label">城市</label><select class="select"><option>上海</option><option>杭州</option><option>成都</option></select></div>
+        <div class="field"><label class="label">联系手机</label><input class="input is-error" value="1380000"><span class="hint is-error">手机号格式不正确，需 11 位数字</span></div>
+        <div class="field"><label class="label">活动介绍</label><textarea class="textarea" rows="3" placeholder="说明活动流程与注意事项"></textarea><span class="hint">建议 100–500 字</span></div>
+        <div class="field"><label class="label">搜索</label><div class="search-wrap"><span class="ico">⌕</span><input class="input" placeholder="搜索活动 / 城市"></div></div>
+      </div>
+    </div>
+    <div>
+      <div class="section-title" style="font-size:var(--fs-xl)"><span class="section-num">03 —</span> 徽章 / 进度</div>
+      <div class="card card-pad">
+        <div class="caps muted mb-3">8 种活动状态</div>
+        <div class="row wrap gap-2 mb-6">
+          <span class="badge badge-neutral">草稿配置</span>
+          <span class="badge badge-info">数调中</span>
+          <span class="badge badge-neutral">待开放</span>
+          <span class="badge badge-success">报名中</span>
+          <span class="badge badge-warning">即将截止</span>
+          <span class="badge badge-volt">付款确认中</span>
+          <span class="badge badge-acid">已成团</span>
+          <span class="badge badge-ink">已结束</span>
+        </div>
+        <div class="caps muted mb-3">订单状态</div>
+        <div class="row wrap gap-2 mb-6">
+          <span class="badge badge-warning">待审核</span>
+          <span class="badge badge-danger">超时待审</span>
+          <span class="badge badge-success">已确认</span>
+          <span class="badge badge-danger">已驳回</span>
+          <span class="badge badge-neutral">已取消</span>
+          <span class="badge badge-acid">已签到</span>
+        </div>
+        <div class="caps muted mb-3">进度 / 分段</div>
+        <div class="stack gap-4">
+          <div><div class="caps muted mb-2">Acid · 70%</div><div class="progress"><span style="width:70%"></span></div></div>
+          <div><div class="caps muted mb-2">Volt · 62%</div><div class="progress is-volt"><span style="width:62%"></span></div></div>
+          <div><div class="caps muted mb-2">Flare · 81% 接近满员</div><div class="progress is-flare"><span style="width:81%"></span></div></div>
+          <div class="seg"><button class="is-active">全部</button><button>报名中</button><button>已结束</button></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-title"><span class="section-num">04 —</span> 卡片 · 3 语义变体</div>
+  <div class="grid g-3 mb-10">
+    <div class="card card-pad"><div class="caps mb-3">01 / Default</div><p class="small muted">2px 黑描边，无阴影。基础容器。</p></div>
+    <div class="card card-interactive card-pad"><div class="caps mb-3">02 / Interactive</div><p class="small muted">hover 位移 -4px 并浮出硬阴影。用于活动卡。</p></div>
+    <div class="card card-emphasis card-pad"><div class="caps mb-3">03 / Emphasis</div><p class="small muted">硬阴影常驻。用于关键动作区与告警。</p></div>
+  </div>
+
+  <div class="section-title"><span class="section-num">05 —</span> 模态</div>
+  <div class="card card-pad">
+    <button class="btn btn-ink btn-md" onclick="openModal()">打开确认模态</button>
+    <p class="small muted mt-3">模态头部为荧光绿实心块，3px 描边 + 10px 硬阴影。</p>
+  </div>
+</section>
+
+<!-- ==================== 页面 6：状态 ==================== -->
+<section class="page" id="page-states">
+  <div class="kicker">设计系统 / 03</div>
+  <h1 class="page-title">States</h1>
+  <p class="page-sub">Loading 骨架 / Empty 空状态 / Error 错误 —— 空状态用巨型数字与描边字，不用插画。</p>
+
+  <div class="rule"></div>
+
+  <div class="section-title"><span class="section-num">01 —</span> Loading · 骨架屏</div>
+  <div class="grid g-2 mb-10">
+    <div class="card">
+      <div class="card-head"><span class="card-title">列表骨架</span></div>
+      <div>
+        <div class="todo"><div class="skel" style="width:26px;height:20px"></div><div class="todo-main stack gap-2"><div class="skel skel-title" style="width:54%"></div><div class="skel skel-line" style="width:76%"></div></div><div class="skel" style="width:64px;height:24px"></div></div>
+        <div class="todo"><div class="skel" style="width:26px;height:20px"></div><div class="todo-main stack gap-2"><div class="skel skel-title" style="width:44%"></div><div class="skel skel-line" style="width:64%"></div></div><div class="skel" style="width:64px;height:24px"></div></div>
+        <div class="todo"><div class="skel" style="width:26px;height:20px"></div><div class="todo-main stack gap-2"><div class="skel skel-title" style="width:62%"></div><div class="skel skel-line" style="width:70%"></div></div><div class="skel" style="width:64px;height:24px"></div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head"><span class="card-title">指标骨架</span></div>
+      <div class="grid g-2" style="gap:0">
+        <div class="metric" style="border-right:var(--border-w) solid var(--border-default);border-bottom:var(--border-w) solid var(--border-default)"><div class="skel skel-line" style="width:64%"></div><div class="skel mt-3" style="width:76px;height:44px"></div></div>
+        <div class="metric" style="border-bottom:var(--border-w) solid var(--border-default)"><div class="skel skel-line" style="width:54%"></div><div class="skel mt-3" style="width:90px;height:44px"></div></div>
+        <div class="metric" style="border-right:var(--border-w) solid var(--border-default)"><div class="skel skel-line" style="width:70%"></div><div class="skel mt-3" style="width:84px;height:44px"></div></div>
+        <div class="metric"><div class="skel skel-line" style="width:48%"></div><div class="skel mt-3" style="width:60px;height:44px"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card mb-10">
+    <div class="card-head"><span class="card-title">表格骨架</span></div>
+    <div class="table-wrap">
+      <table class="tbl">
+        <thead><tr><th>订单号</th><th>参与者</th><th>活动</th><th class="right">金额</th><th>状态</th></tr></thead>
+        <tbody>
+          <tr><td><div class="skel skel-line" style="width:76px"></div></td><td><div class="skel skel-line" style="width:88px"></div></td><td><div class="skel skel-line" style="width:120px"></div></td><td class="right"><div class="skel skel-line" style="width:56px;margin-left:auto"></div></td><td><div class="skel" style="width:72px;height:24px"></div></td></tr>
+          <tr><td><div class="skel skel-line" style="width:76px"></div></td><td><div class="skel skel-line" style="width:70px"></div></td><td><div class="skel skel-line" style="width:104px"></div></td><td class="right"><div class="skel skel-line" style="width:48px;margin-left:auto"></div></td><td><div class="skel" style="width:72px;height:24px"></div></td></tr>
+          <tr><td><div class="skel skel-line" style="width:76px"></div></td><td><div class="skel skel-line" style="width:96px"></div></td><td><div class="skel skel-line" style="width:112px"></div></td><td class="right"><div class="skel skel-line" style="width:52px;margin-left:auto"></div></td><td><div class="skel" style="width:72px;height:24px"></div></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="section-title"><span class="section-num">02 —</span> Empty · 空状态</div>
+  <div class="grid g-3 mb-10">
+    <div class="card">
+      <div class="empty">
+        <div class="empty-mark">00</div>
+        <div class="empty-title">还没有活动</div>
+        <div class="empty-desc">创建第一场活动后，报名、审核与签到都在这里统一管理。</div>
+        <button class="btn btn-primary btn-md">创建第一场</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="empty">
+        <div class="empty-mark">?</div>
+        <div class="empty-title">没有匹配结果</div>
+        <div class="empty-desc">当前筛选：上海 · 免费 · 本周内。试着放宽条件。</div>
+        <button class="btn btn-secondary btn-md">清除筛选</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="empty">
+        <div class="empty-mark">✓</div>
+        <div class="empty-title">全部处理完毕</div>
+        <div class="empty-desc">12 笔付款已审核完成，没有阻塞参与者的事项。</div>
+        <button class="btn btn-ghost btn-md">查看记录</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-title"><span class="section-num">03 —</span> Error · 内联</div>
+  <div class="stack gap-4 mb-10">
+    <div class="alert alert-danger"><span class="alert-mark">!!</span><div><div class="alert-title">付款凭证上传失败</div><div class="alert-body">文件超过 5 MB 限制。请压缩后重试，或改用截图。</div></div></div>
+    <div class="alert alert-warning"><span class="alert-mark">!</span><div><div class="alert-title">距报名截止不足 24 小时</div><div class="alert-body">此时修改票价不会影响已提交的订单。</div></div></div>
+    <div class="alert alert-info"><span class="alert-mark">i</span><div><div class="alert-title">名额即将售罄</div><div class="alert-body">仅剩 18 席，建议尽快完成付款以锁定名额。</div></div></div>
+    <div class="alert alert-acid"><span class="alert-mark">✓</span><div><div class="alert-title">报名提交成功</div><div class="alert-body">已通知主办，确认后将以短信提醒你。</div></div></div>
+  </div>
+
+  <div class="section-title"><span class="section-num">04 —</span> Error · 整页</div>
+  <div class="card card-emphasis">
+    <div class="empty">
+      <div class="empty-mark" style="color:var(--flare-400)">500</div>
+      <div class="empty-title">工作台加载失败</div>
+      <div class="empty-desc">数据载入异常。请重新加载页面；若问题持续，请检查后端服务状态。</div>
+      <div class="row gap-3" style="justify-content:center">
+        <button class="btn btn-primary btn-md">重新加载</button>
+        <button class="btn btn-secondary btn-md">系统状态</button>
+      </div>
+      <div class="mt-6 mono xsmall muted">GU_DASHBOARD_FETCH_FAILED · REQ a71f3c9e</div>
+    </div>
+  </div>
+</section>
+
+</div>
+
+<div class="modal-scrim" id="modal" hidden onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title">确认报名？</div>
+      <div class="modal-desc">《坂本龙一：杰作》线下观影 · 标准票 × 2</div>
+    </div>
+    <div class="modal-body stack gap-4">
+      <div class="row-between small"><span class="caps muted">活动时间</span><span class="black">2026.06.22 14:30</span></div>
+      <div class="row-between small"><span class="caps muted">地点</span><span class="black">百丽宫影城 环贸店</span></div>
+      <div class="row-between"><span class="caps muted">应付金额</span><span class="price" style="font-size:var(--fs-2xl)">¥176</span></div>
+      <div class="alert alert-warning"><span class="alert-mark">!</span><div class="alert-body">请在 <b>30 分钟</b>内完成付款并上传凭证，逾期名额自动释放。</div></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-secondary btn-lg" onclick="closeModal()">再想想</button>
+      <button class="btn btn-primary btn-lg" onclick="closeModal()">确认提交</button>
+    </div>
+  </div>
+</div>
+
+<script>
+function goto(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.toggle('is-active', p.id === 'page-' + id));
+  document.querySelectorAll('.nav-link').forEach(n => n.classList.toggle('is-active', n.dataset.goto === id));
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+document.querySelectorAll('[data-goto]').forEach(el => el.addEventListener('click', () => goto(el.dataset.goto)));
+
+function toggleTheme() {
+  const root = document.documentElement;
+  const next = root.dataset.theme === 'dark' ? 'light' : 'dark';
+  root.dataset.theme = next;
+  document.getElementById('theme-txt').textContent = next === 'dark' ? '亮色' : '暗色';
+}
+function openModal() { document.getElementById('modal').hidden = false; }
+function closeModal() { document.getElementById('modal').hidden = true; }
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+</script>
+</body>
+</html>

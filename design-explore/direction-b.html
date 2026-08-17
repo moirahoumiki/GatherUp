@@ -1,0 +1,1567 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>方向 B · 温暖社交型 — GatherUp 设计探索</title>
+<style>
+/* ============================================================
+   DIRECTION B — "Warm Gathering"
+   气质：温暖 / 圆润 / 有色彩 / 情绪价值 / 插画感
+   与 A 的结构性区别：
+     · 顶部导航（不是侧边栏）—— 消费型产品而非工具
+     · 大圆角 16–28px，胶囊按钮 —— 柔软
+     · 多色相调色板（珊瑚橘主 + 青绿辅 + 鹅黄点缀）
+     · 柔和大阴影分层（不靠边框）
+     · 宽松间距、大行高、圆体字重偏粗
+     · CSS 绘制的插画 blob / 渐变网格
+   ============================================================ */
+
+/* ---------- TOKENS: LIGHT ---------- */
+:root {
+  /* 中性阶 —— 暖调米灰（不是冷灰） */
+  --n-0:   #ffffff;
+  --n-25:  #fffdfb;
+  --n-50:  #fdf8f4;
+  --n-100: #f8f0e9;
+  --n-150: #f2e6db;
+  --n-200: #e9d9cc;
+  --n-300: #d8c2b1;
+  --n-400: #b9a08c;
+  --n-500: #947c67;
+  --n-600: #75604e;
+  --n-700: #5a483a;
+  --n-800: #40332a;
+  --n-900: #2b211b;
+  --n-950: #1a1310;
+
+  /* 主色 —— 珊瑚橘（温暖、邀请感） */
+  --brand-50:  #fff1ec;
+  --brand-100: #ffe1d6;
+  --brand-200: #ffc5b0;
+  --brand-300: #ffa286;
+  --brand-400: #ff7d59;
+  --brand-500: #f95f38;
+  --brand-600: #e64620;
+  --brand-700: #bd3417;
+  --brand-800: #962a13;
+  --brand-900: #7a2513;
+
+  /* 辅色 —— 青绿（平衡暖色，用于成功/次要动作） */
+  --teal-50:  #e8f8f4;
+  --teal-100: #cbefe7;
+  --teal-200: #9adfd0;
+  --teal-300: #5fc9b3;
+  --teal-400: #2fae95;
+  --teal-500: #189179;
+  --teal-600: #0f7562;
+  --teal-700: #0d5e4f;
+
+  /* 点缀 —— 鹅黄 / 薰衣草（插画色） */
+  --sun-100: #fff3cf;
+  --sun-200: #ffe49b;
+  --sun-300: #ffd15e;
+  --sun-400: #f7b62c;
+  --sun-500: #db9410;
+
+  --lav-100: #efeafd;
+  --lav-200: #ddd2fb;
+  --lav-300: #c2b0f6;
+  --lav-400: #a288ee;
+  --lav-500: #8265dd;
+
+  /* 语义色 */
+  --success-bg: #e2f7f0; --success-fg: #0d6b58; --success-br: #9de0cd; --success-solid: #189179;
+  --warning-bg: #fff4d9; --warning-fg: #8a6008; --warning-br: #ffd98e; --warning-solid: #e0a01a;
+  --danger-bg:  #ffe9e5; --danger-fg:  #ad2f1c; --danger-br:  #ffb8a8; --danger-solid: #e04a2c;
+  --info-bg:    #eeeafe; --info-fg:    #58399f; --info-br:    #cbbcf8; --info-solid:  #7a5ad1;
+
+  /* 表面 */
+  --bg-app:     var(--n-50);
+  --bg-surface: var(--n-0);
+  --bg-sunken:  var(--n-100);
+  --bg-hover:   var(--n-100);
+  --bg-inverse: var(--n-900);
+  --bg-warm:    linear-gradient(160deg, #fff5ee 0%, #fdf0f6 45%, #eef7f5 100%);
+
+  --fg-primary:   var(--n-900);
+  --fg-secondary: var(--n-600);
+  --fg-tertiary:  var(--n-500);
+  --fg-disabled:  var(--n-400);
+  --fg-inverse:   #fff;
+  --fg-brand:     var(--brand-600);
+
+  --border-subtle:  var(--n-150);
+  --border-default: var(--n-200);
+  --border-strong:  var(--n-300);
+
+  /* 阴影 —— B 方向的主要分层手段，柔和大范围 + 暖色调 */
+  --shadow-sm: 0 2px 6px rgba(112, 76, 48, .06);
+  --shadow-md: 0 6px 18px rgba(112, 76, 48, .09), 0 2px 6px rgba(112, 76, 48, .05);
+  --shadow-lg: 0 16px 40px rgba(112, 76, 48, .13), 0 4px 12px rgba(112, 76, 48, .07);
+  --shadow-xl: 0 28px 68px rgba(112, 76, 48, .17), 0 8px 20px rgba(112, 76, 48, .09);
+  --shadow-brand: 0 8px 22px rgba(233, 74, 38, .28);
+  --shadow-focus: 0 0 0 4px var(--brand-100);
+
+  --skeleton-base: var(--n-100);
+  --skeleton-shine: var(--n-50);
+}
+
+/* ---------- TOKENS: DARK ---------- */
+[data-theme="dark"] {
+  --n-0:   #191310;
+  --n-25:  #1d1613;
+  --n-50:  #241b17;
+  --n-100: #2e231d;
+  --n-150: #3a2c24;
+  --n-200: #4a382e;
+  --n-300: #634c3e;
+  --n-400: #8a6c58;
+  --n-500: #ad8d76;
+  --n-600: #ceb09a;
+  --n-700: #e2ccba;
+  --n-800: #f0e2d5;
+  --n-900: #fdf4ec;
+  --n-950: #ffffff;
+
+  --brand-50:  #3a1a10;
+  --brand-100: #4d2115;
+  --brand-200: #6b2d1c;
+  --brand-300: #984025;
+  --brand-400: #d55c33;
+  --brand-500: #ff7d59;
+  --brand-600: #ff9576;
+  --brand-700: #ffb098;
+  --brand-800: #ffcbba;
+  --brand-900: #ffe1d6;
+
+  --teal-50:  #0d2b26;
+  --teal-100: #123b32;
+  --teal-200: #175446;
+  --teal-300: #1f7864;
+  --teal-400: #2fae95;
+  --teal-500: #4fc9ae;
+  --teal-600: #7bdcc4;
+  --teal-700: #a6ebd9;
+
+  --sun-100: #3a2c0c;
+  --sun-200: #513d0f;
+  --sun-300: #7d5f18;
+  --sun-400: #d9a52a;
+  --sun-500: #f5c95e;
+
+  --lav-100: #2a2245;
+  --lav-200: #3b2f63;
+  --lav-300: #57468f;
+  --lav-400: #8f77e0;
+  --lav-500: #b6a3f2;
+
+  --success-bg: #0f3229; --success-fg: #74dcbf; --success-br: #1c5647; --success-solid: #2fae95;
+  --warning-bg: #372711; --warning-fg: #ffd280; --warning-br: #5e4318; --warning-solid: #dfa42a;
+  --danger-bg:  #3a1a13; --danger-fg:  #ffab95; --danger-br:  #67291c; --danger-solid: #e75c3d;
+  --info-bg:    #271f47; --info-fg:    #c0abfa; --info-br:    #423372; --info-solid:  #8f77e0;
+
+  --bg-app:     var(--n-25);
+  --bg-surface: var(--n-50);
+  --bg-sunken:  var(--n-100);
+  --bg-hover:   var(--n-100);
+  --bg-inverse: var(--n-900);
+  --bg-warm:    linear-gradient(160deg, #2e201a 0%, #2c1d24 45%, #1c2a27 100%);
+
+  --fg-primary:   var(--n-900);
+  --fg-secondary: var(--n-600);
+  --fg-tertiary:  var(--n-500);
+  --fg-disabled:  var(--n-400);
+  --fg-inverse:   var(--n-0);
+  --fg-brand:     var(--brand-600);
+
+  --border-subtle:  var(--n-150);
+  --border-default: var(--n-200);
+  --border-strong:  var(--n-300);
+
+  --shadow-sm: 0 2px 6px rgba(0,0,0,.35);
+  --shadow-md: 0 6px 18px rgba(0,0,0,.45), 0 2px 6px rgba(0,0,0,.3);
+  --shadow-lg: 0 16px 40px rgba(0,0,0,.55), 0 4px 12px rgba(0,0,0,.35);
+  --shadow-xl: 0 28px 68px rgba(0,0,0,.62), 0 8px 20px rgba(0,0,0,.4);
+  --shadow-brand: 0 8px 22px rgba(255,125,89,.3);
+  --shadow-focus: 0 0 0 4px var(--brand-200);
+
+  --skeleton-base: var(--n-100);
+  --skeleton-shine: var(--n-150);
+}
+
+/* ---------- 排版 / 间距 / 圆角 ---------- */
+:root {
+  --font-sans: "Nunito", "Quicksand", -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  --font-display: "Nunito", "Quicksand", -apple-system, "PingFang SC", sans-serif;
+
+  /* 字号阶梯 —— 比 A 大一档，1.2 比例，阅读友好 */
+  --fs-xs:  12px;
+  --fs-sm:  13px;
+  --fs-md:  15px;   /* 正文基准 —— 比 A 大 2px */
+  --fs-lg:  17px;
+  --fs-xl:  20px;
+  --fs-2xl: 24px;
+  --fs-3xl: 29px;
+  --fs-4xl: 35px;
+  --fs-5xl: 44px;
+  --fs-6xl: 56px;
+
+  --fw-regular: 400;
+  --fw-medium: 500;
+  --fw-semibold: 600;
+  --fw-bold: 700;
+  --fw-extra: 800;
+
+  --lh-tight: 1.2;
+  --lh-snug: 1.35;
+  --lh-normal: 1.65;   /* 比 A 更松 */
+  --lh-relaxed: 1.85;
+
+  --ls-tight: -0.02em;
+  --ls-normal: 0;
+  --ls-wide: 0.02em;
+
+  /* 间距 —— 比 A 更大方 */
+  --sp-1: 4px;   --sp-2: 8px;   --sp-3: 12px;  --sp-4: 16px;
+  --sp-5: 20px;  --sp-6: 24px;  --sp-7: 28px;  --sp-8: 32px;
+  --sp-10: 40px; --sp-12: 48px; --sp-16: 64px; --sp-20: 80px; --sp-24: 96px;
+
+  /* 圆角 —— 大而柔软 */
+  --r-sm: 8px;  --r-md: 12px; --r-lg: 16px;
+  --r-xl: 20px; --r-2xl: 28px; --r-3xl: 36px; --r-full: 999px;
+
+  --dur-fast: 140ms;
+  --dur-base: 240ms;
+  --dur-slow: 400ms;
+  --ease: cubic-bezier(.34,1.4,.64,1);       /* 微弹 */
+  --ease-out: cubic-bezier(.22,.61,.36,1);
+}
+
+/* ============================================================
+   BASE
+   ============================================================ */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-font-smoothing: antialiased; scroll-behavior: smooth; }
+body {
+  font-family: var(--font-sans);
+  font-size: var(--fs-md);
+  line-height: var(--lh-normal);
+  color: var(--fg-primary);
+  background: var(--bg-app);
+  transition: background var(--dur-base) var(--ease-out), color var(--dur-base) var(--ease-out);
+}
+a { color: inherit; text-decoration: none; }
+button { font: inherit; cursor: pointer; border: none; background: none; color: inherit; }
+input, select, textarea { font: inherit; color: inherit; }
+::selection { background: var(--brand-200); color: var(--n-900); }
+
+/* ============================================================
+   顶部方案切换条
+   ============================================================ */
+.dirbar {
+  position: sticky; top: 0; z-index: 90;
+  background: var(--n-900); color: var(--n-0);
+  display: flex; align-items: center; gap: var(--sp-2);
+  padding: 0 var(--sp-5); height: 44px; font-size: var(--fs-sm);
+}
+[data-theme="dark"] .dirbar { background: var(--n-100); color: var(--n-900); }
+.dirbar a { color: rgba(255,255,255,.6); font-weight: var(--fw-bold); padding: 5px 12px; border-radius: var(--r-full); }
+[data-theme="dark"] .dirbar a { color: var(--n-500); }
+.dirbar a:hover { color: #fff; background: rgba(255,255,255,.12); }
+[data-theme="dark"] .dirbar a:hover { color: var(--n-900); background: var(--n-200); }
+.dirbar a.is-current { color: #fff; background: var(--brand-500); }
+[data-theme="dark"] .dirbar a.is-current { color: #fff; }
+.dirbar .spacer { margin-left: auto; }
+.theme-toggle {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 5px 14px; border-radius: var(--r-full);
+  background: rgba(255,255,255,.14); color: #fff;
+  font-size: var(--fs-xs); font-weight: var(--fw-bold);
+  transition: all var(--dur-fast) var(--ease-out);
+}
+[data-theme="dark"] .theme-toggle { background: var(--n-200); color: var(--n-900); }
+.theme-toggle:hover { transform: translateY(-1px); }
+
+/* ============================================================
+   顶部导航（消费型产品）
+   ============================================================ */
+.nav {
+  position: sticky; top: 44px; z-index: 80;
+  background: color-mix(in srgb, var(--bg-surface) 86%, transparent);
+  backdrop-filter: blur(14px) saturate(150%);
+  border-bottom: 1px solid var(--border-subtle);
+}
+.nav-inner {
+  max-width: 1200px; margin: 0 auto; padding: var(--sp-3) var(--sp-6);
+  display: flex; align-items: center; gap: var(--sp-6);
+}
+.logo { display: flex; align-items: center; gap: var(--sp-2); font-size: var(--fs-xl); font-weight: var(--fw-extra); letter-spacing: var(--ls-tight); }
+.logo-mark {
+  width: 34px; height: 34px; border-radius: 12px;
+  background: linear-gradient(140deg, var(--brand-400), var(--brand-600) 60%, var(--lav-400));
+  box-shadow: var(--shadow-brand);
+  display: grid; place-items: center; color: #fff; font-size: var(--fs-lg); font-weight: var(--fw-extra);
+  transform: rotate(-6deg);
+}
+.nav-links { display: flex; gap: 4px; }
+.nav-link {
+  padding: 8px 16px; border-radius: var(--r-full);
+  font-weight: var(--fw-bold); font-size: var(--fs-md); color: var(--fg-secondary);
+  transition: all var(--dur-fast) var(--ease-out);
+}
+.nav-link:hover { background: var(--bg-hover); color: var(--fg-primary); }
+.nav-link.is-active { background: var(--brand-50); color: var(--brand-600); }
+.nav-right { margin-left: auto; display: flex; align-items: center; gap: var(--sp-3); }
+.avatar {
+  width: 38px; height: 38px; border-radius: var(--r-full);
+  background: linear-gradient(140deg, var(--teal-300), var(--teal-500));
+  color: #fff; display: grid; place-items: center;
+  font-weight: var(--fw-extra); font-size: var(--fs-sm);
+  border: 2px solid var(--bg-surface); box-shadow: var(--shadow-sm);
+  flex-shrink: 0;
+}
+
+.wrap-page { max-width: 1200px; margin: 0 auto; padding: var(--sp-8) var(--sp-6) var(--sp-24); }
+
+/* ============================================================
+   按钮 —— 胶囊，带弹性
+   ============================================================ */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  border-radius: var(--r-full); font-weight: var(--fw-bold);
+  border: 2px solid transparent; white-space: nowrap;
+  transition: transform var(--dur-fast) var(--ease), box-shadow var(--dur-fast) var(--ease-out),
+              background var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
+}
+.btn:active { transform: scale(.96); }
+.btn:focus-visible { outline: none; box-shadow: var(--shadow-focus); }
+.btn-sm { height: 34px; padding: 0 16px; font-size: var(--fs-sm); }
+.btn-md { height: 42px; padding: 0 22px; font-size: var(--fs-md); }
+.btn-lg { height: 50px; padding: 0 30px; font-size: var(--fs-lg); }
+.btn-xl { height: 58px; padding: 0 38px; font-size: var(--fs-lg); }
+
+.btn-primary { background: var(--brand-500); color: #fff; box-shadow: var(--shadow-brand); }
+.btn-primary:hover { background: var(--brand-600); transform: translateY(-2px); box-shadow: 0 12px 28px rgba(233,74,38,.34); }
+.btn-secondary { background: var(--bg-surface); color: var(--fg-primary); border-color: var(--border-default); box-shadow: var(--shadow-sm); }
+.btn-secondary:hover { border-color: var(--brand-300); color: var(--brand-600); transform: translateY(-2px); box-shadow: var(--shadow-md); }
+.btn-ghost { background: transparent; color: var(--fg-secondary); }
+.btn-ghost:hover { background: var(--bg-hover); color: var(--fg-primary); }
+.btn-teal { background: var(--teal-500); color: #fff; box-shadow: 0 8px 22px rgba(24,145,121,.26); }
+.btn-teal:hover { background: var(--teal-600); transform: translateY(-2px); }
+.btn-danger { background: var(--danger-solid); color: #fff; box-shadow: 0 8px 22px rgba(224,74,44,.26); }
+.btn-danger:hover { filter: brightness(.93); transform: translateY(-2px); }
+.btn-danger-soft { background: var(--danger-bg); color: var(--danger-fg); border-color: var(--danger-br); }
+.btn-danger-soft:hover { background: var(--danger-br); }
+.btn:disabled, .btn.is-disabled { opacity: .45; pointer-events: none; box-shadow: none; }
+.btn-icon { padding: 0; width: 42px; }
+.btn-icon.btn-sm { width: 34px; }
+
+/* ---------- 输入 ---------- */
+.field { display: flex; flex-direction: column; gap: 7px; }
+.label { font-size: var(--fs-sm); font-weight: var(--fw-bold); color: var(--fg-secondary); }
+.input, .select, .textarea {
+  height: 46px; padding: 0 18px; width: 100%;
+  background: var(--bg-surface); color: var(--fg-primary);
+  border: 2px solid var(--border-default); border-radius: var(--r-lg);
+  font-size: var(--fs-md); font-weight: var(--fw-medium);
+  transition: border-color var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out);
+}
+.textarea { height: auto; padding: 13px 18px; resize: vertical; line-height: var(--lh-normal); }
+.input::placeholder, .textarea::placeholder { color: var(--fg-disabled); font-weight: var(--fw-regular); }
+.input:focus, .select:focus, .textarea:focus { outline: none; border-color: var(--brand-400); box-shadow: var(--shadow-focus); }
+.input.is-error { border-color: var(--danger-solid); }
+.hint { font-size: var(--fs-xs); color: var(--fg-tertiary); }
+.hint.is-error { color: var(--danger-fg); font-weight: var(--fw-bold); }
+.select { appearance: none; background-image: linear-gradient(45deg,transparent 50%,var(--fg-tertiary) 50%),linear-gradient(135deg,var(--fg-tertiary) 50%,transparent 50%); background-position: calc(100% - 20px) 21px, calc(100% - 14px) 21px; background-size: 6px 6px,6px 6px; background-repeat: no-repeat; padding-right: 40px; }
+.search-wrap { position: relative; }
+.search-wrap .ico { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: var(--fg-tertiary); }
+.search-wrap .input { padding-left: 44px; }
+
+/* ---------- 卡片：3 个语义变体 ---------- */
+.card { background: var(--bg-surface); border-radius: var(--r-2xl); box-shadow: var(--shadow-sm); }
+.card-interactive { cursor: pointer; transition: transform var(--dur-base) var(--ease), box-shadow var(--dur-base) var(--ease-out); }
+.card-interactive:hover { transform: translateY(-6px); box-shadow: var(--shadow-xl); }
+.card-emphasis { box-shadow: var(--shadow-lg); }
+.card-pad { padding: var(--sp-6); }
+.card-head { padding: var(--sp-5) var(--sp-6); display: flex; align-items: center; gap: var(--sp-3); }
+.card-title { font-size: var(--fs-xl); font-weight: var(--fw-extra); letter-spacing: var(--ls-tight); }
+.card-body { padding: 0 var(--sp-6) var(--sp-6); }
+
+/* ---------- 徽章 —— 胶囊、饱满 ---------- */
+.badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  height: 28px; padding: 0 13px; border-radius: var(--r-full);
+  font-size: var(--fs-xs); font-weight: var(--fw-extra); white-space: nowrap;
+}
+.badge .dot { width: 6px; height: 6px; border-radius: var(--r-full); background: currentColor; }
+.badge-neutral { background: var(--n-100); color: var(--n-600); }
+.badge-brand   { background: var(--brand-100); color: var(--brand-700); }
+.badge-success { background: var(--success-bg); color: var(--success-fg); }
+.badge-warning { background: var(--warning-bg); color: var(--warning-fg); }
+.badge-danger  { background: var(--danger-bg);  color: var(--danger-fg); }
+.badge-info    { background: var(--info-bg);    color: var(--info-fg); }
+.badge-sun     { background: var(--sun-100);    color: var(--sun-500); }
+.badge-lg { height: 34px; padding: 0 18px; font-size: var(--fs-sm); }
+
+/* ---------- 表格 —— 卡片化、行间留白 ---------- */
+.table-wrap { overflow-x: auto; }
+table.tbl { width: 100%; border-collapse: separate; border-spacing: 0 8px; font-size: var(--fs-sm); }
+.tbl thead th {
+  text-align: left; padding: 0 var(--sp-4) var(--sp-2);
+  font-size: var(--fs-xs); font-weight: var(--fw-extra); color: var(--fg-tertiary);
+  white-space: nowrap;
+}
+.tbl tbody tr { background: var(--bg-sunken); transition: transform var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out); }
+.tbl tbody tr:hover { transform: translateX(3px); box-shadow: var(--shadow-md); }
+.tbl tbody td { padding: var(--sp-4); vertical-align: middle; }
+.tbl tbody td:first-child { border-radius: var(--r-lg) 0 0 var(--r-lg); }
+.tbl tbody td:last-child { border-radius: 0 var(--r-lg) var(--r-lg) 0; }
+.tbl .cell-main { font-weight: var(--fw-bold); font-size: var(--fs-md); }
+.tbl .cell-sub { font-size: var(--fs-xs); color: var(--fg-tertiary); }
+.tbl .right { text-align: right; }
+.num { font-variant-numeric: tabular-nums; }
+
+/* ---------- 模态 ---------- */
+.modal-scrim {
+  position: fixed; inset: 0; background: rgba(43,33,27,.48);
+  backdrop-filter: blur(5px); z-index: 200;
+  display: grid; place-items: center; padding: var(--sp-6);
+}
+.modal-scrim[hidden] { display: none; }
+.modal {
+  background: var(--bg-surface); border-radius: var(--r-3xl);
+  box-shadow: var(--shadow-xl); width: 100%; max-width: 460px;
+  overflow: hidden; animation: pop var(--dur-slow) var(--ease);
+}
+@keyframes pop { from { opacity: 0; transform: scale(.9) translateY(16px); } }
+.modal-illu {
+  height: 108px; background: var(--bg-warm);
+  display: grid; place-items: center; font-size: 46px; position: relative; overflow: hidden;
+}
+.modal-body { padding: var(--sp-6); text-align: center; }
+.modal-title { font-size: var(--fs-2xl); font-weight: var(--fw-extra); letter-spacing: var(--ls-tight); }
+.modal-desc { color: var(--fg-secondary); margin-top: 6px; }
+.modal-foot { padding: 0 var(--sp-6) var(--sp-6); display: flex; gap: var(--sp-3); }
+.modal-foot .btn { flex: 1; }
+
+/* ---------- 状态：骨架 / 空 / 错误 ---------- */
+.skel { background: var(--skeleton-base); border-radius: var(--r-full); position: relative; overflow: hidden; }
+.skel::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, transparent, var(--skeleton-shine), transparent); animation: shimmer 1.6s infinite; }
+@keyframes shimmer { 100% { transform: translateX(200%); } }
+.skel-line { height: 12px; }
+.skel-title { height: 18px; }
+.skel-block { border-radius: var(--r-xl); }
+
+.empty { text-align: center; padding: var(--sp-16) var(--sp-6); }
+.empty-illu {
+  width: 96px; height: 96px; margin: 0 auto var(--sp-5);
+  border-radius: var(--r-3xl); background: var(--bg-warm);
+  display: grid; place-items: center; font-size: 42px;
+  box-shadow: var(--shadow-md); transform: rotate(-4deg);
+}
+.empty-title { font-size: var(--fs-2xl); font-weight: var(--fw-extra); letter-spacing: var(--ls-tight); margin-bottom: var(--sp-2); }
+.empty-desc { color: var(--fg-tertiary); max-width: 360px; margin: 0 auto var(--sp-6); }
+
+.alert { display: flex; gap: var(--sp-3); padding: var(--sp-4) var(--sp-5); border-radius: var(--r-xl); }
+.alert-icon { font-size: var(--fs-xl); flex-shrink: 0; line-height: 1.2; }
+.alert-danger  { background: var(--danger-bg);  color: var(--danger-fg); }
+.alert-warning { background: var(--warning-bg); color: var(--warning-fg); }
+.alert-info    { background: var(--info-bg);    color: var(--info-fg); }
+.alert-success { background: var(--success-bg); color: var(--success-fg); }
+.alert-title { font-weight: var(--fw-extra); }
+.alert-body { opacity: .9; font-size: var(--fs-sm); margin-top: 2px; }
+
+/* ---------- 进度 ---------- */
+.progress { height: 10px; background: var(--n-100); border-radius: var(--r-full); overflow: hidden; }
+.progress > span { display: block; height: 100%; border-radius: var(--r-full); background: linear-gradient(90deg, var(--brand-400), var(--brand-500)); transition: width var(--dur-slow) var(--ease-out); }
+.progress.is-teal > span { background: linear-gradient(90deg, var(--teal-300), var(--teal-500)); }
+.progress.is-sun > span { background: linear-gradient(90deg, var(--sun-300), var(--sun-400)); }
+
+/* ---------- 分段 ---------- */
+.seg { display: inline-flex; background: var(--bg-sunken); border-radius: var(--r-full); padding: 4px; gap: 4px; }
+.seg button { padding: 7px 18px; border-radius: var(--r-full); font-size: var(--fs-sm); font-weight: var(--fw-bold); color: var(--fg-tertiary); transition: all var(--dur-fast) var(--ease-out); }
+.seg button.is-active { background: var(--bg-surface); color: var(--brand-600); box-shadow: var(--shadow-sm); }
+
+/* ---------- 页面切换 ---------- */
+.page { display: none; }
+.page.is-active { display: block; animation: rise var(--dur-slow) var(--ease-out); }
+@keyframes rise { from { opacity: 0; transform: translateY(12px); } }
+
+.page-head { margin-bottom: var(--sp-8); }
+.page-title { font-family: var(--font-display); font-size: var(--fs-4xl); font-weight: var(--fw-extra); letter-spacing: var(--ls-tight); line-height: var(--lh-tight); }
+.page-sub { font-size: var(--fs-lg); color: var(--fg-tertiary); margin-top: var(--sp-2); }
+.section-title { font-size: var(--fs-xl); font-weight: var(--fw-extra); letter-spacing: var(--ls-tight); margin-bottom: var(--sp-4); }
+.eyebrow { font-size: var(--fs-xs); font-weight: var(--fw-extra); color: var(--brand-500); letter-spacing: var(--ls-wide); text-transform: uppercase; margin-bottom: var(--sp-2); }
+
+.grid { display: grid; gap: var(--sp-5); }
+.g-2 { grid-template-columns: repeat(2,1fr); }
+.g-3 { grid-template-columns: repeat(3,1fr); }
+.g-4 { grid-template-columns: repeat(4,1fr); }
+.row { display: flex; align-items: center; gap: var(--sp-3); }
+.row-between { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-3); }
+.wrap { flex-wrap: wrap; }
+.stack { display: flex; flex-direction: column; }
+.gap-1{gap:var(--sp-1)}.gap-2{gap:var(--sp-2)}.gap-3{gap:var(--sp-3)}.gap-4{gap:var(--sp-4)}.gap-5{gap:var(--sp-5)}.gap-6{gap:var(--sp-6)}
+.mt-2{margin-top:var(--sp-2)}.mt-3{margin-top:var(--sp-3)}.mt-4{margin-top:var(--sp-4)}.mt-5{margin-top:var(--sp-5)}.mt-6{margin-top:var(--sp-6)}.mt-8{margin-top:var(--sp-8)}.mt-10{margin-top:var(--sp-10)}
+.mb-2{margin-bottom:var(--sp-2)}.mb-3{margin-bottom:var(--sp-3)}.mb-4{margin-bottom:var(--sp-4)}.mb-5{margin-bottom:var(--sp-5)}.mb-6{margin-bottom:var(--sp-6)}.mb-8{margin-bottom:var(--sp-8)}
+.muted { color: var(--fg-tertiary); }
+.small { font-size: var(--fs-sm); }
+.xsmall { font-size: var(--fs-xs); }
+.strong { font-weight: var(--fw-bold); }
+.xstrong { font-weight: var(--fw-extra); }
+
+/* ---------- Hero ---------- */
+.hero {
+  border-radius: var(--r-3xl); padding: var(--sp-12) var(--sp-10);
+  background: var(--bg-warm); position: relative; overflow: hidden;
+  margin-bottom: var(--sp-8);
+}
+.blob { position: absolute; border-radius: 50%; filter: blur(46px); opacity: .5; pointer-events: none; }
+.blob-1 { width: 280px; height: 280px; background: var(--brand-300); top: -90px; right: -50px; }
+.blob-2 { width: 220px; height: 220px; background: var(--teal-300); bottom: -90px; right: 190px; }
+.blob-3 { width: 180px; height: 180px; background: var(--sun-300); top: 30px; right: 260px; opacity: .38; }
+.hero > *:not(.blob) { position: relative; z-index: 1; }
+.hero-title { font-family: var(--font-display); font-size: var(--fs-6xl); font-weight: var(--fw-extra); letter-spacing: -.03em; line-height: 1.08; max-width: 12ch; }
+.hero-sub { font-size: var(--fs-xl); color: var(--fg-secondary); margin-top: var(--sp-4); max-width: 42ch; line-height: var(--lh-snug); }
+.hero-stats { display: flex; gap: var(--sp-8); margin-top: var(--sp-8); flex-wrap: wrap; }
+.hero-stat-num { font-size: var(--fs-3xl); font-weight: var(--fw-extra); letter-spacing: var(--ls-tight); }
+.hero-stat-lbl { font-size: var(--fs-sm); color: var(--fg-tertiary); font-weight: var(--fw-bold); }
+
+/* ---------- 活动卡 ---------- */
+.event-card { overflow: hidden; display: flex; flex-direction: column; }
+.event-cover { height: 158px; position: relative; display: flex; align-items: flex-start; justify-content: space-between; padding: var(--sp-4); overflow: hidden; }
+.event-cover .emoji { position: absolute; right: 14px; bottom: -12px; font-size: 76px; opacity: .9; transform: rotate(-8deg); }
+.event-body { padding: var(--sp-5); display: flex; flex-direction: column; gap: var(--sp-3); flex: 1; }
+.event-name { font-size: var(--fs-xl); font-weight: var(--fw-extra); letter-spacing: var(--ls-tight); line-height: var(--lh-snug); }
+.event-meta { display: flex; flex-direction: column; gap: 6px; font-size: var(--fs-sm); color: var(--fg-secondary); font-weight: var(--fw-medium); }
+.event-meta div { display: flex; align-items: center; gap: 8px; }
+.event-foot { margin-top: auto; padding-top: var(--sp-4); display: flex; align-items: center; justify-content: space-between; }
+.price { font-size: var(--fs-2xl); font-weight: var(--fw-extra); letter-spacing: var(--ls-tight); }
+.price small { font-size: var(--fs-md); }
+.price-free { font-size: var(--fs-xl); font-weight: var(--fw-extra); color: var(--teal-500); }
+.face-stack { display: flex; }
+.face {
+  width: 28px; height: 28px; border-radius: var(--r-full);
+  border: 2px solid var(--bg-surface); margin-left: -9px;
+  display: grid; place-items: center; font-size: 11px; font-weight: var(--fw-extra); color: #fff;
+}
+.face:first-child { margin-left: 0; }
+
+/* ---------- 色板 ---------- */
+.swatch-grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(104px,1fr)); gap: var(--sp-3); }
+.swatch { border-radius: var(--r-lg); overflow: hidden; box-shadow: var(--shadow-sm); }
+.swatch-chip { height: 58px; }
+.swatch-info { padding: 8px 10px; background: var(--bg-surface); }
+.swatch-name { font-size: var(--fs-xs); font-weight: var(--fw-extra); }
+.swatch-val { font-size: 11px; color: var(--fg-tertiary); }
+.spec-row { display: flex; align-items: baseline; gap: var(--sp-5); padding: var(--sp-3) 0; border-bottom: 1px solid var(--border-subtle); }
+.spec-key { width: 110px; flex-shrink: 0; font-size: var(--fs-xs); color: var(--fg-tertiary); font-weight: var(--fw-bold); }
+
+/* ---------- 详情 ---------- */
+.detail-grid { display: grid; grid-template-columns: 1fr 356px; gap: var(--sp-8); align-items: start; }
+.detail-cover {
+  height: 260px; border-radius: var(--r-3xl); background: var(--bg-warm);
+  position: relative; overflow: hidden; display: flex; align-items: flex-end; padding: var(--sp-8);
+  margin-bottom: var(--sp-6);
+}
+.detail-cover .emoji { position: absolute; right: 40px; top: 30px; font-size: 130px; transform: rotate(-8deg); opacity: .92; }
+.fact { display: flex; gap: var(--sp-4); align-items: flex-start; padding: var(--sp-4) 0; }
+.fact + .fact { border-top: 1px solid var(--border-subtle); }
+.fact-ico { width: 44px; height: 44px; border-radius: var(--r-lg); display: grid; place-items: center; font-size: var(--fs-xl); flex-shrink: 0; }
+.fact-val { font-weight: var(--fw-bold); font-size: var(--fs-md); }
+.fact-sub { font-size: var(--fs-sm); color: var(--fg-tertiary); margin-top: 2px; }
+.sticky-buy { position: sticky; top: 116px; }
+.ticket {
+  padding: var(--sp-4) var(--sp-5); border-radius: var(--r-xl);
+  border: 2px solid var(--border-default); cursor: pointer;
+  display: flex; align-items: center; justify-content: space-between; gap: var(--sp-3);
+  transition: all var(--dur-fast) var(--ease-out);
+}
+.ticket:hover { border-color: var(--brand-300); }
+.ticket.is-selected { border-color: var(--brand-500); background: var(--brand-50); }
+
+.steps { display: flex; align-items: center; gap: var(--sp-2); }
+.step-dot {
+  width: 32px; height: 32px; border-radius: var(--r-full);
+  background: var(--n-100); color: var(--fg-tertiary);
+  display: grid; place-items: center; font-size: var(--fs-xs); font-weight: var(--fw-extra); flex-shrink: 0;
+}
+.step-dot.is-current { background: var(--brand-500); color: #fff; box-shadow: var(--shadow-brand); }
+.step-dot.is-done { background: var(--teal-200); color: var(--teal-700); }
+.step-line { flex: 1; height: 3px; background: var(--n-100); border-radius: var(--r-full); }
+
+/* ---------- 指标卡 ---------- */
+.metric { padding: var(--sp-6); position: relative; overflow: hidden; }
+.metric-ico { width: 48px; height: 48px; border-radius: var(--r-lg); display: grid; place-items: center; font-size: var(--fs-xl); margin-bottom: var(--sp-4); }
+.metric-label { font-size: var(--fs-sm); color: var(--fg-tertiary); font-weight: var(--fw-bold); }
+.metric-value { font-size: var(--fs-4xl); font-weight: var(--fw-extra); letter-spacing: -.025em; line-height: 1.1; margin-top: 4px; }
+.metric-value small { font-size: var(--fs-lg); }
+.metric-foot { margin-top: var(--sp-2); font-size: var(--fs-sm); font-weight: var(--fw-bold); }
+
+/* ---------- 待办 ---------- */
+.todo { display: flex; align-items: center; gap: var(--sp-4); padding: var(--sp-4); border-radius: var(--r-xl); transition: background var(--dur-fast) var(--ease-out); }
+.todo:hover { background: var(--bg-sunken); }
+.todo-ico { width: 44px; height: 44px; border-radius: var(--r-lg); display: grid; place-items: center; font-size: var(--fs-lg); flex-shrink: 0; }
+.todo-main { flex: 1; min-width: 0; }
+.todo-title { font-weight: var(--fw-bold); font-size: var(--fs-md); }
+.todo-sub { font-size: var(--fs-sm); color: var(--fg-tertiary); margin-top: 2px; }
+
+/* ---------- 响应式 ---------- */
+@media (max-width: 1080px) {
+  .detail-grid { grid-template-columns: 1fr; }
+  .sticky-buy { position: static; }
+  .g-4 { grid-template-columns: repeat(2,1fr); }
+  .hero-title { font-size: var(--fs-5xl); }
+}
+@media (max-width: 880px) {
+  .g-3 { grid-template-columns: repeat(2,1fr); }
+  .nav-links { display: none; }
+  .hero { padding: var(--sp-8) var(--sp-6); }
+  .wrap-page { padding: var(--sp-6) var(--sp-4) var(--sp-16); }
+}
+@media (max-width: 620px) {
+  .g-2,.g-3,.g-4 { grid-template-columns: 1fr; }
+  .hero-title { font-size: var(--fs-4xl); }
+  .page-title { font-size: var(--fs-3xl); }
+  .detail-cover { height: 180px; }
+  .detail-cover .emoji { font-size: 80px; }
+}
+</style>
+</head>
+<body>
+
+<nav class="dirbar">
+  <a href="index.html">← 全部方案</a>
+  <a href="direction-a.html">A 克制专业</a>
+  <a href="direction-b.html" class="is-current">B 温暖社交</a>
+  <a href="direction-c.html">C 大胆现代</a>
+  <span class="spacer"></span>
+  <button class="theme-toggle" onclick="toggleTheme()"><span id="theme-ico">🌙</span> <span id="theme-txt">暗色</span></button>
+</nav>
+
+<header class="nav">
+  <div class="nav-inner">
+    <div class="logo"><span class="logo-mark">G</span> GatherUp</div>
+    <div class="nav-links">
+      <button class="nav-link is-active" data-goto="plaza">发现活动</button>
+      <button class="nav-link" data-goto="detail">活动详情</button>
+      <button class="nav-link" data-goto="console">我的工作台</button>
+      <button class="nav-link" data-goto="tokens">设计 Token</button>
+      <button class="nav-link" data-goto="components">组件</button>
+      <button class="nav-link" data-goto="states">状态</button>
+    </div>
+    <div class="nav-right">
+      <button class="btn btn-primary btn-sm">＋ 发起活动</button>
+      <div class="avatar">MK</div>
+    </div>
+  </div>
+</header>
+
+<div class="wrap-page">
+
+<!-- ==================== 页面 1：活动广场 ==================== -->
+<section class="page is-active" id="page-plaza">
+
+  <div class="hero">
+    <div class="blob blob-1"></div><div class="blob blob-2"></div><div class="blob blob-3"></div>
+    <div class="eyebrow">本周 · 6 座城市</div>
+    <h1 class="hero-title">找到你的人，一起赴约</h1>
+    <p class="hero-sub">观影、咖啡、火锅局、招新日——24 场正在招募的线下聚会，报名只要 30 秒。</p>
+    <div class="row gap-3 mt-6 wrap">
+      <button class="btn btn-primary btn-lg">看看附近的活动</button>
+      <button class="btn btn-secondary btn-lg">我要发起一场</button>
+    </div>
+    <div class="hero-stats">
+      <div><div class="hero-stat-num">24</div><div class="hero-stat-lbl">正在招募</div></div>
+      <div><div class="hero-stat-num">6</div><div class="hero-stat-lbl">座城市</div></div>
+      <div><div class="hero-stat-num">1,842</div><div class="hero-stat-lbl">位伙伴已加入</div></div>
+      <div><div class="hero-stat-num">98%</div><div class="hero-stat-lbl">好评率</div></div>
+    </div>
+  </div>
+
+  <div class="row-between mb-6 wrap gap-4">
+    <div class="seg">
+      <button class="is-active">全部</button>
+      <button>同好活动</button>
+      <button>校园活动</button>
+      <button>会议会务</button>
+      <button>好友聚会</button>
+    </div>
+    <div class="row gap-3">
+      <div class="search-wrap" style="width:230px"><span class="ico">🔍</span><input class="input" style="height:42px" placeholder="搜索活动或城市"></div>
+      <button class="btn btn-secondary btn-md">筛选</button>
+    </div>
+  </div>
+
+  <div class="grid g-3 mb-10">
+
+    <article class="card card-interactive event-card" data-goto="detail">
+      <div class="event-cover" style="background:linear-gradient(150deg,var(--brand-100),var(--lav-200))">
+        <span class="badge badge-warning"><span class="dot"></span>还剩 3 天</span>
+        <span class="emoji">🎬</span>
+      </div>
+      <div class="event-body">
+        <div class="row gap-2"><span class="badge badge-neutral">同好活动</span><span class="badge badge-neutral">线下观影</span></div>
+        <h3 class="event-name">《坂本龙一：杰作》线下观影</h3>
+        <div class="event-meta">
+          <div><span>📅</span> 6月22日 周一 14:30</div>
+          <div><span>📍</span> 上海 · 百丽宫影城 环贸店</div>
+        </div>
+        <div>
+          <div class="row-between mb-2"><span class="xsmall strong muted">42 人已加入，还差 18 位</span></div>
+          <div class="progress"><span style="width:70%"></span></div>
+        </div>
+        <div class="event-foot">
+          <div class="row gap-3">
+            <div class="face-stack">
+              <span class="face" style="background:var(--teal-400)">月</span>
+              <span class="face" style="background:var(--lav-400)">青</span>
+              <span class="face" style="background:var(--sun-400)">吉</span>
+              <span class="face" style="background:var(--n-400)">+39</span>
+            </div>
+          </div>
+          <div class="price"><small>¥</small>88</div>
+        </div>
+      </div>
+    </article>
+
+    <article class="card card-interactive event-card">
+      <div class="event-cover" style="background:linear-gradient(150deg,var(--sun-200),var(--brand-100))">
+        <span class="badge badge-success"><span class="dot"></span>报名中</span>
+        <span class="emoji">☕</span>
+      </div>
+      <div class="event-body">
+        <div class="row gap-2"><span class="badge badge-neutral">同好活动</span><span class="badge badge-neutral">生咖</span></div>
+        <h3 class="event-name">生日咖试运营小聚</h3>
+        <div class="event-meta">
+          <div><span>📅</span> 7月5日 周日 12:00</div>
+          <div><span>📍</span> 南京 · 雾岛咖啡</div>
+        </div>
+        <div>
+          <div class="row-between mb-2"><span class="xsmall strong muted">36 人已加入，位置充足</span></div>
+          <div class="progress is-teal"><span style="width:45%"></span></div>
+        </div>
+        <div class="event-foot">
+          <div class="face-stack">
+            <span class="face" style="background:var(--brand-400)">满</span>
+            <span class="face" style="background:var(--teal-400)">默</span>
+            <span class="face" style="background:var(--n-400)">+34</span>
+          </div>
+          <div class="price"><small>¥</small>45</div>
+        </div>
+      </div>
+    </article>
+
+    <article class="card card-interactive event-card">
+      <div class="event-cover" style="background:linear-gradient(150deg,var(--teal-100),var(--sun-200))">
+        <span class="badge badge-success"><span class="dot"></span>报名中</span>
+        <span class="emoji">🎪</span>
+      </div>
+      <div class="event-body">
+        <div class="row gap-2"><span class="badge badge-neutral">校园活动</span><span class="badge badge-neutral">校园招新</span></div>
+        <h3 class="event-name">春季社团招新开放日</h3>
+        <div class="event-meta">
+          <div><span>📅</span> 7月12日 周日 10:00</div>
+          <div><span>📍</span> 广州 · 岭南大学生活动中心</div>
+        </div>
+        <div>
+          <div class="row-between mb-2"><span class="xsmall strong muted">186 人已加入，超热门</span></div>
+          <div class="progress is-teal"><span style="width:62%"></span></div>
+        </div>
+        <div class="event-foot">
+          <div class="face-stack">
+            <span class="face" style="background:var(--lav-400)">阿</span>
+            <span class="face" style="background:var(--sun-400)">N</span>
+            <span class="face" style="background:var(--teal-400)">柠</span>
+            <span class="face" style="background:var(--n-400)">+183</span>
+          </div>
+          <div class="price-free">免费</div>
+        </div>
+      </div>
+    </article>
+
+    <article class="card card-interactive event-card">
+      <div class="event-cover" style="background:linear-gradient(150deg,var(--lav-200),var(--teal-100))">
+        <span class="badge badge-info"><span class="dot"></span>付款确认中</span>
+        <span class="emoji">🎤</span>
+      </div>
+      <div class="event-body">
+        <div class="row gap-2"><span class="badge badge-neutral">会议会务</span><span class="badge badge-neutral">闭门会议</span></div>
+        <h3 class="event-name">城市青年消费趋势闭门论坛</h3>
+        <div class="event-meta">
+          <div><span>📅</span> 7月18日 周六 13:30</div>
+          <div><span>📍</span> 北京 · 望京会议中心</div>
+        </div>
+        <div>
+          <div class="row-between mb-2"><span class="xsmall strong muted">74 人已加入</span></div>
+          <div class="progress"><span style="width:62%"></span></div>
+        </div>
+        <div class="event-foot">
+          <div class="face-stack">
+            <span class="face" style="background:var(--brand-400)">默</span>
+            <span class="face" style="background:var(--teal-400)">月</span>
+            <span class="face" style="background:var(--n-400)">+72</span>
+          </div>
+          <div class="price"><small>¥</small>199</div>
+        </div>
+      </div>
+    </article>
+
+    <article class="card card-interactive event-card">
+      <div class="event-cover" style="background:linear-gradient(150deg,var(--n-150),var(--lav-100))">
+        <span class="badge badge-neutral"><span class="dot"></span>即将开放</span>
+        <span class="emoji">🍿</span>
+      </div>
+      <div class="event-body">
+        <div class="row gap-2"><span class="badge badge-neutral">同好活动</span><span class="badge badge-neutral">线下观影</span></div>
+        <h3 class="event-name">春日同好重映场</h3>
+        <div class="event-meta">
+          <div><span>📅</span> 6月29日 周一 19:00</div>
+          <div><span>📍</span> 杭州 · 浙影时代影城</div>
+        </div>
+        <div>
+          <div class="row-between mb-2"><span class="xsmall strong muted">26 人候补中，仅 32 席</span></div>
+          <div class="progress is-sun"><span style="width:81%"></span></div>
+        </div>
+        <div class="event-foot">
+          <button class="btn btn-secondary btn-sm">提醒我</button>
+          <div class="price"><small>¥</small>72</div>
+        </div>
+      </div>
+    </article>
+
+    <article class="card card-interactive event-card">
+      <div class="event-cover" style="background:linear-gradient(150deg,var(--brand-200),var(--sun-200))">
+        <span class="badge badge-success"><span class="dot"></span>已成团</span>
+        <span class="emoji">🍲</span>
+      </div>
+      <div class="event-body">
+        <div class="row gap-2"><span class="badge badge-neutral">好友聚会</span><span class="badge badge-neutral">好友聚餐</span></div>
+        <h3 class="event-name">周末火锅局</h3>
+        <div class="event-meta">
+          <div><span>📅</span> 7月20日 周一 18:30</div>
+          <div><span>📍</span> 成都 · 玉林路附近</div>
+        </div>
+        <div>
+          <div class="row-between mb-2"><span class="xsmall strong muted">6 / 8 人，小而美</span></div>
+          <div class="progress is-teal"><span style="width:75%"></span></div>
+        </div>
+        <div class="event-foot">
+          <div class="face-stack">
+            <span class="face" style="background:var(--sun-400)">吉</span>
+            <span class="face" style="background:var(--lav-400)">柠</span>
+            <span class="face" style="background:var(--teal-400)">满</span>
+            <span class="face" style="background:var(--n-400)">+3</span>
+          </div>
+          <div class="price-free">免费</div>
+        </div>
+      </div>
+    </article>
+  </div>
+
+  <div class="section-title">加载中 · 骨架屏</div>
+  <div class="grid g-3">
+    <div class="card"><div class="skel skel-block" style="height:158px;border-radius:var(--r-2xl) var(--r-2xl) 0 0"></div><div class="card-pad stack gap-3"><div class="skel skel-line" style="width:42%"></div><div class="skel skel-title" style="width:82%"></div><div class="skel skel-line" style="width:62%"></div><div class="skel" style="height:10px;width:100%"></div><div class="row-between mt-2"><div class="skel" style="width:88px;height:28px"></div><div class="skel skel-title" style="width:60px"></div></div></div></div>
+    <div class="card"><div class="skel skel-block" style="height:158px;border-radius:var(--r-2xl) var(--r-2xl) 0 0"></div><div class="card-pad stack gap-3"><div class="skel skel-line" style="width:38%"></div><div class="skel skel-title" style="width:70%"></div><div class="skel skel-line" style="width:58%"></div><div class="skel" style="height:10px;width:100%"></div><div class="row-between mt-2"><div class="skel" style="width:88px;height:28px"></div><div class="skel skel-title" style="width:60px"></div></div></div></div>
+    <div class="card"><div class="skel skel-block" style="height:158px;border-radius:var(--r-2xl) var(--r-2xl) 0 0"></div><div class="card-pad stack gap-3"><div class="skel skel-line" style="width:46%"></div><div class="skel skel-title" style="width:76%"></div><div class="skel skel-line" style="width:66%"></div><div class="skel" style="height:10px;width:100%"></div><div class="row-between mt-2"><div class="skel" style="width:88px;height:28px"></div><div class="skel skel-title" style="width:60px"></div></div></div></div>
+  </div>
+</section>
+
+<!-- ==================== 页面 2：活动详情 ==================== -->
+<section class="page" id="page-detail">
+  <button class="btn btn-ghost btn-sm mb-5" data-goto="plaza">← 回到广场</button>
+
+  <div class="detail-grid">
+    <div>
+      <div class="detail-cover">
+        <div class="blob blob-1"></div><div class="blob blob-2"></div>
+        <span class="emoji">🎬</span>
+        <div style="position:relative;z-index:1">
+          <div class="row gap-2 mb-3">
+            <span class="badge badge-warning badge-lg"><span class="dot"></span>还剩 3 天截止</span>
+            <span class="badge badge-neutral badge-lg">同好活动</span>
+          </div>
+          <h1 style="font-size:var(--fs-4xl);font-weight:var(--fw-extra);letter-spacing:var(--ls-tight);line-height:1.15;max-width:16ch">《坂本龙一：杰作》线下观影</h1>
+        </div>
+      </div>
+
+      <div class="card card-pad mb-6">
+        <div class="row gap-4">
+          <div class="avatar" style="width:56px;height:56px;font-size:var(--fs-lg);background:linear-gradient(140deg,var(--brand-400),var(--brand-600))">MK</div>
+          <div style="flex:1">
+            <div class="row gap-2"><span class="xstrong" style="font-size:var(--fs-lg)">比奇堡miki</span><span class="badge badge-success">✓ 已实名</span></div>
+            <div class="small muted">主办过 12 场活动 · 好评率 98% · 平均 2 小时内回复</div>
+          </div>
+          <button class="btn btn-secondary btn-md">关注</button>
+        </div>
+      </div>
+
+      <div class="card mb-6">
+        <div class="card-head"><span class="card-title">活动安排</span></div>
+        <div class="card-body">
+          <div class="fact">
+            <div class="fact-ico" style="background:var(--brand-100)">📅</div>
+            <div><div class="fact-val">2026年6月22日 周一 14:30 – 17:00</div><div class="fact-sub">报名截止 6月18日 23:59 · 还剩 3 天</div></div>
+          </div>
+          <div class="fact">
+            <div class="fact-ico" style="background:var(--teal-100)">📍</div>
+            <div><div class="fact-val">百丽宫影城 环贸店 3 号厅</div><div class="fact-sub">上海市徐汇区淮海中路 999 号 6 层</div></div>
+          </div>
+          <div class="fact">
+            <div class="fact-ico" style="background:var(--sun-100)">👥</div>
+            <div style="flex:1">
+              <div class="fact-val">42 位伙伴已加入，还差 18 位</div>
+              <div class="fact-sub">一单最多 4 人，同行的座位会安排在一起</div>
+              <div class="progress mt-3" style="max-width:280px"><span style="width:70%"></span></div>
+            </div>
+          </div>
+          <div class="fact">
+            <div class="fact-ico" style="background:var(--lav-100)">🎟️</div>
+            <div><div class="fact-val">扫码签到，无需纸质票</div><div class="fact-sub">活动开始前 30 分钟开放签到</div></div>
+          </div>
+          <div class="fact">
+            <div class="fact-ico" style="background:var(--success-bg)">💸</div>
+            <div><div class="fact-val">截止前可全额退款</div><div class="fact-sub">截止后不支持退款，但可以转让给朋友</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card mb-6">
+        <div class="card-head"><span class="card-title">关于这场活动</span></div>
+        <div class="card-body">
+          <p style="line-height:var(--lh-relaxed);color:var(--fg-secondary)">
+            纪录片《坂本龙一：杰作》记录了这位音乐家生命最后阶段的创作现场。这次是一场同好向的小规模包场——不用抢票、不用担心旁边有人聊天，散场后我们还留了 40 分钟一起坐坐。
+          </p>
+          <p class="mt-4" style="line-height:var(--lh-relaxed);color:var(--fg-secondary)">
+            茶点已经备好了。建议提前 15 分钟到场，影厅内请不要拍照。交流环节完全自愿，想直接回家也没问题 🙂
+          </p>
+          <div class="alert alert-info mt-5">
+            <span class="alert-icon">💡</span>
+            <div><div class="alert-title">这是一场付费包场</div><div class="alert-body">报名后请在 30 分钟内完成付款并上传截图，主办确认后名额才算锁定哦。</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><span class="card-title">谁会来 · 42 位</span></div>
+        <div class="card-body">
+          <div class="row wrap gap-3">
+            <div class="row gap-2"><span class="face" style="background:var(--teal-400);margin:0">月</span><span class="small strong">月见草</span></div>
+            <div class="row gap-2"><span class="face" style="background:var(--lav-400);margin:0">青</span><span class="small strong">青柠</span></div>
+            <div class="row gap-2"><span class="face" style="background:var(--sun-400);margin:0">吉</span><span class="small strong">阿吉</span></div>
+            <div class="row gap-2"><span class="face" style="background:var(--brand-400);margin:0">N</span><span class="small strong">Nori</span></div>
+            <div class="row gap-2"><span class="face" style="background:var(--teal-500);margin:0">满</span><span class="small strong">小满</span></div>
+            <span class="badge badge-neutral badge-lg">+37 位伙伴</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 报名侧栏 -->
+    <div class="sticky-buy stack gap-5">
+      <div class="card card-emphasis card-pad">
+        <div class="row-between mb-5">
+          <div><div class="xsmall muted strong">每人</div><div class="price" style="font-size:var(--fs-4xl)"><small>¥</small>88</div></div>
+          <span class="badge badge-warning badge-lg">3 天后截止</span>
+        </div>
+
+        <div class="stack gap-3 mb-5">
+          <label class="ticket is-selected">
+            <div><div class="strong">标准票 · 单人</div><div class="xsmall muted">报名后线上确认付款</div></div>
+            <div class="xstrong" style="font-size:var(--fs-lg)">¥88</div>
+          </label>
+          <label class="ticket">
+            <div><div class="strong">多人同行</div><div class="xsmall muted">最多 4 人，座位相邻</div></div>
+            <div class="xstrong" style="font-size:var(--fs-lg)">¥88<span class="xsmall muted">/人</span></div>
+          </label>
+        </div>
+
+        <div class="field mb-4">
+          <label class="label">几个人一起来？</label>
+          <div class="row gap-3">
+            <button class="btn btn-secondary btn-icon btn-md">−</button>
+            <input class="input num" value="2" style="text-align:center;width:74px">
+            <button class="btn btn-secondary btn-icon btn-md">＋</button>
+            <span class="xsmall muted strong">还剩 18 席</span>
+          </div>
+        </div>
+
+        <div class="field mb-4">
+          <label class="label">联系手机</label>
+          <input class="input" value="138 **** 6021">
+        </div>
+
+        <div class="field mb-5">
+          <label class="label">想说点什么？（选填）</label>
+          <textarea class="textarea" rows="2" placeholder="比如：想和朋友坐一起"></textarea>
+        </div>
+
+        <div class="stack gap-3 mb-5" style="padding-top:var(--sp-4);border-top:2px dashed var(--border-subtle)">
+          <div class="row-between small"><span class="muted">标准票 × 2</span><span class="strong num">¥176.00</span></div>
+          <div class="row-between small"><span class="muted">平台服务费</span><span class="strong" style="color:var(--teal-500)">免费</span></div>
+          <div class="row-between"><span class="xstrong" style="font-size:var(--fs-lg)">合计</span><span class="price" style="font-size:var(--fs-2xl)"><small>¥</small>176</span></div>
+        </div>
+
+        <button class="btn btn-primary btn-xl" style="width:100%" onclick="openModal()">立即报名 🎉</button>
+        <p class="xsmall muted mt-3" style="text-align:center">报名即表示同意《活动参与须知》</p>
+      </div>
+
+      <div class="card card-pad">
+        <div class="strong mb-4">报名之后会发生什么</div>
+        <div class="steps mb-4">
+          <div class="step-dot is-current">1</div><div class="step-line"></div>
+          <div class="step-dot">2</div><div class="step-line"></div>
+          <div class="step-dot">3</div><div class="step-line"></div>
+          <div class="step-dot">4</div>
+        </div>
+        <div class="stack gap-2 xsmall muted strong">
+          <div>1 · 填写信息 → 2 · 付款上传截图 → 3 · 主办确认 → 4 · 现场扫码签到</div>
+        </div>
+      </div>
+
+      <div class="alert alert-success">
+        <span class="alert-icon">🌿</span>
+        <div><div class="alert-title">这位主办很靠谱</div><div class="alert-body">12 场活动零投诉，平均 2 小时内回复消息。</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== 页面 3：主办工作台 ==================== -->
+<section class="page" id="page-console">
+  <div class="page-head row-between wrap gap-4">
+    <div>
+      <h1 class="page-title">嗨，miki 👋</h1>
+      <p class="page-sub">有 12 位伙伴在等你确认付款，先处理这些吧</p>
+    </div>
+    <div class="row gap-3">
+      <button class="btn btn-secondary btn-md">导出报表</button>
+      <button class="btn btn-primary btn-md">＋ 发起新活动</button>
+    </div>
+  </div>
+
+  <div class="alert alert-danger mb-6" style="align-items:center">
+    <span class="alert-icon">⏰</span>
+    <div style="flex:1">
+      <div class="alert-title">3 笔付款已经等了超过 24 小时</div>
+      <div class="alert-body">超时不处理的话，伙伴们的名额会被自动释放，他们可能就来不了了。</div>
+    </div>
+    <button class="btn btn-danger btn-md">马上处理</button>
+  </div>
+
+  <div class="grid g-4 mb-8">
+    <div class="card metric">
+      <div class="metric-ico" style="background:var(--danger-bg)">📋</div>
+      <div class="metric-label">待你确认的付款</div>
+      <div class="metric-value">12</div>
+      <div class="metric-foot" style="color:var(--danger-fg)">3 笔已超时</div>
+    </div>
+    <div class="card metric">
+      <div class="metric-ico" style="background:var(--teal-100)">🎊</div>
+      <div class="metric-label">这个月来了多少人</div>
+      <div class="metric-value">348 <small>人</small></div>
+      <div class="metric-foot" style="color:var(--teal-500)">↑ 比上月多 22%</div>
+    </div>
+    <div class="card metric">
+      <div class="metric-ico" style="background:var(--sun-100)">💰</div>
+      <div class="metric-label">已到账收入</div>
+      <div class="metric-value"><small>¥</small>28,640</div>
+      <div class="metric-foot muted">还有 ¥4,180 待确认</div>
+    </div>
+    <div class="card metric">
+      <div class="metric-ico" style="background:var(--lav-100)">🗓️</div>
+      <div class="metric-label">正在筹备的活动</div>
+      <div class="metric-value">5</div>
+      <div class="metric-foot muted">2 场本周就开始了</div>
+    </div>
+  </div>
+
+  <div class="grid" style="grid-template-columns:1fr 372px;gap:var(--sp-6);align-items:start">
+    <div class="stack gap-6">
+
+      <div class="card">
+        <div class="card-head">
+          <span class="card-title">需要你处理</span>
+          <span class="badge badge-danger">7 项</span>
+          <div class="seg" style="margin-left:auto"><button class="is-active">全部</button><button>紧急</button></div>
+        </div>
+        <div class="card-body stack gap-1">
+          <div class="todo">
+            <div class="todo-ico" style="background:var(--danger-bg)">💳</div>
+            <div class="todo-main">
+              <div class="todo-title">确认 12 笔付款截图</div>
+              <div class="todo-sub">坂本龙一观影 · 最早一笔已等了 26 小时</div>
+            </div>
+            <button class="btn btn-primary btn-sm">去确认</button>
+          </div>
+          <div class="todo">
+            <div class="todo-ico" style="background:var(--warning-bg)">📱</div>
+            <div class="todo-main">
+              <div class="todo-title">上传收款二维码</div>
+              <div class="todo-sub">春日同好重映场 · 没有这个就没法开放报名</div>
+            </div>
+            <button class="btn btn-secondary btn-sm">去上传</button>
+          </div>
+          <div class="todo">
+            <div class="todo-ico" style="background:var(--info-bg)">🏛️</div>
+            <div class="todo-main">
+              <div class="todo-title">跟场地确认档期</div>
+              <div class="todo-sub">闭门论坛 · 望京会议中心还没回复</div>
+            </div>
+            <button class="btn btn-secondary btn-sm">查看</button>
+          </div>
+          <div class="todo">
+            <div class="todo-ico" style="background:var(--teal-100)">🎟️</div>
+            <div class="todo-main">
+              <div class="todo-title">生成签到二维码</div>
+              <div class="todo-sub">生日咖小聚 · 7月5日 12:00 开始</div>
+            </div>
+            <button class="btn btn-secondary btn-sm">生成</button>
+          </div>
+          <div class="todo">
+            <div class="todo-ico" style="background:var(--n-100)">🖼️</div>
+            <div class="todo-main">
+              <div class="todo-title">补一张活动封面</div>
+              <div class="todo-sub">社团招新开放日 · 有封面的活动报名率高 3 倍</div>
+            </div>
+            <button class="btn btn-ghost btn-sm">稍后</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <span class="card-title">最近报名的伙伴</span>
+          <button class="btn btn-teal btn-sm" style="margin-left:auto">一键全部通过</button>
+        </div>
+        <div class="card-body table-wrap">
+          <table class="tbl">
+            <thead><tr><th>伙伴</th><th>活动</th><th class="right">金额</th><th>状态</th><th class="right">操作</th></tr></thead>
+            <tbody>
+              <tr>
+                <td><div class="row gap-3"><span class="face" style="background:var(--teal-400);margin:0;width:34px;height:34px;font-size:12px">月</span><div><div class="cell-main">月见草</div><div class="cell-sub">2 人 · 26 小时前</div></div></div></td>
+                <td class="small">坂本龙一观影</td>
+                <td class="right cell-main num">¥176</td>
+                <td><span class="badge badge-danger"><span class="dot"></span>超时未确认</span></td>
+                <td class="right"><div class="row gap-2" style="justify-content:flex-end"><button class="btn btn-teal btn-sm">通过</button><button class="btn btn-danger-soft btn-sm">驳回</button></div></td>
+              </tr>
+              <tr>
+                <td><div class="row gap-3"><span class="face" style="background:var(--lav-400);margin:0;width:34px;height:34px;font-size:12px">青</span><div><div class="cell-main">青柠</div><div class="cell-sub">1 人 · 4 小时前</div></div></div></td>
+                <td class="small">坂本龙一观影</td>
+                <td class="right cell-main num">¥88</td>
+                <td><span class="badge badge-warning"><span class="dot"></span>待确认</span></td>
+                <td class="right"><div class="row gap-2" style="justify-content:flex-end"><button class="btn btn-teal btn-sm">通过</button><button class="btn btn-danger-soft btn-sm">驳回</button></div></td>
+              </tr>
+              <tr>
+                <td><div class="row gap-3"><span class="face" style="background:var(--sun-400);margin:0;width:34px;height:34px;font-size:12px">吉</span><div><div class="cell-main">阿吉</div><div class="cell-sub">1 人 · 昨天 18:30</div></div></div></td>
+                <td class="small">生日咖小聚</td>
+                <td class="right cell-main num">¥45</td>
+                <td><span class="badge badge-success"><span class="dot"></span>已确认</span></td>
+                <td class="right"><button class="btn btn-ghost btn-sm">详情</button></td>
+              </tr>
+              <tr>
+                <td><div class="row gap-3"><span class="face" style="background:var(--brand-400);margin:0;width:34px;height:34px;font-size:12px">N</span><div><div class="cell-main">Nori</div><div class="cell-sub">4 人 · 昨天 15:02</div></div></div></td>
+                <td class="small">闭门论坛</td>
+                <td class="right cell-main num">¥796</td>
+                <td><span class="badge badge-warning"><span class="dot"></span>待确认</span></td>
+                <td class="right"><div class="row gap-2" style="justify-content:flex-end"><button class="btn btn-teal btn-sm">通过</button><button class="btn btn-danger-soft btn-sm">驳回</button></div></td>
+              </tr>
+              <tr>
+                <td><div class="row gap-3"><span class="face" style="background:var(--teal-500);margin:0;width:34px;height:34px;font-size:12px">满</span><div><div class="cell-main">小满</div><div class="cell-sub">1 人 · 2 天前</div></div></div></td>
+                <td class="small">社团招新</td>
+                <td class="right cell-main" style="color:var(--teal-500)">免费</td>
+                <td><span class="badge badge-success"><span class="dot"></span>已确认</span></td>
+                <td class="right"><button class="btn btn-ghost btn-sm">详情</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="stack gap-5">
+      <div class="card">
+        <div class="card-head"><span class="card-title">筹备得怎么样了</span></div>
+        <div class="card-body stack gap-5">
+          <div>
+            <div class="row-between mb-2"><span class="strong small">坂本龙一观影</span><span class="xsmall xstrong" style="color:var(--teal-500)">92%</span></div>
+            <div class="progress is-teal"><span style="width:92%"></span></div>
+            <div class="xsmall muted mt-2">就差付款确认了，快完成啦</div>
+          </div>
+          <div>
+            <div class="row-between mb-2"><span class="strong small">春日同好重映场</span><span class="xsmall xstrong" style="color:var(--sun-500)">45%</span></div>
+            <div class="progress is-sun"><span style="width:45%"></span></div>
+            <div class="xsmall muted mt-2">还缺收款码和活动介绍</div>
+          </div>
+          <div>
+            <div class="row-between mb-2"><span class="strong small">闭门论坛</span><span class="xsmall xstrong" style="color:var(--brand-500)">68%</span></div>
+            <div class="progress"><span style="width:68%"></span></div>
+            <div class="xsmall muted mt-2">等场地方回复档期</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card card-emphasis" style="background:var(--bg-warm);overflow:hidden;position:relative">
+        <div class="blob blob-1" style="width:180px;height:180px;top:-70px;right:-40px"></div>
+        <div class="card-head" style="position:relative"><span class="card-title">这个月的账</span></div>
+        <div class="card-body stack gap-3" style="position:relative">
+          <div class="row-between small"><span class="muted strong">报名收入</span><span class="xstrong num">¥32,820</span></div>
+          <div class="row-between small"><span class="muted strong">已到账</span><span class="xstrong num" style="color:var(--teal-500)">¥28,640</span></div>
+          <div class="row-between small"><span class="muted strong">待确认</span><span class="xstrong num" style="color:var(--sun-500)">¥4,180</span></div>
+          <div class="row-between small"><span class="muted strong">场地支出</span><span class="xstrong num">−¥12,400</span></div>
+          <div class="row-between small"><span class="muted strong">物料支出</span><span class="xstrong num">−¥2,860</span></div>
+          <div class="row-between mt-3" style="padding-top:var(--sp-4);border-top:2px dashed var(--border-default)">
+            <span class="xstrong">净结余</span><span class="price" style="font-size:var(--fs-2xl);color:var(--teal-500)"><small>¥</small>13,380</span>
+          </div>
+          <button class="btn btn-secondary btn-md mt-3" style="width:100%">看看明细</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="empty" style="padding:var(--sp-10) var(--sp-5)">
+          <div class="empty-illu" style="font-size:36px;width:76px;height:76px">🎈</div>
+          <div class="empty-title" style="font-size:var(--fs-xl)">今天没有要签到的活动</div>
+          <div class="empty-desc small">活动开始前 30 分钟，签到入口会自动出现在这里。</div>
+          <button class="btn btn-secondary btn-sm">看全部活动</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== 页面 4：Token ==================== -->
+<section class="page" id="page-tokens">
+  <div class="page-head">
+    <h1 class="page-title">设计 Token · 方向 B</h1>
+    <p class="page-sub">暖调中性阶 + 珊瑚橘主色 + 青绿/鹅黄/薰衣草插画色 · 阴影分层 · 大圆角</p>
+  </div>
+
+  <div class="card card-pad mb-5">
+    <div class="section-title">中性阶 Neutral（暖米灰 · 12 阶）</div>
+    <div class="swatch-grid">
+      <div class="swatch"><div class="swatch-chip" style="background:var(--n-0)"></div><div class="swatch-info"><div class="swatch-name">n-0</div><div class="swatch-val">#ffffff</div></div></div>
+      <div class="swatch"><div class="swatch-chip" style="background:var(--n-50)"></div><div class="swatch-info"><div class="swatch-name">n-50</div><div class="swatch-val">#fdf8f4</div></div></div>
+      <div class="swatch"><div class="swatch-chip" style="background:var(--n-100)"></div><div class="swatch-info"><div class="swatch-name">n-100</div><div class="swatch-val">#f8f0e9</div></div></div>
+      <div class="swatch"><div class="swatch-chip" style="background:var(--n-150)"></div><div class="swatch-info"><div class="swatch-name">n-150</div><div class="swatch-val">#f2e6db</div></div></div>
+      <div class="swatch"><div class="swatch-chip" style="background:var(--n-200)"></div><div class="swatch-info"><div class="swatch-name">n-200</div><div class="swatch-val">#e9d9cc</div></div></div>
+      <div class="swatch"><div class="swatch-chip" style="background:var(--n-300)"></div><div class="swatch-info"><div class="swatch-name">n-300</div><div class="swatch-val">#d8c2b1</div></div></div>
+      <div class="swatch"><div class="swatch-chip" style="background:var(--n-400)"></div><div class="swatch-info"><div class="swatch-name">n-400</div><div class="swatch-val">#b9a08c</div></div></div>
+      <div class="swatch"><div class="swatch-chip" style="background:var(--n-500)"></div><div class="swatch-info"><div class="swatch-name">n-500</div><div class="swatch-val">#947c67</div></div></div>
+      <div class="swatch"><div class="swatch-chip" style="background:var(--n-600)"></div><div class="swatch-info"><div class="swatch-name">n-600</div><div class="swatch-val">#75604e</div></div></div>
+      <div class="swatch"><div class="swatch-chip" style="background:var(--n-700)"></div><div class="swatch-info"><div class="swatch-name">n-700</div><div class="swatch-val">#5a483a</div></div></div>
+      <div class="swatch"><div class="swatch-chip" style="background:var(--n-800)"></div><div class="swatch-info"><div class="swatch-name">n-800</div><div class="swatch-val">#40332a</div></div></div>
+      <div class="swatch"><div class="swatch-chip" style="background:var(--n-900)"></div><div class="swatch-info"><div class="swatch-name">n-900</div><div class="swatch-val">#2b211b</div></div></div>
+    </div>
+  </div>
+
+  <div class="grid g-2 mb-5">
+    <div class="card card-pad">
+      <div class="section-title">主色 · 珊瑚橘 Coral</div>
+      <div class="swatch-grid">
+        <div class="swatch"><div class="swatch-chip" style="background:var(--brand-100)"></div><div class="swatch-info"><div class="swatch-name">brand-100</div><div class="swatch-val">#ffe1d6</div></div></div>
+        <div class="swatch"><div class="swatch-chip" style="background:var(--brand-200)"></div><div class="swatch-info"><div class="swatch-name">brand-200</div><div class="swatch-val">#ffc5b0</div></div></div>
+        <div class="swatch"><div class="swatch-chip" style="background:var(--brand-300)"></div><div class="swatch-info"><div class="swatch-name">brand-300</div><div class="swatch-val">#ffa286</div></div></div>
+        <div class="swatch"><div class="swatch-chip" style="background:var(--brand-400)"></div><div class="swatch-info"><div class="swatch-name">brand-400</div><div class="swatch-val">#ff7d59</div></div></div>
+        <div class="swatch"><div class="swatch-chip" style="background:var(--brand-500)"></div><div class="swatch-info"><div class="swatch-name">brand-500</div><div class="swatch-val">#f95f38</div></div></div>
+        <div class="swatch"><div class="swatch-chip" style="background:var(--brand-600)"></div><div class="swatch-info"><div class="swatch-name">brand-600</div><div class="swatch-val">#e64620</div></div></div>
+        <div class="swatch"><div class="swatch-chip" style="background:var(--brand-700)"></div><div class="swatch-info"><div class="swatch-name">brand-700</div><div class="swatch-val">#bd3417</div></div></div>
+        <div class="swatch"><div class="swatch-chip" style="background:var(--brand-800)"></div><div class="swatch-info"><div class="swatch-name">brand-800</div><div class="swatch-val">#962a13</div></div></div>
+      </div>
+    </div>
+    <div class="card card-pad">
+      <div class="section-title">辅色 · 青绿 Teal（成功 / 次要动作）</div>
+      <div class="swatch-grid">
+        <div class="swatch"><div class="swatch-chip" style="background:var(--teal-100)"></div><div class="swatch-info"><div class="swatch-name">teal-100</div><div class="swatch-val">#cbefe7</div></div></div>
+        <div class="swatch"><div class="swatch-chip" style="background:var(--teal-200)"></div><div class="swatch-info"><div class="swatch-name">teal-200</div><div class="swatch-val">#9adfd0</div></div></div>
+        <div class="swatch"><div class="swatch-chip" style="background:var(--teal-300)"></div><div class="swatch-info"><div class="swatch-name">teal-300</div><div class="swatch-val">#5fc9b3</div></div></div>
+        <div class="swatch"><div class="swatch-chip" style="background:var(--teal-400)"></div><div class="swatch-info"><div class="swatch-name">teal-400</div><div class="swatch-val">#2fae95</div></div></div>
+        <div class="swatch"><div class="swatch-chip" style="background:var(--teal-500)"></div><div class="swatch-info"><div class="swatch-name">teal-500</div><div class="swatch-val">#189179</div></div></div>
+        <div class="swatch"><div class="swatch-chip" style="background:var(--teal-600)"></div><div class="swatch-info"><div class="swatch-name">teal-600</div><div class="swatch-val">#0f7562</div></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid g-2 mb-5">
+    <div class="card card-pad">
+      <div class="section-title">点缀 · 鹅黄 Sun</div>
+      <div class="swatch-grid">
+        <div class="swatch"><div class="swatch-chip" style="background:var(--sun-100)"></div><div class="swatch-info"><div class="swatch-name">sun-100</div><div class="swatch-val">#fff3cf</div></div></div>
+        <div class="swatch"><div class="swatch-chip" style="background:var(--sun-200)"></div><div class="swatch-info"><div class="swatch-name">sun-200</div><div class="swatch-val">#ffe49b</div></div></div>
+        <div class="swatch"><div class="swatch-chip" style="background:var(--sun-300)"></div><div class="swatch-info"><div class="swatch-name">sun-300</div><div class="swatch-val">#ffd15e</div></div></div>
+        <div class="swatch"><div class="swatch-chip" style="background:var(--sun-400)"></div><div class="swatch-info"><div class="swatch-name">sun-400</div><div class="swatch-val">#f7b62c</div></div></div>
+      </div>
+    </div>
+    <div class="card card-pad">
+      <div class="section-title">点缀 · 薰衣草 Lavender</div>
+      <div class="swatch-grid">
+        <div class="swatch"><div class="swatch-chip" style="background:var(--lav-100)"></div><div class="swatch-info"><div class="swatch-name">lav-100</div><div class="swatch-val">#efeafd</div></div></div>
+        <div class="swatch"><div class="swatch-chip" style="background:var(--lav-200)"></div><div class="swatch-info"><div class="swatch-name">lav-200</div><div class="swatch-val">#ddd2fb</div></div></div>
+        <div class="swatch"><div class="swatch-chip" style="background:var(--lav-300)"></div><div class="swatch-info"><div class="swatch-name">lav-300</div><div class="swatch-val">#c2b0f6</div></div></div>
+        <div class="swatch"><div class="swatch-chip" style="background:var(--lav-400)"></div><div class="swatch-info"><div class="swatch-name">lav-400</div><div class="swatch-val">#a288ee</div></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid g-4 mb-5">
+    <div class="card card-pad"><div class="strong mb-3">Success</div><div style="height:44px;border-radius:var(--r-lg);background:var(--success-solid)"></div><div style="height:32px;border-radius:var(--r-lg);background:var(--success-bg);margin-top:8px"></div><div class="xsmall muted mt-3">已确认 / 已成团 / 签到成功</div></div>
+    <div class="card card-pad"><div class="strong mb-3">Warning</div><div style="height:44px;border-radius:var(--r-lg);background:var(--warning-solid)"></div><div style="height:32px;border-radius:var(--r-lg);background:var(--warning-bg);margin-top:8px"></div><div class="xsmall muted mt-3">待确认 / 即将截止</div></div>
+    <div class="card card-pad"><div class="strong mb-3">Danger</div><div style="height:44px;border-radius:var(--r-lg);background:var(--danger-solid)"></div><div style="height:32px;border-radius:var(--r-lg);background:var(--danger-bg);margin-top:8px"></div><div class="xsmall muted mt-3">超时 / 驳回 / 取消</div></div>
+    <div class="card card-pad"><div class="strong mb-3">Info</div><div style="height:44px;border-radius:var(--r-lg);background:var(--info-solid)"></div><div style="height:32px;border-radius:var(--r-lg);background:var(--info-bg);margin-top:8px"></div><div class="xsmall muted mt-3">进行中 / 提示</div></div>
+  </div>
+
+  <div class="grid g-2">
+    <div class="card card-pad">
+      <div class="section-title">字号阶梯（基准 15px · 阅读友好）</div>
+      <div class="spec-row"><span class="spec-key">6xl / 56</span><span style="font-size:56px;font-weight:800;letter-spacing:-.03em;line-height:1.1">一起赴约</span></div>
+      <div class="spec-row"><span class="spec-key">5xl / 44</span><span style="font-size:44px;font-weight:800;letter-spacing:-.03em">找到你的人</span></div>
+      <div class="spec-row"><span class="spec-key">4xl / 35</span><span style="font-size:35px;font-weight:800;letter-spacing:-.02em">嗨，miki 👋</span></div>
+      <div class="spec-row"><span class="spec-key">3xl / 29</span><span style="font-size:29px;font-weight:800">348 人</span></div>
+      <div class="spec-row"><span class="spec-key">2xl / 24</span><span style="font-size:24px;font-weight:800">周末火锅局</span></div>
+      <div class="spec-row"><span class="spec-key">xl / 20</span><span style="font-size:20px;font-weight:800">活动安排</span></div>
+      <div class="spec-row"><span class="spec-key">lg / 17</span><span style="font-size:17px">副标题与强调正文</span></div>
+      <div class="spec-row"><span class="spec-key">md / 15</span><span style="font-size:15px">正文基准，比 A 大 2px，行高 1.65</span></div>
+      <div class="spec-row"><span class="spec-key">sm / 13</span><span style="font-size:13px">次要信息、元数据</span></div>
+      <div class="spec-row"><span class="spec-key">xs / 12</span><span style="font-size:12px">徽章、脚注</span></div>
+    </div>
+    <div class="card card-pad">
+      <div class="section-title">间距 · 圆角 · 阴影 · 字重</div>
+      <div class="spec-row"><span class="spec-key">间距 4px 基</span><div class="row gap-1">
+        <span style="width:4px;height:24px;background:var(--brand-400);border-radius:2px"></span><span style="width:8px;height:24px;background:var(--brand-400);border-radius:2px"></span><span style="width:12px;height:24px;background:var(--brand-400);border-radius:2px"></span><span style="width:16px;height:24px;background:var(--brand-400);border-radius:2px"></span><span style="width:24px;height:24px;background:var(--brand-400);border-radius:2px"></span><span style="width:32px;height:24px;background:var(--brand-400);border-radius:2px"></span><span style="width:48px;height:24px;background:var(--brand-400);border-radius:2px"></span>
+      </div></div>
+      <div class="spec-row"><span class="spec-key">圆角（大而柔）</span><div class="row gap-2">
+        <span style="width:44px;height:44px;background:var(--n-150);border-radius:8px"></span>
+        <span style="width:44px;height:44px;background:var(--n-150);border-radius:12px"></span>
+        <span style="width:44px;height:44px;background:var(--n-150);border-radius:16px"></span>
+        <span style="width:44px;height:44px;background:var(--n-150);border-radius:20px"></span>
+        <span style="width:44px;height:44px;background:var(--n-150);border-radius:28px"></span>
+        <span style="width:44px;height:44px;background:var(--n-150);border-radius:999px"></span>
+      </div></div>
+      <div class="spec-row"><span class="spec-key">阴影（暖调）</span><div class="row gap-4">
+        <span style="width:60px;height:44px;background:var(--bg-surface);border-radius:16px;box-shadow:var(--shadow-sm)"></span>
+        <span style="width:60px;height:44px;background:var(--bg-surface);border-radius:16px;box-shadow:var(--shadow-md)"></span>
+        <span style="width:60px;height:44px;background:var(--bg-surface);border-radius:16px;box-shadow:var(--shadow-lg)"></span>
+        <span style="width:60px;height:44px;background:var(--bg-surface);border-radius:16px;box-shadow:var(--shadow-xl)"></span>
+      </div></div>
+      <div class="spec-row"><span class="spec-key">字重</span><div class="row gap-4 wrap"><span style="font-weight:400">400</span><span style="font-weight:500">500</span><span style="font-weight:600">600</span><span style="font-weight:700">700</span><span style="font-weight:800">800 主力</span></div></div>
+      <div class="spec-row"><span class="spec-key">行高</span><div class="row gap-4 small"><span>1.2 标题</span><span>1.35 紧</span><span>1.65 正文</span><span>1.85 长文</span></div></div>
+      <div class="spec-row"><span class="spec-key">字体</span><span>Nunito / Quicksand — 圆体，无衬线</span></div>
+      <div class="spec-row"><span class="spec-key">缓动</span><span class="small">cubic-bezier(.34,1.4,.64,1) — 带微弹，按压缩放 .96</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== 页面 5：组件 ==================== -->
+<section class="page" id="page-components">
+  <div class="page-head">
+    <h1 class="page-title">组件总览 · 方向 B</h1>
+    <p class="page-sub">胶囊按钮 5 变体 × 4 尺寸 · 卡片 3 语义变体 · 头像堆叠 · 插画式空状态</p>
+  </div>
+
+  <div class="card card-pad mb-5">
+    <div class="section-title">按钮</div>
+    <div class="stack gap-5">
+      <div class="row wrap gap-3"><span class="spec-key">Primary</span><button class="btn btn-primary btn-sm">立即报名</button><button class="btn btn-primary btn-md">立即报名</button><button class="btn btn-primary btn-lg">立即报名</button><button class="btn btn-primary btn-xl">立即报名 🎉</button><button class="btn btn-primary btn-md is-disabled">已截止</button></div>
+      <div class="row wrap gap-3"><span class="spec-key">Secondary</span><button class="btn btn-secondary btn-sm">查看详情</button><button class="btn btn-secondary btn-md">查看详情</button><button class="btn btn-secondary btn-lg">查看详情</button><button class="btn btn-secondary btn-xl">查看详情</button><button class="btn btn-secondary btn-md is-disabled">查看详情</button></div>
+      <div class="row wrap gap-3"><span class="spec-key">Ghost</span><button class="btn btn-ghost btn-sm">再想想</button><button class="btn btn-ghost btn-md">再想想</button><button class="btn btn-ghost btn-lg">再想想</button><button class="btn btn-ghost btn-xl">再想想</button><button class="btn btn-ghost btn-md is-disabled">再想想</button></div>
+      <div class="row wrap gap-3"><span class="spec-key">Teal 确认</span><button class="btn btn-teal btn-sm">通过</button><button class="btn btn-teal btn-md">确认付款</button><button class="btn btn-teal btn-lg">确认付款</button><button class="btn btn-teal btn-xl">确认付款</button><button class="btn btn-teal btn-md is-disabled">通过</button></div>
+      <div class="row wrap gap-3"><span class="spec-key">Danger</span><button class="btn btn-danger btn-sm">驳回</button><button class="btn btn-danger btn-md">驳回付款</button><button class="btn btn-danger-soft btn-md">取消报名</button><button class="btn btn-danger-soft btn-lg">取消报名</button><button class="btn btn-danger btn-md is-disabled">驳回</button></div>
+    </div>
+  </div>
+
+  <div class="grid g-2 mb-5">
+    <div class="card card-pad">
+      <div class="section-title">输入控件</div>
+      <div class="stack gap-4">
+        <div class="field"><label class="label">活动叫什么名字？</label><input class="input" placeholder="例：周末火锅局"></div>
+        <div class="field"><label class="label">已填状态</label><input class="input" value="《坂本龙一：杰作》线下观影"></div>
+        <div class="field"><label class="label">在哪个城市</label><select class="select"><option>上海</option><option>杭州</option><option>成都</option></select></div>
+        <div class="field"><label class="label">联系手机</label><input class="input is-error" value="1380000"><span class="hint is-error">手机号好像不太对，需要 11 位数字哦</span></div>
+        <div class="field"><label class="label">跟大家介绍一下</label><textarea class="textarea" rows="3" placeholder="说说活动流程、要带什么、注意事项…"></textarea><span class="hint">写得详细一点，报名率会更高</span></div>
+        <div class="field"><label class="label">搜索</label><div class="search-wrap"><span class="ico">🔍</span><input class="input" placeholder="搜索活动或城市"></div></div>
+      </div>
+    </div>
+    <div class="card card-pad">
+      <div class="section-title">徽章 · 8 种活动状态</div>
+      <div class="row wrap gap-2 mb-5">
+        <span class="badge badge-neutral"><span class="dot"></span>草稿配置</span>
+        <span class="badge badge-info"><span class="dot"></span>数调中</span>
+        <span class="badge badge-neutral"><span class="dot"></span>即将开放</span>
+        <span class="badge badge-success"><span class="dot"></span>报名中</span>
+        <span class="badge badge-warning"><span class="dot"></span>还剩 3 天</span>
+        <span class="badge badge-info"><span class="dot"></span>付款确认中</span>
+        <span class="badge badge-success"><span class="dot"></span>已成团</span>
+        <span class="badge badge-neutral"><span class="dot"></span>已结束</span>
+      </div>
+      <div class="section-title">订单状态</div>
+      <div class="row wrap gap-2 mb-5">
+        <span class="badge badge-warning">待确认</span>
+        <span class="badge badge-danger">超时未确认</span>
+        <span class="badge badge-success">已确认</span>
+        <span class="badge badge-danger">已驳回</span>
+        <span class="badge badge-neutral">已取消</span>
+        <span class="badge badge-brand">已签到</span>
+        <span class="badge badge-sun">候补中</span>
+      </div>
+      <div class="section-title">头像堆叠 / 进度 / 分段</div>
+      <div class="stack gap-4">
+        <div class="face-stack">
+          <span class="face" style="background:var(--teal-400)">月</span>
+          <span class="face" style="background:var(--lav-400)">青</span>
+          <span class="face" style="background:var(--sun-400)">吉</span>
+          <span class="face" style="background:var(--brand-400)">N</span>
+          <span class="face" style="background:var(--n-400)">+38</span>
+        </div>
+        <div><div class="xsmall muted strong mb-2">珊瑚 · 名额 70%</div><div class="progress"><span style="width:70%"></span></div></div>
+        <div><div class="xsmall muted strong mb-2">青绿 · 已成团</div><div class="progress is-teal"><span style="width:100%"></span></div></div>
+        <div><div class="xsmall muted strong mb-2">鹅黄 · 接近满员 81%</div><div class="progress is-sun"><span style="width:81%"></span></div></div>
+        <div class="seg"><button class="is-active">全部</button><button>报名中</button><button>已结束</button></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid g-3 mb-5">
+    <div class="card card-pad"><div class="strong mb-2">卡片 1 · Default</div><p class="small muted">基础容器，sm 阴影、28px 圆角、无边框。用于大多数内容区块。</p></div>
+    <div class="card card-interactive card-pad"><div class="strong mb-2">卡片 2 · Interactive</div><p class="small muted">可点击。hover 上浮 6px + xl 阴影，带弹性缓动。用于活动卡。</p></div>
+    <div class="card card-emphasis card-pad"><div class="strong mb-2">卡片 3 · Emphasis</div><p class="small muted">强调。lg 阴影常驻。用于报名栏、财务卡等关键区域。</p></div>
+  </div>
+
+  <div class="card card-pad">
+    <div class="section-title">模态框</div>
+    <button class="btn btn-primary btn-md" onclick="openModal()">打开报名确认</button>
+    <p class="small muted mt-3">模态顶部带渐变插画区，按钮等宽铺满底部——比起工具型确认框更像一次「邀请」。</p>
+  </div>
+</section>
+
+<!-- ==================== 页面 6：状态 ==================== -->
+<section class="page" id="page-states">
+  <div class="page-head">
+    <h1 class="page-title">状态规范 · 方向 B</h1>
+    <p class="page-sub">空状态用插画 + 鼓励型文案，错误提示不吓人</p>
+  </div>
+
+  <div class="card mb-5">
+    <div class="card-head"><span class="card-title">Loading · 骨架屏</span></div>
+    <div class="card-body">
+      <div class="grid g-2 gap-6">
+        <div>
+          <div class="strong mb-3">列表骨架</div>
+          <div class="stack gap-3">
+            <div class="row gap-4" style="padding:var(--sp-4);background:var(--bg-sunken);border-radius:var(--r-xl)"><div class="skel" style="width:44px;height:44px;border-radius:var(--r-lg)"></div><div class="stack gap-2" style="flex:1"><div class="skel skel-title" style="width:56%"></div><div class="skel skel-line" style="width:78%"></div></div><div class="skel" style="width:70px;height:34px"></div></div>
+            <div class="row gap-4" style="padding:var(--sp-4);background:var(--bg-sunken);border-radius:var(--r-xl)"><div class="skel" style="width:44px;height:44px;border-radius:var(--r-lg)"></div><div class="stack gap-2" style="flex:1"><div class="skel skel-title" style="width:46%"></div><div class="skel skel-line" style="width:66%"></div></div><div class="skel" style="width:70px;height:34px"></div></div>
+            <div class="row gap-4" style="padding:var(--sp-4);background:var(--bg-sunken);border-radius:var(--r-xl)"><div class="skel" style="width:44px;height:44px;border-radius:var(--r-lg)"></div><div class="stack gap-2" style="flex:1"><div class="skel skel-title" style="width:62%"></div><div class="skel skel-line" style="width:72%"></div></div><div class="skel" style="width:70px;height:34px"></div></div>
+          </div>
+        </div>
+        <div>
+          <div class="strong mb-3">指标卡骨架</div>
+          <div class="grid g-2">
+            <div class="card card-pad stack gap-3"><div class="skel" style="width:48px;height:48px;border-radius:var(--r-lg)"></div><div class="skel skel-line" style="width:70%"></div><div class="skel" style="width:70px;height:32px"></div></div>
+            <div class="card card-pad stack gap-3"><div class="skel" style="width:48px;height:48px;border-radius:var(--r-lg)"></div><div class="skel skel-line" style="width:60%"></div><div class="skel" style="width:86px;height:32px"></div></div>
+            <div class="card card-pad stack gap-3"><div class="skel" style="width:48px;height:48px;border-radius:var(--r-lg)"></div><div class="skel skel-line" style="width:76%"></div><div class="skel" style="width:78px;height:32px"></div></div>
+            <div class="card card-pad stack gap-3"><div class="skel" style="width:48px;height:48px;border-radius:var(--r-lg)"></div><div class="skel skel-line" style="width:54%"></div><div class="skel" style="width:62px;height:32px"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid g-3 mb-5">
+    <div class="card">
+      <div class="empty">
+        <div class="empty-illu">🌱</div>
+        <div class="empty-title">还没办过活动</div>
+        <div class="empty-desc">发起第一场聚会吧，报名、收款、签到我们都帮你搞定。</div>
+        <button class="btn btn-primary btn-md">发起第一场活动</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="empty">
+        <div class="empty-illu">🔍</div>
+        <div class="empty-title">这里还没有活动</div>
+        <div class="empty-desc">当前筛选是「上海 · 免费 · 本周」。要不要放宽一点看看？</div>
+        <button class="btn btn-secondary btn-md">清除筛选</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="empty">
+        <div class="empty-illu" style="background:var(--success-bg)">🎉</div>
+        <div class="empty-title">全部处理完啦</div>
+        <div class="empty-desc">12 笔付款都确认好了，没有伙伴在等你了。</div>
+        <button class="btn btn-ghost btn-md">看看处理记录</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card card-pad mb-5">
+    <div class="section-title">Error · 内联提示</div>
+    <div class="stack gap-3">
+      <div class="alert alert-danger"><span class="alert-icon">😥</span><div><div class="alert-title">截图上传失败了</div><div class="alert-body">文件超过 5 MB。压缩一下再试试，或者直接截屏也行。</div></div></div>
+      <div class="alert alert-warning"><span class="alert-icon">⏳</span><div><div class="alert-title">离截止不到 24 小时了</div><div class="alert-body">现在改票价不会影响已经报名的伙伴。</div></div></div>
+      <div class="alert alert-info"><span class="alert-icon">💡</span><div><div class="alert-title">名额快没了</div><div class="alert-body">只剩 18 席，早点付款可以锁定位置。</div></div></div>
+      <div class="alert alert-success"><span class="alert-icon">✅</span><div><div class="alert-title">报名成功！</div><div class="alert-body">已经通知主办啦，确认后会给你发短信。</div></div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="empty">
+      <div class="empty-illu" style="background:var(--danger-bg)">🛠️</div>
+      <div class="empty-title">工作台暂时打不开</div>
+      <div class="empty-desc">数据没加载出来，可能是网络问题。刷新一下试试？如果一直这样，我们已经收到通知了。</div>
+      <div class="row gap-3" style="justify-content:center">
+        <button class="btn btn-primary btn-md">重新加载</button>
+        <button class="btn btn-secondary btn-md">联系客服</button>
+      </div>
+      <div class="mt-5 xsmall muted">错误代码 GU_DASHBOARD_FETCH_FAILED · 请求 ID a71f3c9e</div>
+    </div>
+  </div>
+</section>
+
+</div>
+
+<div class="modal-scrim" id="modal" hidden onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <div class="modal-illu">
+      <div class="blob blob-1" style="width:160px;height:160px;top:-60px;right:20px"></div>
+      <span style="position:relative">🎬</span>
+    </div>
+    <div class="modal-body">
+      <div class="modal-title">确认要报名吗？</div>
+      <div class="modal-desc">《坂本龙一：杰作》线下观影 · 2 位</div>
+      <div class="stack gap-3 mt-5" style="text-align:left">
+        <div class="row-between small"><span class="muted strong">时间</span><span class="strong">6月22日 14:30</span></div>
+        <div class="row-between small"><span class="muted strong">地点</span><span class="strong">百丽宫影城 环贸店</span></div>
+        <div class="row-between small"><span class="muted strong">需要支付</span><span class="xstrong" style="font-size:var(--fs-lg)">¥176.00</span></div>
+      </div>
+      <div class="alert alert-warning mt-5" style="text-align:left">
+        <span class="alert-icon">⏰</span>
+        <div class="alert-body">记得在 <b>30 分钟</b>内付款并上传截图，不然名额会被释放给别人哦。</div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-secondary btn-lg" onclick="closeModal()">再想想</button>
+      <button class="btn btn-primary btn-lg" onclick="closeModal()">确认报名</button>
+    </div>
+  </div>
+</div>
+
+<script>
+function goto(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.toggle('is-active', p.id === 'page-' + id));
+  document.querySelectorAll('.nav-link').forEach(n => n.classList.toggle('is-active', n.dataset.goto === id));
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+document.querySelectorAll('[data-goto]').forEach(el => el.addEventListener('click', () => goto(el.dataset.goto)));
+
+function toggleTheme() {
+  const root = document.documentElement;
+  const next = root.dataset.theme === 'dark' ? 'light' : 'dark';
+  root.dataset.theme = next;
+  document.getElementById('theme-txt').textContent = next === 'dark' ? '亮色' : '暗色';
+  document.getElementById('theme-ico').textContent = next === 'dark' ? '☀️' : '🌙';
+}
+function openModal() { document.getElementById('modal').hidden = false; }
+function closeModal() { document.getElementById('modal').hidden = true; }
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+</script>
+</body>
+</html>
