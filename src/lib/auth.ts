@@ -145,6 +145,7 @@ export function isPublicRoutePath(pathname: string) {
     pathname === "/login" ||
     pathname === "/terms" ||
     pathname === "/privacy" ||
+    pathname === "/support" ||
     /^\/events\/[^/]+\/?$/.test(pathname)
   );
 }

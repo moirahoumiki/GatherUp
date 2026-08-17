@@ -22,11 +22,13 @@ import { getSupabaseBrowserClient, isSupabaseConfigured } from "@/lib/supabase/c
 import {
   sendSupabaseEmailCode,
   sendSupabasePasswordReset,
+  signInWithApple,
   signInWithSupabasePassword,
   signUpWithSupabasePassword,
   verifySupabaseEmailCode
 } from "@/lib/supabase/auth";
 import { getCurrentSupabaseProfile } from "@/lib/supabase/profile";
+import { isNativePlatform } from "@/lib/mobile/env";
 
 type AuthMode = "login" | "register" | "code" | "reset";
 
@@ -84,9 +86,11 @@ function LoginForm() {
   const [verificationCode, setVerificationCode] = useState("");
   const [message, setMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isAppleSubmitting, setIsAppleSubmitting] = useState(false);
   const supabaseEnabled = isSupabaseConfigured();
   const prototypeAuthAllowed = isPrototypeAuthEnabled();
   const authUnavailable = !supabaseEnabled && !prototypeAuthAllowed;
+  const showAppleButton = supabaseEnabled && isNativePlatform();
 
   useEffect(() => {
     async function redirectExistingSession() {
@@ -310,6 +314,23 @@ function LoginForm() {
     }
   }
 
+  async function submitAppleAction() {
+    setMessage("");
+    setIsAppleSubmitting(true);
+
+    try {
+      const result = await signInWithApple();
+      if (!result.ok) {
+        setMessage(result.message);
+        return;
+      }
+
+      completeLogin(result.account, nextPath, "supabase");
+    } finally {
+      setIsAppleSubmitting(false);
+    }
+  }
+
   return (
     <main className="login-shell">
       <section className="login-panel">
@@ -370,6 +391,19 @@ function LoginForm() {
         {authUnavailable && <p className="validation-note">账号服务暂时不可用，请联系管理员配置 Supabase。</p>}
 
         <div className="auth-action-grid">
+          {showAppleButton && (
+            <button
+              className="button apple-signin full"
+              type="button"
+              onClick={submitAppleAction}
+              disabled={isSubmitting || isAppleSubmitting || authUnavailable}
+            >
+              <span aria-hidden="true" className="apple-signin-logo">
+                
+              </span>
+              {isAppleSubmitting ? "Apple 登录中…" : "Sign in with Apple"}
+            </button>
+          )}
           {mode === "code" && (
             <button className="button secondary full" type="button" onClick={sendCode} disabled={isSubmitting || authUnavailable}>
               发送验证码
