@@ -16,7 +16,7 @@ import {
 } from "../src/lib/auth.ts";
 
 const repoRoot = dirname(dirname(fileURLToPath(import.meta.url)));
-const middlewareSource = readFileSync(join(repoRoot, "src", "middleware.ts"), "utf8");
+const middlewareSource = readFileSync(join(repoRoot, "src", "proxy.ts"), "utf8");
 const loginPageSource = readFileSync(join(repoRoot, "src", "app", "login", "page.tsx"), "utf8");
 const appRoot = join(repoRoot, "src", "app");
 

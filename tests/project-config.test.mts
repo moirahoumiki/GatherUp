@@ -44,8 +44,8 @@ describe("project configuration", () => {
     assert.match(nextConfig, /frame-ancestors 'none'/);
   });
 
-  it("keeps the auth middleware inside src/ so Next.js picks it up", () => {
-    assert.ok(existsSync(join(repoRoot, "src", "middleware.ts")), "src/middleware.ts must exist");
+  it("keeps the auth proxy inside src/ so Next.js picks it up", () => {
+    assert.ok(existsSync(join(repoRoot, "src", "proxy.ts")), "src/proxy.ts must exist");
     assert.ok(
       !existsSync(join(repoRoot, "middleware.ts")),
       "middleware.ts must not live at the repo root: Next.js silently ignores it when the project uses src/"
