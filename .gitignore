@@ -12,6 +12,7 @@ out/
 dist/
 build/
 *.tsbuildinfo
+.turbo
 
 # Logs and coverage
 *.log
@@ -24,9 +25,16 @@ coverage/
 # Local environment and deployment state
 .env
 .env.*
+.env.local
+.env*.local
 !.env.example
 .vercel/
 .netlify/
+
+# iOS / Xcode artifacts
+ios/App/Pods/
+ios/DerivedData/
+*.xcuserdata
 
 # Supabase local runtime artifacts
 supabase/.branches/
