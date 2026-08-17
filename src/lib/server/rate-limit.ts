@@ -1,5 +1,7 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
+type Database = import("../supabase/database.types").Database;
+
 type RateLimitOptions = {
   keyPrefix: string;
   limit: number;
@@ -18,7 +20,7 @@ type RateLimitDecision = {
 };
 
 const buckets = new Map<string, RateLimitBucket>();
-let rateLimitServiceClient: SupabaseClient | null = null;
+let rateLimitServiceClient: SupabaseClient<Database> | null = null;
 
 function isDistributedRateLimitConfigured() {
   return Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY);
@@ -26,7 +28,7 @@ function isDistributedRateLimitConfigured() {
 
 function getRateLimitServiceClient() {
   if (!rateLimitServiceClient) {
-    rateLimitServiceClient = createClient(
+    rateLimitServiceClient = createClient<Database>(
       process.env.NEXT_PUBLIC_SUPABASE_URL as string,
       process.env.SUPABASE_SERVICE_ROLE_KEY as string,
       {

@@ -654,7 +654,7 @@ export async function getOrganizerDashboard(): Promise<OrganizerDashboardData> {
     return {
       eventSetups: eventRows.map((row) => eventRowToSetup(row)),
       events: dashboardEvents,
-      organizersByEventId: organizerRowsToMap((organizerResult.data ?? []) as EventOrganizerRow[]),
+      organizersByEventId: organizerRowsToMap((organizerResult.data ?? []) as unknown as EventOrganizerRow[]),
       registrations: dashboardRegistrations,
       source: "supabase",
       status: "ready"
@@ -762,12 +762,12 @@ export async function getOrganizerEventDetail(eventId: string): Promise<Organize
       announcements: ((announcementResult.data ?? []) as AnnouncementRow[]).map(announcementRowToEventAnnouncement),
       auditLogs: ((auditLogResult.data ?? []) as AuditLogRow[]).map(auditLogRowToEventAuditLog),
       event,
-      organizers: organizerRowsToMap((organizerResult.data ?? []) as EventOrganizerRow[]).get(eventRow.id) ?? [],
+      organizers: organizerRowsToMap((organizerResult.data ?? []) as unknown as EventOrganizerRow[]).get(eventRow.id) ?? [],
       registrations: eventRegistrations,
-      refundRequests: ((refundRequestResult.data ?? []) as RefundRequestRow[]).map(refundRequestRowToEventRefundRequest),
+      refundRequests: ((refundRequestResult.data ?? []) as unknown as RefundRequestRow[]).map(refundRequestRowToEventRefundRequest),
       setup: eventRowToSetup(eventRow),
       source: "supabase",
-      waitlistEntries: ((waitlistEntryResult.data ?? []) as WaitlistEntryRow[]).map(waitlistEntryRowToEventWaitlistEntry)
+      waitlistEntries: ((waitlistEntryResult.data ?? []) as unknown as WaitlistEntryRow[]).map(waitlistEntryRowToEventWaitlistEntry)
     };
   } catch (error) {
     reportDataAccessFailure("getOrganizerEventDetail", error);
@@ -841,7 +841,7 @@ export async function getOrganizerFinanceDetail(eventId: string): Promise<Organi
     const event = eventRowToGatherEvent(eventRow);
     const eventRegistrations = ((registrationResult.data ?? []) as RegistrationRow[]).map(rowToRegistration);
     applyRegistrationTotals(event, eventRegistrations);
-    const expenses = ((expenseResult.data ?? []) as ExpenseRow[]).map(expenseRowToExpense);
+    const expenses = ((expenseResult.data ?? []) as unknown as ExpenseRow[]).map(expenseRowToExpense);
     const fallbackSetting: FinanceSettingRow = {
       event_id: eventRow.id,
       fee_mode: eventRow.price_cents > 0 ? "paid" : "free",

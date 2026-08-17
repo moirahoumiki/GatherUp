@@ -1,9 +1,6 @@
-import { NextResponse } from "next/server";
-
 import { hasPlatformAdminError, requirePlatformAdmin } from "@/lib/server/admin";
-import { processPendingEmailNotifications } from "@/lib/server/email-notifications";
 import { enforceRateLimit } from "@/lib/server/rate-limit";
-import { getSupabaseServiceClient } from "@/lib/supabase/server";
+import { sendPendingEmails } from "@/lib/services";
 
 export const runtime = "nodejs";
 
@@ -24,14 +21,5 @@ export async function POST(request: Request) {
     return adminCheck.error;
   }
 
-  const serviceSupabase = getSupabaseServiceClient();
-  const results = await processPendingEmailNotifications(serviceSupabase);
-
-  return NextResponse.json({
-    ok: true,
-    processed_count: results.length,
-    sent_count: results.filter((result) => result.ok).length,
-    failed_count: results.filter((result) => !result.ok).length,
-    results
-  });
+  return sendPendingEmails();
 }

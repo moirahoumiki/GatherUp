@@ -1,70 +1,68 @@
 import Link from "next/link";
 
-const lastUpdated = "2026-07-22";
+const lastUpdated = "2026-08-17";
 
 const sections = [
   {
-    title: "我们收集哪些信息",
+    title: "我们收集哪些数据 / What we collect",
     items: [
-      "账号信息：邮箱、密码（加密存储）、昵称、GatherUp ID，用于登录、身份识别和活动名单管理。",
-      "活动数据：你创建或报名的活动信息、报名表单填写内容、同行人信息、座位选择和签到状态。",
-      "付款凭证：报名付费活动时上传的付款截图或凭证文件，用于组织者核实收款情况；退款流程中的退款凭证同样属于此类。",
-      "操作日志：关键操作（如资料修改、GatherUp ID 变更、活动状态变化、审核动作）会被记录，用于安全审计和纠纷处理。",
-      "设备与使用信息：登录设备、访问时间等技术信息，用于保障账号安全和排查异常行为。"
+      "我们会收集邮箱、姓名、支付凭证照片以及设备推送 token（APNs token）。",
+      "We collect email address, display name, payment proof images, and device push tokens (APNs token).",
+      "我们还会记录必要的账号与订单操作日志，用于安全审计和纠纷处理。",
+      "We also keep essential account/order operation logs for security audit and dispute handling."
     ]
   },
   {
-    title: "信息如何被使用",
+    title: "数据用途 / How we use data",
     items: [
-      "邮箱和账号信息用于登录验证、账号找回和重要通知发送。",
-      "活动数据用于报名、选座、签到、候补和通知等核心功能运转。",
-      "付款凭证仅供对应活动的组织者（或获得付款权限的协办者）核实收款和处理退款，不用于任何其他商业目的。",
-      "操作日志仅用于安全审计、异常排查和纠纷取证，不会被用于用户画像或广告推送。",
-      "GatherUp 不会将你的个人信息出售给第三方，也不会未经同意将付款凭证等敏感信息提供给活动之外的第三方。"
+      "用于账号认证、登录会话维护和账号安全。",
+      "Used for account authentication, session management, and account security.",
+      "用于活动管理、报名订单处理、退款协同和通知发送。",
+      "Used for event operations, registration/order handling, refund coordination, and notifications.",
+      "用于推送服务（活动提醒、订单状态更新、退款进度等）。",
+      "Used for push services, such as event reminders, order updates, and refund status."
     ]
   },
   {
-    title: "付款凭证的存储与留存策略",
+    title: "数据存储与保留 / Storage and retention",
     items: [
-      "付款凭证和退款凭证存储在 Supabase Storage 的私有存储桶中，不会公开访问，只有对应活动的组织者、协办者和平台管理员在权限范围内可以查看。",
-      "默认情况下，组织者可在活动结束后 90 天内查看已上传的付款凭证；超过该期限后，凭证访问会受到限制，该期限可由平台按活动配置调整。",
-      "如活动存在未结的投诉或退款申请，凭证的可访问期限会相应延长，直到相关事项处理完毕。",
-      "平台管理员在留存期限之后如需访问凭证（例如处理投诉或安全审计），相应访问会被记入审计日志。",
-      "付款凭证一经上传即不可篡改删除，以保障交易记录的完整性和纠纷处理的可追溯性。"
+      "GatherUp 使用 Supabase 托管数据库、身份认证和文件存储。",
+      "GatherUp uses Supabase-managed infrastructure for database, auth, and file storage.",
+      "支付凭证照片存储在受访问策略保护的私有存储桶中。",
+      "Payment proof images are stored in private buckets protected by access policies.",
+      "账号删除后将进入 30 天软删除保留期，期满后执行永久清除。",
+      "After account deletion request, data enters a 30-day soft-delete period before permanent purge."
     ]
   },
   {
-    title: "数据托管",
+    title: "第三方服务 / Third-party services",
     items: [
-      "GatherUp 使用 Supabase 提供云端数据库、身份认证和文件存储服务，所有账号、活动、订单和凭证数据均托管在 Supabase 的云基础设施上。",
-      "数据库访问通过行级安全策略（RLS）进行权限控制，确保每个用户只能访问自己有权限查看的数据。",
-      "私有存储桶采用路径级别的访问策略，付款凭证等敏感文件不会被未授权用户访问。",
-      "敏感操作（如资金相关的状态变更、权限调整）通过带审计记录的数据库事务处理，降低数据不一致和越权访问的风险。"
+      "Supabase Auth：用于邮箱/Apple 登录后的账号认证与会话管理。",
+      "Supabase Auth: used for account authentication and session management after email/Apple sign-in.",
+      "Sign in with Apple：用于 Apple 账号快捷登录。",
+      "Sign in with Apple: used for Apple account sign-in.",
+      "APNs（Apple Push Notification service）：用于发送 iOS 推送通知。",
+      "APNs (Apple Push Notification service): used for iOS push notifications."
     ]
   },
   {
-    title: "你的数据权利",
+    title: "你的权利 / Your rights",
     items: [
-      "你可以在「我的活动 - 账号中心」查看和更新自己的昵称、GatherUp ID 等公开资料。",
-      "你可以随时申请账号删除；提交申请前需要先处理完未结订单、退款、进行中的活动、组织者角色和未解决的争议。",
-      "账号删除申请通过后，个人资料会被匿名化处理，但必要的交易记录和审计日志会依法依规继续保留，用于财务对账和安全审计。",
-      "如对自己数据的收集或使用方式有疑问，可以通过账号中心的投诉入口或平台支持渠道联系我们。"
+      "你可以查看、修改并申请删除你的个人数据。",
+      "You may access, correct, and request deletion of your personal data.",
+      "你可以在 App 内设置页面发起账号删除流程。",
+      "You can initiate account deletion from in-app settings.",
+      "如需导出或进一步处理你的数据，请通过支持渠道联系我们。",
+      "For data export or special handling requests, please contact support."
     ]
   },
   {
-    title: "信息安全",
+    title: "联系我们 / Contact",
     items: [
-      "登录凭证使用加密存储，敏感操作通过 Supabase Auth 和服务端会话验证，避免未授权访问。",
-      "密钥、服务角色凭证等后端配置不会出现在客户端代码或公开仓库中。",
-      "尽管我们采取了合理的安全措施，任何互联网服务都无法保证绝对安全；如发现安全问题，欢迎通过安全报告渠道及时告知我们。"
-    ]
-  },
-  {
-    title: "政策变更",
-    items: [
-      "我们可能根据产品迭代或法律法规要求更新本政策，更新后会在本页标注最近更新日期。",
-      "重大变更（例如新增数据收集类型或改变留存策略）会通过站内通知或公告提前告知。",
-      "继续使用 GatherUp 即表示你接受更新后的隐私政策。"
+      "联系邮箱（占位）：privacy@gatherup.app",
+      "Contact email (placeholder): privacy@gatherup.app",
+      "若你对隐私政策有疑问，可通过 /support 页面提交反馈。",
+      "If you have privacy questions, submit feedback via /support."
     ]
   }
 ];
@@ -76,7 +74,8 @@ export default function PrivacyPage() {
         <h1 className="apple-title">隐私政策</h1>
         <p className="subtle">最近更新：{lastUpdated}</p>
         <p className="legal-intro">
-          本政策说明 GatherUp 会收集哪些信息、如何使用和存储这些信息，以及你对自己数据拥有的权利，尤其是涉及付款凭证等敏感信息的处理方式。
+          本政策说明 GatherUp 在账号认证、活动管理与通知服务中如何处理个人数据。This policy explains how GatherUp handles
+          personal data for account authentication, event operations, and notifications.
         </p>
       </header>
 

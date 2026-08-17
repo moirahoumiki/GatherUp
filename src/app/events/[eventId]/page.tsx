@@ -3,6 +3,8 @@ import { notFound } from "next/navigation";
 import { CalendarDays, MapPin, TicketCheck, UsersRound } from "lucide-react";
 
 import { EventAnnouncements } from "@/components/event-announcements";
+import { EventShareButton } from "@/components/event-share-button";
+import { ViewedEventCacheSync } from "@/components/viewed-event-cache-sync";
 import { getPublicEventDetail } from "@/lib/events-data";
 
 type EventPageProps = {
@@ -25,7 +27,7 @@ export default async function EventPage({ params }: EventPageProps) {
   const primaryActionHref = `/events/${event.id}/register?step=${canRegister ? "profile" : "survey"}`;
 
   return (
-    <div className="g2-page g2-detail">
+    <div className="g2-page g2-detail" data-event-cache-key={event.id}>
       <section className="g2-hero">
         <p className="g2-hero-tag">{event.category} · {event.customTypeLabel} · {event.status}</p>
         <h1 className="g2-hero-title">{event.name}</h1>
@@ -33,6 +35,9 @@ export default async function EventPage({ params }: EventPageProps) {
           {organizers.length > 0 ? `发起人 ${organizers.map((organizer) => organizer.name).join("、")} · ` : ""}
           编号 {event.publicCode}
         </p>
+        <div className="g2-hero-actions">
+          <EventShareButton eventId={event.id} eventName={event.name} />
+        </div>
       </section>
 
       <section className="g2-info-card">
@@ -117,6 +122,7 @@ export default async function EventPage({ params }: EventPageProps) {
           {primaryAction}
         </Link>
       </div>
+      <ViewedEventCacheSync eventId={event.id} />
     </div>
   );
 }

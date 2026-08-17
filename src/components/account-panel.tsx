@@ -30,6 +30,9 @@ export function AccountPanel() {
   const [message, setMessage] = useState("");
   const [sessionType, setSessionType] = useState<AuthSession["sessionType"]>("demo");
   const [isSaving, setIsSaving] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [deleteConfirmText, setDeleteConfirmText] = useState("");
 
   useEffect(() => {
     const session = getAuthSession(document.cookie);
@@ -125,6 +128,46 @@ export function AccountPanel() {
     setIsSaving(false);
   }
 
+  async function deleteAccount() {
+    if (deleteConfirmText.trim().toUpperCase() !== "DELETE") {
+      setMessage("请输入 DELETE 以确认删除。");
+      return;
+    }
+
+    setIsDeleting(true);
+    setMessage("");
+
+    try {
+      const response = await fetch("/api/account/delete", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json"
+        }
+      });
+      const payload = (await response.json()) as { ok?: boolean; message?: string };
+
+      if (!response.ok || !payload.ok) {
+        setMessage(payload.message ?? "账号删除申请失败，请稍后再试。");
+        setIsDeleting(false);
+        return;
+      }
+
+      document.cookie = "gatherup_session=; path=/; max-age=0; SameSite=Lax";
+      document.cookie = "gatherup_user=; path=/; max-age=0; SameSite=Lax";
+      document.cookie = "gatherup_name=; path=/; max-age=0; SameSite=Lax";
+      document.cookie = "gatherup_id=; path=/; max-age=0; SameSite=Lax";
+      setMessage(payload.message ?? "账号删除已提交。");
+      setDeleteConfirmOpen(false);
+      setTimeout(() => {
+        window.location.href = "/login";
+      }, 800);
+    } catch {
+      setMessage("网络异常，暂时无法提交删除请求。");
+    } finally {
+      setIsDeleting(false);
+    }
+  }
+
   return (
     <section className="account-grid">
       <article className="content-card account-card">
@@ -173,6 +216,46 @@ export function AccountPanel() {
           <span className="subtle">剩余修改 {remainingChanges} 次</span>
         </div>
       </article>
+
+      <article className="content-card account-card">
+        <div className="section-heading">
+          <div>
+            <p className="eyebrow">账号安全</p>
+            <h2>删除账号</h2>
+          </div>
+        </div>
+        <p className="subtle">
+          你可以申请删除账号。系统会先进行 30 天软删除保留期，之后执行永久清除。该操作会影响你的报名记录和组织者身份。
+        </p>
+        <div className="button-row">
+          <button className="button danger" type="button" onClick={() => setDeleteConfirmOpen(true)}>
+            删除账号
+          </button>
+        </div>
+      </article>
+
+      {deleteConfirmOpen ? (
+        <div className="confirm-overlay" role="dialog" aria-modal="true" aria-label="删除账号确认">
+          <div className="confirm-card">
+            <h3>确认删除账号</h3>
+            <p className="subtle">
+              为防止误操作，请输入 <strong>DELETE</strong> 并再次确认。提交后账号会进入 30 天保留期。
+            </p>
+            <label>
+              确认文本
+              <input value={deleteConfirmText} onChange={(event) => setDeleteConfirmText(event.target.value)} />
+            </label>
+            <div className="button-row">
+              <button className="button secondary" type="button" onClick={() => setDeleteConfirmOpen(false)} disabled={isDeleting}>
+                取消
+              </button>
+              <button className="button danger" type="button" onClick={deleteAccount} disabled={isDeleting}>
+                {isDeleting ? "提交中" : "确认删除"}
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </section>
   );
 }

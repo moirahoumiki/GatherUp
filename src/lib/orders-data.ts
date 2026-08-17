@@ -314,7 +314,7 @@ export async function getMyOrders(): Promise<MyOrdersData> {
       .eq("user_id", appUser.id)
       .in("status", ["waiting", "invited"])
       .order("created_at", { ascending: false });
-    const waitlistInvitations = ((waitlistData ?? []) as WaitlistEntryRow[]).map(rowToMyWaitlistInvitation);
+    const waitlistInvitations = ((waitlistData ?? []) as unknown as WaitlistEntryRow[]).map(rowToMyWaitlistInvitation);
     const eventIds = Array.from(new Set([
       ...registrationRows.map((registration) => registration.event_id),
       ...waitlistInvitations.map((entry) => entry.eventId)
@@ -390,7 +390,7 @@ export async function getOrderDetail(orderNumber: string): Promise<OrderDetailDa
       .eq("registration_id", registrationData.id)
       .order("created_at", { ascending: false })
       .limit(1);
-    const refundRequest = ((refundRequestData ?? []) as RefundRequestRow[]).map(rowToRefundSummary)[0];
+    const refundRequest = ((refundRequestData ?? []) as unknown as RefundRequestRow[]).map(rowToRefundSummary)[0];
 
     const { data: attendeeData } = await supabase
       .from("registration_attendees")
