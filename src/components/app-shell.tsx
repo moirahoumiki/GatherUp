@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { CalendarRange, LayoutDashboard, LogOut, MapPinned, Plus, UserRound } from "lucide-react";
 
@@ -28,6 +28,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const [session, setSession] = useState<AuthSession | null>(null);
   const [isOffline, setIsOffline] = useState(false);
+  const pushNavigateRef = useRef<(route: string) => void>(() => {});
   const isWorkspace = pathname.startsWith("/organizer") || pathname.startsWith("/admin") || pathname.startsWith("/dev");
   const shellClassName = `app-shell ${isWorkspace ? "workspace-shell" : "community-shell"}`;
 
@@ -70,12 +71,18 @@ export function AppShell({ children }: { children: ReactNode }) {
   }, [router]);
 
   useEffect(() => {
+    pushNavigateRef.current = (route: string) => {
+      router.push(route);
+    };
+  }, [router]);
+
+  useEffect(() => {
     void registerPushNotifications({
       onNavigate(route) {
-        router.push(route);
+        pushNavigateRef.current(route);
       }
     });
-  }, [router]);
+  }, []);
 
   useEffect(() => {
     let isCancelled = false;

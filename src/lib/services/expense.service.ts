@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { canManageEventFinance, findUserByAuthUserId, getNumber, getString, jsonError } from "@/lib/server/api";
+import { AppError } from "@/lib/services/errors";
 import { type AuthenticatedSupabaseContext, getSupabaseServiceClient } from "@/lib/supabase/server";
 
 const categoryMap: Record<string, string> = {
@@ -89,7 +90,7 @@ async function writeExpenseProofAudit({
     user_agent: request.headers.get("user-agent") ?? "unknown"
   });
   if (error) {
-    throw new Error(error.message);
+    throw new AppError(error.message, 500);
   }
 }
 

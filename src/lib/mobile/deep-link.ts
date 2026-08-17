@@ -38,6 +38,11 @@ function toInternalRoute(pathname: string, rawUrl: string): string | null {
     return `/events/${eventMatch[1]}`;
   }
 
+  const eventRegisterMatch = pathname.match(/^\/events\/([^/?#]+)\/register(?:\/)?$/i);
+  if (eventRegisterMatch) {
+    return `/events/${eventRegisterMatch[1]}/register`;
+  }
+
   const orderMatch = pathname.match(/^\/orders\/([^/?#]+)/i);
   if (orderMatch) {
     return `/me/orders/${orderMatch[1]}`;

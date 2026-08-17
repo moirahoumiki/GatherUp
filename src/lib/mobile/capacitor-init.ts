@@ -1,8 +1,7 @@
-import { App } from "@capacitor/app";
 import { SplashScreen } from "@capacitor/splash-screen";
 import { StatusBar, Style } from "@capacitor/status-bar";
 
-import { isNativePlatform } from "./env";
+import { isNativePlatform } from "@/lib/mobile/env";
 
 let initialized = false;
 
@@ -26,9 +25,4 @@ export const initCapacitor = async (): Promise<void> => {
     // Ignore when status bar plugin is unavailable in web runtime.
   }
 
-  App.addListener("appStateChange", ({ isActive }) => {
-    if (isActive) {
-      return;
-    }
-  });
 };

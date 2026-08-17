@@ -2,7 +2,6 @@ export { createEventFromRequestBody } from "./event.service";
 export { createOrderFromRequestBody } from "./order.service";
 export { joinWaitlistFromRequestBody } from "./waitlist.service";
 export { type ServiceContext } from "./context";
-export { AppError, mapErrorToHttp } from "./errors";
 export {
   updateEventFromRequestBody,
   publishEventFromRequestBody,

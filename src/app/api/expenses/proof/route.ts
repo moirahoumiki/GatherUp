@@ -1,12 +1,11 @@
 import { asRecord, jsonError } from "@/lib/server/api";
 import { enforceRateLimit } from "@/lib/server/rate-limit";
 import { uploadExpenseProofFromRequestBody, voidExpenseProofFromRequestBody } from "@/lib/services";
-import { getAuthenticatedSupabaseClient, getSupabaseServiceClient } from "@/lib/supabase/server";
+import { getAuthenticatedSupabaseClient } from "@/lib/supabase/server";
 
 export const runtime = "nodejs";
 
 export async function POST(request: Request) {
-  void getSupabaseServiceClient;
   const rateLimitResponse = await enforceRateLimit(request, {
     keyPrefix: "expenses:proof",
     limit: 30,
